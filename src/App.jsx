@@ -12,6 +12,7 @@ import { useAuth } from "./lib/useAuth";
 import Auth from "./components/Auth";
 import WriteEditor from "./components/WriteEditor";
 import AdminPanel from "./components/AdminPanel";
+import EditorProfile from "./components/EditorProfile";
 
 export default function Sloist(){
   const { ED: _ED, ALL, SPACE, SCENE, OBJET, loading, error } = useSupabaseData();
@@ -20,6 +21,7 @@ export default function Sloist(){
   const [showAuth, setShowAuth] = useState(false);
   const [showWrite, setShowWrite] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showEditorProfile, setShowEditorProfile] = useState(false);
   const [editItem, setEditItem] = useState(null);
 
   const [view,sView]=useState("home");
@@ -132,7 +134,8 @@ export default function Sloist(){
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:r1h,padding:mob?"0 16px":"0 36px",background:S.bg,position:"relative",zIndex:2}}>
         <div onClick={goHome} style={{fontFamily:S.sf,fontSize:mob?20:28,fontWeight:300,letterSpacing:mob?8:16,color:S.tx,cursor:"pointer"}}>sloist</div>
         <div style={{display:"flex",alignItems:"center",gap:mob?14:24}}>
-          {auth.isEditor&&<button onClick={()=>{setEditItem(null);setShowWrite(true);}} style={{fontFamily:S.sf,fontSize:10,letterSpacing:3,color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>write</button>}
+          {auth.isEditor&&!auth.editorId&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.sf,fontSize:10,letterSpacing:3,color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필 만들기</button>}
+          {auth.isEditor&&auth.editorId&&<button onClick={()=>{setEditItem(null);setShowWrite(true);}} style={{fontFamily:S.sf,fontSize:10,letterSpacing:3,color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>write</button>}
           {auth.isAdmin&&<button onClick={()=>setShowAdmin(true)} style={{fontFamily:S.sf,fontSize:10,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:4}}>admin</button>}
           <button onClick={()=>sSov(true)} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><SIcon/></button>
           <button onClick={()=>{if(auth.user){if(view!=="mypage")goTo("mypage");}else setShowAuth(true);}} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><UIcon/></button>
@@ -442,5 +445,8 @@ export default function Sloist(){
 
     {/* 관리자 패널 */}
     {showAdmin&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><AdminPanel onClose={()=>setShowAdmin(false)}/></div>}
+
+    {/* 슬로이스트 프로필 만들기 */}
+    {showEditorProfile&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><EditorProfile userId={auth.user?.id} existingEditor={auth.editorId&&ED[auth.editorId]?{...ED[auth.editorId],id:auth.editorId}:null} onClose={()=>setShowEditorProfile(false)} onSaved={()=>{setShowEditorProfile(false);auth.reloadProfile();window.location.reload();}}/></div>}
   </div>;
 }
