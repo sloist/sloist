@@ -55,6 +55,7 @@ export function useSupabaseData() {
           type: row.type || undefined,
           otype: row.otype || undefined,
           maker: row.maker || undefined,
+          aspect: row.aspect || undefined,
           link: row.link || undefined,
           lat: row.lat || undefined,
           lng: row.lng || undefined,

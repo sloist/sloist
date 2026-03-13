@@ -21,6 +21,7 @@ export default function WriteEditor({ editorId, isAdmin, onClose, onSaved, editI
   const [maker, setMaker] = useState(editItem?.maker || "");
   const [link, setLink] = useState(editItem?.link || "");
   const [tags, setTags] = useState(editItem?.tags || "");
+  const [aspect, setAspect] = useState(editItem?.aspect || "");
   const [lat, setLat] = useState(editItem?.lat || "");
   const [lng, setLng] = useState(editItem?.lng || "");
   const [geoLoading, setGeoLoading] = useState(false);
@@ -47,6 +48,7 @@ export default function WriteEditor({ editorId, isAdmin, onClose, onSaved, editI
   }
 
   const subCats = root === "space" ? SP_C : root === "scene" ? SC_C : OB_C;
+  const ASPECT_OPTIONS = root === "space" ? ["4/5","3/4","1/1"] : root === "scene" ? ["3/4","16/9"] : ["1/1","4/5","3/4"];
 
   async function handleSave() {
     if (!title.trim()) { setMsg("제목을 입력하세요"); return; }
@@ -67,6 +69,7 @@ export default function WriteEditor({ editorId, isAdmin, onClose, onSaved, editI
       type: root === "scene" ? type || null : null,
       otype: root === "objet" ? otype || null : null,
       maker: maker.trim() || null,
+      aspect: aspect || null,
       link: link.trim() || null,
       lat: lat ? parseFloat(lat) : null,
       lng: lng ? parseFloat(lng) : null,
@@ -108,6 +111,7 @@ export default function WriteEditor({ editorId, isAdmin, onClose, onSaved, editI
         {root === "scene" && <div style={{ marginBottom: 28 }}><span style={labelStyle}>부제 (저자/감독)</span><input value={sub} onChange={e => setSub(e.target.value)} placeholder="저자 또는 감독" style={inputStyle} /></div>}
         <div style={{ marginBottom: 28 }}><span style={labelStyle}>본문</span><textarea value={note} onChange={e => setNote(e.target.value)} placeholder="느리게 기록하세요" style={textareaStyle} /></div>
         <div style={{ marginBottom: 28 }}><span style={labelStyle}>이미지</span><ImageUpload value={photo} onChange={setPhoto} folder="contents" /></div>
+        <div style={{ marginBottom: 28 }}><span style={labelStyle}>썸네일 비율</span><div style={{ display: "flex", gap: 16, marginTop: 8 }}>{ASPECT_OPTIONS.map(a => <button key={a} onClick={() => setAspect(aspect === a ? "" : a)} style={catBtn(aspect === a)}>{a}</button>)}<span style={{ fontFamily: S.sn, fontSize: 10, color: S.txGh, alignSelf: "center" }}>미선택 시 기본값</span></div></div>
         {root === "space" && <>
           <div style={{ marginBottom: 28 }}>
             <span style={labelStyle}>위치</span>
