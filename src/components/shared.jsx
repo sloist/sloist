@@ -17,15 +17,7 @@ export function lLabel(it) {
 }
 
 // 이미지 컴포넌트
-// padded: 이미지 안쪽 여백 추가 (scene/objet 카드에서 사용)
-export function Img({ grad, photo, aspect = "4/3", r = 2, padded = false }) {
-  if (padded) {
-    return (
-      <div style={{ width: "100%", aspectRatio: aspect, background: grad || "#f4f3f1", borderRadius: r, position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        {photo && <img src={photo} alt="" loading="lazy" style={{ width: "88%", height: "88%", objectFit: "cover", borderRadius: Math.max(r - 1, 1), zIndex: 1 }} />}
-      </div>
-    );
-  }
+export function Img({ grad, photo, aspect = "4/3", r = 2 }) {
   return (
     <div style={{ width: "100%", aspectRatio: aspect, background: grad, borderRadius: r, position: "relative", overflow: "hidden" }}>
       {photo && <img src={photo} alt="" loading="lazy" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />}
