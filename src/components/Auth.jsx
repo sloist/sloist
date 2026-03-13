@@ -50,44 +50,46 @@ export default function Auth({ onAuth, signIn, signUp }) {
     background: "transparent",
     border: "none",
     borderBottom: "1px solid " + S.ln,
-    padding: "14px 0",
-    fontFamily: S.bd,
-    fontSize: 14,
+    padding: "16px 0",
+    fontFamily: S.sn,
+    fontSize: 13,
+    fontWeight: 300,
     color: S.tx,
     outline: "none",
     letterSpacing: 1,
+    transition: "border-color .5s",
   };
-
-  // 안 보이는 입력칸도 자리를 차지하게 해서 버튼 위치 고정
-  const hiddenInput = { ...inputStyle, visibility: "hidden", height: 0, padding: 0, margin: 0, borderBottom: "none", overflow: "hidden" };
 
   return (
     <div style={{ minHeight: "100vh", height: "100vh", background: S.bg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {/* 자동완성 파란 배경 제거 */}
-      <style>{`input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px ${S.bg} inset !important;-webkit-text-fill-color:${S.tx} !important;caret-color:${S.tx};transition:background-color 5000s ease-in-out 0s;}`}</style>
+      <style>{`input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px ${S.bg} inset !important;-webkit-text-fill-color:${S.tx} !important;caret-color:${S.tx};transition:background-color 5000s ease-in-out 0s;}input::placeholder{color:${S.txGh};font-weight:300;}`}</style>
 
       {/* 헤더 */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        height: mob ? 44 : 56, padding: mob ? "0 16px" : "0 36px", flexShrink: 0,
+        height: mob ? 48 : 60, padding: mob ? "0 20px" : "0 40px", flexShrink: 0,
       }}>
         <div
           onClick={onAuth}
-          style={{ fontFamily: S.sf, fontSize: mob ? 20 : 28, fontWeight: 300, letterSpacing: mob ? 8 : 16, color: S.tx, cursor: "pointer" }}
+          style={{ fontFamily: S.sf, fontSize: mob ? 18 : 24, fontWeight: 300, letterSpacing: mob ? 8 : 14, color: S.tx, cursor: "pointer", transition: "opacity .5s" }}
+          onMouseEnter={e => e.currentTarget.style.opacity = ".6"}
+          onMouseLeave={e => e.currentTarget.style.opacity = "1"}
         >sloist</div>
         <button
           onClick={onAuth}
-          style={{ fontFamily: S.sf, fontSize: 10, letterSpacing: 4, color: S.txGh, background: "none", border: "none", cursor: "pointer" }}
+          style={{ fontFamily: S.sn, fontSize: 9, fontWeight: 300, letterSpacing: 3, color: S.txGh, background: "none", border: "none", cursor: "pointer", transition: "color .5s" }}
+          onMouseEnter={e => e.currentTarget.style.color = S.txQ}
+          onMouseLeave={e => e.currentTarget.style.color = S.txGh}
         >close</button>
       </div>
 
       {/* 폼 */}
       <div style={{ flex: 1, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "0 24px", paddingTop: mob ? "12vh" : "16vh" }}>
-        <div style={{ width: "100%", maxWidth: 340 }}>
+        <div style={{ width: "100%", maxWidth: 320 }}>
           {/* 타이틀 */}
           <div style={{
-            fontFamily: S.sf, fontSize: mob ? 18 : 22, fontWeight: 300,
-            letterSpacing: mob ? 4 : 6, color: S.tx, marginBottom: mob ? 36 : 48,
+            fontFamily: S.sf, fontSize: mob ? 20 : 24, fontWeight: 300,             letterSpacing: mob ? 2 : 3, color: S.tx, marginBottom: mob ? 40 : 56,
           }}>
             {mode === "login" ? "로그인" : mode === "signup" ? "가입하기" : "비밀번호 찾기"}
           </div>
@@ -113,17 +115,17 @@ export default function Auth({ onAuth, signIn, signUp }) {
 
             {/* 메시지 — 고정 높이 확보 */}
             <div style={{ minHeight: 20 }}>
-              {msg && <div style={{ fontSize: 12, color: msg.includes("완료") || msg.includes("전송했습니다") ? S.ac : "#c47", lineHeight: 1.6 }}>{msg}</div>}
+              {msg && <div style={{ fontFamily: S.sn, fontSize: 11, fontWeight: 300, color: msg.includes("완료") || msg.includes("전송했습니다") ? S.ac : "#c47", lineHeight: 1.7 }}>{msg}</div>}
             </div>
 
             <button
               onClick={handleSubmit}
               disabled={loading}
               style={{
-                fontFamily: S.sf, fontSize: 12, letterSpacing: 4,
+                fontFamily: S.sn, fontSize: 11, fontWeight: 300, letterSpacing: 3,
                 color: "#fff", background: S.tx, border: "none",
-                padding: "14px 0", cursor: "pointer",
-                opacity: loading ? 0.5 : 1, transition: "opacity .3s",
+                padding: "15px 0", cursor: "pointer",
+                opacity: loading ? 0.5 : 1, transition: "opacity .5s",
               }}
             >
               {loading ? "..." : mode === "login" ? "로그인" : mode === "signup" ? "가입하기" : "전송"}
@@ -133,24 +135,30 @@ export default function Auth({ onAuth, signIn, signUp }) {
       </div>
 
       {/* 보조 링크 — 하단 고정 */}
-      <div style={{ flexShrink: 0, padding: mob ? "0 0 32px" : "0 0 40px", display: "flex", justifyContent: "center", gap: mob ? 20 : 28 }}>
+      <div style={{ flexShrink: 0, padding: mob ? "0 0 36px" : "0 0 44px", display: "flex", justifyContent: "center", gap: mob ? 20 : 28 }}>
         {mode === "login" && (
           <>
             <button
               onClick={() => { setMode("reset"); setMsg(null); }}
-              style={{ fontFamily: S.sf, fontSize: 11, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+              style={{ fontFamily: S.sn, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: 0, transition: "color .5s" }}
+              onMouseEnter={e => e.currentTarget.style.color = S.txQ}
+              onMouseLeave={e => e.currentTarget.style.color = S.txF}
             >비밀번호 찾기</button>
             <span style={{ color: S.lnL }}>|</span>
             <button
               onClick={() => { setMode("signup"); setMsg(null); }}
-              style={{ fontFamily: S.sf, fontSize: 11, letterSpacing: 2, color: S.txQ, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+              style={{ fontFamily: S.sn, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txQ, background: "none", border: "none", cursor: "pointer", padding: 0, transition: "color .5s" }}
+              onMouseEnter={e => e.currentTarget.style.color = S.tx}
+              onMouseLeave={e => e.currentTarget.style.color = S.txQ}
             >가입하기</button>
           </>
         )}
         {(mode === "signup" || mode === "reset") && (
           <button
             onClick={() => { setMode("login"); setMsg(null); }}
-            style={{ fontFamily: S.sf, fontSize: 11, letterSpacing: 2, color: S.txQ, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            style={{ fontFamily: S.sn, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txQ, background: "none", border: "none", cursor: "pointer", padding: 0, transition: "color .5s" }}
+            onMouseEnter={e => e.currentTarget.style.color = S.tx}
+            onMouseLeave={e => e.currentTarget.style.color = S.txQ}
           >로그인으로 돌아가기</button>
         )}
       </div>

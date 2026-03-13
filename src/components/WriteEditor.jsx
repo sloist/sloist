@@ -23,8 +23,28 @@ export default function WriteEditor({ editorId, isAdmin, onClose, onSaved, editI
   const [tags, setTags] = useState(editItem?.tags || "");
   const [lat, setLat] = useState(editItem?.lat || "");
   const [lng, setLng] = useState(editItem?.lng || "");
+  const [geoLoading, setGeoLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null);
+
+  async function geocodeAddress(addr) {
+    if (!addr.trim()) return;
+    setGeoLoading(true);
+    try {
+      const token = import.meta.env.VITE_MAPBOX_TOKEN;
+      const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(addr.trim())}.json?country=kr&limit=1&access_token=${token}`);
+      const data = await res.json();
+      if (data.features && data.features.length > 0) {
+        const [foundLng, foundLat] = data.features[0].center;
+        setLat(foundLat);
+        setLng(foundLng);
+        setMsg("좌표 자동 입력 완료");
+      } else {
+        setMsg("주소를 찾을 수 없습니다");
+      }
+    } catch { setMsg("주소 검색 실패"); }
+    setGeoLoading(false);
+  }
 
   const subCats = root === "space" ? SP_C : root === "scene" ? SC_C : OB_C;
 
@@ -89,12 +109,15 @@ export default function WriteEditor({ editorId, isAdmin, onClose, onSaved, editI
         <div style={{ marginBottom: 28 }}><span style={labelStyle}>본문</span><textarea value={note} onChange={e => setNote(e.target.value)} placeholder="느리게 기록하세요" style={textareaStyle} /></div>
         <div style={{ marginBottom: 28 }}><span style={labelStyle}>이미지</span><ImageUpload value={photo} onChange={setPhoto} folder="contents" /></div>
         {root === "space" && <>
-          <div style={{ marginBottom: 28 }}><span style={labelStyle}>위치</span><input value={location} onChange={e => setLocation(e.target.value)} placeholder="충남 천안" style={inputStyle} /></div>
-          <div style={{ marginBottom: 28 }}><span style={labelStyle}>태그</span><input value={tags} onChange={e => setTags(e.target.value)} placeholder="카페 · 핸드드립" style={inputStyle} /></div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 28 }}>
-            <div><span style={labelStyle}>위도</span><input value={lat} onChange={e => setLat(e.target.value)} placeholder="36.815" style={inputStyle} /></div>
-            <div><span style={labelStyle}>경도</span><input value={lng} onChange={e => setLng(e.target.value)} placeholder="127.114" style={inputStyle} /></div>
+          <div style={{ marginBottom: 28 }}>
+            <span style={labelStyle}>위치</span>
+            <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
+              <input value={location} onChange={e => setLocation(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); geocodeAddress(location); } }} placeholder="주소 입력 (예: 충남 공주 한옥마을)" style={{ ...inputStyle, flex: 1 }} />
+              <button onClick={() => geocodeAddress(location)} disabled={geoLoading} style={{ fontFamily: S.sn, fontSize: 10, letterSpacing: 2, color: S.txQ, background: "none", border: "none", borderBottom: "1px solid " + S.ln, padding: "12px 0", cursor: "pointer", whiteSpace: "nowrap", opacity: geoLoading ? 0.5 : 1 }}>{geoLoading ? "검색 중..." : "좌표 검색"}</button>
+            </div>
+            {(lat && lng) && <div style={{ fontFamily: S.sn, fontSize: 10, color: S.txF, marginTop: 8, letterSpacing: 1 }}>📍 {Number(lat).toFixed(4)}, {Number(lng).toFixed(4)}</div>}
           </div>
+          <div style={{ marginBottom: 28 }}><span style={labelStyle}>태그</span><input value={tags} onChange={e => setTags(e.target.value)} placeholder="카페 · 핸드드립" style={inputStyle} /></div>
         </>}
         {root === "objet" && <div style={{ marginBottom: 28 }}><span style={labelStyle}>제작자</span><input value={maker} onChange={e => setMaker(e.target.value)} placeholder="공방 이름" style={inputStyle} /></div>}
         <div style={{ marginBottom: 36 }}><span style={labelStyle}>링크 (선택)</span><input value={link} onChange={e => setLink(e.target.value)} placeholder="https://..." style={inputStyle} /></div>

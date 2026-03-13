@@ -15,6 +15,8 @@ import WriteEditor from "./components/WriteEditor";
 import AdminPanel from "./components/AdminPanel";
 import EditorProfile from "./components/EditorProfile";
 import SpaceMap from "./components/SpaceMap";
+import ScrollReveal from "./components/ScrollReveal";
+import StickyCover from "./components/StickyCover";
 
 export default function Sloist(){
   const { ED: _ED, ALL, SPACE, SCENE, OBJET, loading, error } = useSupabaseData();
@@ -47,6 +49,7 @@ export default function Sloist(){
   const [legalOpen,sLeg]=useState(null);
   const [cVis,sCVis]=useState(true);
   const [mobFocus,sMobFocus]=useState(null);
+  const [userLoc,sUserLoc]=useState(null);
   const [headerVis,sHeaderVis]=useState(true);
   const [showTop,sShowTop]=useState(false);
   const prevState=useRef(null);
@@ -60,20 +63,33 @@ export default function Sloist(){
   useEffect(()=>{
     const h=()=>{const y=window.scrollY;sShowTop(y>500);if(y<60)sHeaderVis(true);else if(y>lastScroll.current+8)sHeaderVis(false);else if(y<lastScroll.current-8)sHeaderVis(true);lastScroll.current=y;};
     window.addEventListener("scroll",h,{passive:true});return()=>window.removeEventListener("scroll",h);
-  },[]);
+  },[activeCat]);
 
   // Supabase 데이터 로드되면 items 초기화
   useEffect(()=>{
     if(ALL&&ALL.length>0&&!dataLoaded){sItems(ALL);setDataLoaded(true);}
   },[ALL,dataLoaded]);
+  // 사용자 위치 한 번만
+  useEffect(()=>{
+    if(navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>sUserLoc({lat:p.coords.latitude,lng:p.coords.longitude}),()=>{});
+  },[]);
 
   const flash=useCallback(m=>{sToast(m);setTimeout(()=>sToast(null),1400);},[]);
   const keep=useCallback(id=>{const was=items.find(i=>i.id===id)?.saved;sItems(p=>p.map(i=>i.id===id?{...i,saved:!i.saved}:i));flash(was?"removed":"saved");},[items,flash]);
   const toggleFol=eid=>{const was=following.includes(eid);sFol(p=>was?p.filter(x=>x!==eid):[...p,eid]);flash(was?"unfollowed":"followed");};
   const isSaved=id=>items.find(i=>i.id===id)?.saved;
+  const setCover=useCallback(async(id)=>{
+    // optimistic update
+    sItems(p=>p.map(i=>({...i,isCover:i.id===id})));
+    flash("커버로 지정됨");
+    // clear old covers, set new
+    const{error:e1}=await supabase.from("contents").update({is_cover:false}).eq("is_cover",true);
+    const{error:e2}=await supabase.from("contents").update({is_cover:true}).eq("id",id);
+    if(e1||e2){flash("저장 실패");sItems(p=>p.map(i=>({...i,isCover:false})));}
+  },[flash]);
 
-  const lt=fn=>{sCVis(false);setTimeout(()=>{fn();sCVis(true);},180);};
-  const mt=fn=>{sCVis(false);setTimeout(()=>{fn();window.scrollTo({top:0});setTimeout(()=>sCVis(true),80);},350);};
+  const lt=fn=>{sCVis(false);setTimeout(()=>{fn();sCVis(true);},280);};
+  const mt=fn=>{sCVis(false);setTimeout(()=>{fn();window.scrollTo({top:0});setTimeout(()=>sCVis(true),120);},500);};
 
   // ── URL 라우팅 ──
   const isPopping=useRef(false);
@@ -129,23 +145,30 @@ export default function Sloist(){
   const sv=k=>items.filter(i=>i.root===k&&i.saved);
   const edItems=eid=>items.filter(i=>i.editor===eid);
   const dl=detail?live(detail.id):null;
-  const fd=(show,dur="0.7s")=>({opacity:show?1:0,transition:"opacity "+dur+" ease"});
+  const fd=(show)=>({opacity:show?1:0,transition:"opacity .8s cubic-bezier(.2,0,.3,1)"});
   const px=mob?"0 16px":"0 36px";
   useEffect(()=>{if(sov){sSq("");sShowTags(false);setTimeout(()=>sqRef.current?.focus(),120);}},[sov]);
 
   const homeFeed=useMemo(()=>{
-    const sub=items.filter(i=>i.editor&&following.includes(i.editor));
-    const off=items.filter(i=>i.isOfficial);
-    const rest=items.filter(i=>!i.isOfficial&&!(i.editor&&following.includes(i.editor)));
-    const pool=[...sub,...off,...rest];
-    const byRoot={space:[],scene:[],objet:[]};
-    pool.forEach(i=>{if(byRoot[i.root])byRoot[i.root].push(i);});
-    const result=[];const order=["space","objet","scene"];let idx=[0,0,0];
-    for(let r=0;r<9;r++){const ci=r%3;if(idx[ci]<byRoot[order[ci]].length){result.push(byRoot[order[ci]][idx[ci]]);idx[ci]++;}
-      else{for(let j=1;j<3;j++){const ai=(r+j)%3;if(idx[ai]<byRoot[order[ai]].length){result.push(byRoot[order[ai]][idx[ai]]);idx[ai]++;break;}}}}
-    const day=Math.floor(Date.now()/86400000);
-    return[...result.slice(day%result.length),...result.slice(0,day%result.length)].slice(0,9);
-  },[items,following]);
+    const cover=items.find(i=>i.isCover);
+    const rest=items.filter(i=>!i.isCover);
+    // 카테고리별 최신순 버킷
+    const buckets={space:[],scene:[],objet:[]};
+    [...rest].sort((a,b)=>{
+      const da=a.created_at||a.id, db=b.created_at||b.id;
+      return da<db?1:da>db?-1:0;
+    }).forEach(i=>{if(buckets[i.root])buckets[i.root].push(i);});
+    // 라운드로빈: space→scene→objet 순환
+    const order=["space","scene","objet"];
+    const idx=[0,0,0];
+    const picked=[];
+    for(let r=0;r<7;r++){
+      const ci=r%3;
+      if(idx[ci]<buckets[order[ci]].length){picked.push(buckets[order[ci]][idx[ci]]);idx[ci]++;}
+      else{for(let j=1;j<=2;j++){const ai=(ci+j)%3;if(idx[ai]<buckets[order[ai]].length){picked.push(buckets[order[ai]][idx[ai]]);idx[ai]++;break;}}}
+    }
+    return cover?[cover,...picked]:picked;
+  },[items]);
 
   const catItems=useMemo(()=>{
     if(!activeCat)return homeFeed;
@@ -169,29 +192,29 @@ export default function Sloist(){
     const fv=activeCat==="space"?spCat:activeCat==="scene"?scCat:obCat;
     const fs=activeCat==="space"?sSpCat:activeCat==="scene"?sScCat:sObCat;
     const multi=activeCat==="space";
-    return <>{opts.map(o=>{const a=fv.includes(o);return <button key={o} onClick={()=>{window.scrollTo({top:0,behavior:"smooth"});lt(()=>{multi?fs(a?fv.filter(x=>x!==o):[...fv,o]):fs(a?[]:[o]);});}} style={{fontFamily:S.sf,fontSize:mob?11:12,letterSpacing:3,color:a?S.tx:S.txGh,fontWeight:a?400:300,background:"none",border:"none",borderBottom:a?"1px solid "+S.ac:"1px solid transparent",padding:mob?"6px 0":"8px 0",cursor:"pointer",transition:"all .3s"}}>{o}</button>;})}</>;
+    return <>{opts.map(o=>{const a=fv.includes(o);return <button key={o} onClick={()=>{window.scrollTo({top:0,behavior:"smooth"});lt(()=>{multi?fs(a?fv.filter(x=>x!==o):[...fv,o]):fs(a?[]:[o]);});}} style={{fontFamily:S.sn,fontSize:mob?10:11,fontWeight:a?400:300,letterSpacing:2,color:a?S.tx:S.txGh,background:"none",border:"none",borderBottom:a?"1px solid "+S.ac:"1px solid transparent",padding:mob?"6px 0":"8px 0",cursor:"pointer",transition:"all .5s"}}>{o}</button>;})}</>;
   };
 
   /* ── Nav ── */
   const Nav=({showCats})=>{
-    const r1h=mob?44:56;
+    const r1h=mob?48:60;
     return <div style={{position:"sticky",top:0,zIndex:50}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:r1h,padding:mob?"0 16px":"0 36px",background:S.bg,position:"relative",zIndex:2}}>
-        <div onClick={goHome} style={{fontFamily:S.sf,fontSize:mob?20:28,fontWeight:300,letterSpacing:mob?8:16,color:S.tx,cursor:"pointer"}}>sloist</div>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:r1h,padding:mob?"0 20px":"0 40px",background:S.bg,position:"relative",zIndex:2}}>
+        <div onClick={goHome} style={{fontFamily:S.sf,fontSize:mob?18:24,fontWeight:300,letterSpacing:mob?8:14,color:S.tx,cursor:"pointer",transition:"opacity .5s"}} onMouseEnter={e=>e.currentTarget.style.opacity=".6"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>sloist</div>
         <div style={{display:"flex",alignItems:"center",gap:mob?14:24}}>
-          {auth.isEditor&&!auth.isAdmin&&!auth.editorId&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.sf,fontSize:10,letterSpacing:3,color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필 만들기</button>}
-          {auth.editorId&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.sf,fontSize:10,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필</button>}
-          {(auth.isAdmin||(auth.isEditor&&auth.editorId))&&<button onClick={()=>{setEditItem(null);setShowWrite(true);}} style={{fontFamily:S.sf,fontSize:10,letterSpacing:3,color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>write</button>}
-          {auth.isAdmin&&<button onClick={()=>setShowAdmin(true)} style={{fontFamily:S.sf,fontSize:10,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:4}}>admin</button>}
+          {auth.isEditor&&!auth.isAdmin&&!auth.editorId&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필 만들기</button>}
+          {auth.editorId&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필</button>}
+          {(auth.isAdmin||(auth.isEditor&&auth.editorId))&&<button onClick={()=>{setEditItem(null);setShowWrite(true);}} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>write</button>}
+          {auth.isAdmin&&<button onClick={()=>setShowAdmin(true)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:4}}>admin</button>}
           <button onClick={()=>sSov(true)} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><SIcon/></button>
           <button onClick={()=>{if(auth.user){if(view!=="mypage")goTo("mypage");}else goTo("login");}} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><UIcon/></button>
         </div>
       </div>
-      {showCats&&<div style={{position:"absolute",top:r1h,left:0,right:0,zIndex:1,background:S.bg,transform:headerVis?"translateY(0)":"translateY(-110%)",opacity:headerVis?1:0,transition:"transform .6s cubic-bezier(.4,0,.2,1), opacity .5s ease",pointerEvents:headerVis?"auto":"none"}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?28:48,padding:mob?"6px 0":"8px 0"}}>
-          {CATS.map(k=><button key={k} onClick={()=>onCatClick(k)} style={{fontFamily:S.sf,fontSize:mob?12:14,fontWeight:300,letterSpacing:mob?4:8,textTransform:"lowercase",color:activeCat===k?S.tx:S.txF,background:"none",border:"none",borderBottom:activeCat===k?"1.5px solid "+S.tx:"1.5px solid transparent",padding:mob?"6px 0":"8px 0",cursor:"pointer",transition:"all .25s"}}>{k}</button>)}
+      {showCats&&<div style={{position:"absolute",top:r1h,left:0,right:0,zIndex:1,background:S.bg,transform:headerVis?"translateY(0)":"translateY(-110%)",opacity:headerVis?1:0,transition:"transform .6s cubic-bezier(.4,0,.2,1), opacity .5s cubic-bezier(.2,0,.3,1)",pointerEvents:headerVis?"auto":"none"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?32:56,padding:mob?"8px 0":"10px 0"}}>
+          {CATS.map(k=><button key={k} onClick={()=>onCatClick(k)} style={{fontFamily:S.sn,fontSize:mob?11:12,fontWeight:activeCat===k?400:300,letterSpacing:mob?4:6,textTransform:"lowercase",color:activeCat===k?S.tx:S.txF,background:"none",border:"none",borderBottom:activeCat===k?"1px solid "+S.tx:"1px solid transparent",padding:mob?"6px 0":"8px 0",cursor:"pointer",transition:"all .5s"}}>{k}</button>)}
         </div>
-        {activeCat&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?12:24,flexWrap:"wrap",padding:mob?"2px 16px 8px":"2px 36px 10px"}}>
+        {activeCat&&activeCat!=="space"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?14:28,flexWrap:"wrap",padding:mob?"4px 20px 10px":"4px 40px 12px"}}>
           <FilterBtns/>
         </div>}
       </div>}
@@ -202,31 +225,32 @@ export default function Sloist(){
   /* ── Detail ── */
   const DetailView=({hideEditor})=>{
     if(!dl)return null;
-    return <div style={{...fd(cVis,"0.6s"),minHeight:"100vh",display:"flex",flexDirection:"column"}}>
+    return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}>
       <Nav/>
       <div style={{flex:"1 0 auto"}}>
         <div style={{position:"relative",width:"100%",aspectRatio:mob?"16/10":"21/9",overflow:"hidden"}}>
           {dl.photo?<img src={dl.photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",background:dl.grad}}/>}
         </div>
-        <div style={{maxWidth:mob?undefined:800,margin:"0 auto",padding:mob?"32px 16px 80px":"56px 48px 100px"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:mob?32:48}}>
-            <div style={{fontFamily:S.sf,fontSize:10,letterSpacing:5,textTransform:"lowercase",color:S.ac}}>{dl.type||dl.cat||dl.otype||""}</div>
-            <button onClick={closeDetail} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,background:"none",border:"none",cursor:"pointer"}}>back</button>
+        <div style={{maxWidth:mob?undefined:720,margin:"0 auto",padding:mob?"36px 20px 80px":"64px 48px 120px"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:mob?36:56}}>
+            <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,textTransform:"lowercase",color:S.ac}}>{dl.type||dl.cat||dl.otype||""}</div>
+            <button onClick={closeDetail} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>back</button>
           </div>
-          <h1 style={{fontSize:mob?32:56,fontWeight:300,lineHeight:1.35,letterSpacing:mob?-.5:0,marginBottom:24,textAlign:"center"}}>{dl.title}</h1>
-          {dl.sub&&<p style={{fontSize:15,fontWeight:300,color:S.txQ,marginBottom:24,textAlign:"center"}}>{dl.sub}</p>}
-          {dl.location&&<div style={{fontSize:12,letterSpacing:3,color:S.txF,marginBottom:mob?64:120,textAlign:"center"}}>{dl.location}{dl.tags?" \u00B7 "+dl.tags:""}</div>}
-          {!dl.location&&!dl.sub&&<div style={{height:mob?40:64}}/>}
-          <div style={{maxWidth:600,margin:"0 auto"}}>
-            {dl.note&&<div style={{fontSize:mob?14:16,fontWeight:400,color:S.txM,lineHeight:2.4,marginBottom:mob?64:100}}>{dl.note}</div>}
-            {dl.maker&&<div style={{fontSize:12,color:S.txQ,marginBottom:48,letterSpacing:1}}>{dl.maker}</div>}
+          <h1 style={{fontFamily:S.sf,fontSize:mob?28:48,fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,marginBottom:20,textAlign:"center"}}>{dl.title}</h1>
+          {dl.sub&&<p style={{fontFamily:S.bd,fontSize:14,fontWeight:300,color:S.txQ,marginBottom:20,textAlign:"center",lineHeight:1.8}}>{dl.sub}</p>}
+          {dl.location&&<div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,letterSpacing:2,color:S.txF,marginBottom:mob?64:120,textAlign:"center"}}>{dl.location}{dl.tags?" · "+dl.tags:""}</div>}
+          {!dl.location&&!dl.sub&&<div style={{height:mob?48:80}}/>}
+          <div style={{maxWidth:560,margin:"0 auto"}}>
+            {dl.note&&<div style={{fontFamily:S.bd,fontSize:mob?14:15,fontWeight:400,color:S.txM,lineHeight:2.0,marginBottom:mob?64:120}}>{dl.note}</div>}
+            {dl.maker&&<div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,color:S.txQ,marginBottom:48,letterSpacing:1}}>{dl.maker}</div>}
           </div>
-          <div style={{borderTop:"1px solid "+S.ln,paddingTop:28,display:"flex",alignItems:"center",justifyContent:"center",gap:mob?20:36,flexWrap:"wrap"}}>
-            <button onClick={()=>keep(dl.id)} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:dl.saved?S.ac:S.txGh,background:"none",border:"none",cursor:"pointer"}}>{dl.saved?"kept":"keep"}</button>
-            <button onClick={()=>flash("link copied")} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,background:"none",border:"none",cursor:"pointer"}}>share</button>
-            {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,textDecoration:"none"}}>{lLabel(dl)}</a>}
-            {!hideEditor&&dl.editor&&ED[dl.editor]&&<span onClick={()=>openRoom(dl.editor)} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txQ,cursor:"pointer"}}>{aLabel(dl,ED)}</span>}
-            {dl.isOfficial&&<span style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh}}>by sloist</span>}
+          <div style={{borderTop:"1px solid "+S.lnL,paddingTop:32,display:"flex",alignItems:"center",justifyContent:"center",gap:mob?24:40,flexWrap:"wrap"}}>
+            <button onClick={()=>keep(dl.id)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:dl.saved?S.ac:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}}>{dl.saved?"kept":"keep"}</button>
+            <button onClick={()=>flash("link copied")} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}}>share</button>
+            {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,textDecoration:"none",transition:"color .5s"}}>{lLabel(dl)}</a>}
+            {!hideEditor&&dl.editor&&ED[dl.editor]&&<span onClick={()=>openRoom(dl.editor)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txQ,cursor:"pointer",transition:"color .5s"}}>{aLabel(dl,ED)}</span>}
+            {dl.isOfficial&&<span style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh}}>by sloist</span>}
+            {auth.isAdmin&&<button onClick={()=>setCover(dl.id)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:dl.isCover?S.ac:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}}>{dl.isCover?"홈 커버":"커버 지정"}</button>}
           </div>
         </div>
       </div>
@@ -241,15 +265,15 @@ export default function Sloist(){
     <style>{`::selection{background:rgba(130,125,118,.15);color:inherit}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0}to{opacity:1}}`}</style>
 
     {/* SEARCH */}
-    {sov&&<div style={{position:"fixed",inset:0,background:"rgba(249,248,247,.97)",backdropFilter:"blur(32px)",zIndex:200,overflowY:"auto",animation:"fi .6s ease"}}>
-      <div style={{display:"flex",justifyContent:"flex-end",padding:mob?"16px 16px":"18px 36px"}}>
-        <button onClick={()=>sSov(false)} style={{fontFamily:S.sf,fontSize:12,letterSpacing:4,color:S.txQ,background:"none",border:"none",cursor:"pointer"}}>close</button>
+    {sov&&<div style={{position:"fixed",inset:0,background:"rgba(249,248,247,.97)",backdropFilter:"blur(32px)",zIndex:200,overflowY:"auto",animation:"fi .8s cubic-bezier(.2,0,.3,1)"}}>
+      <div style={{display:"flex",justifyContent:"flex-end",padding:mob?"16px 20px":"20px 40px"}}>
+        <button onClick={()=>sSov(false)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>close</button>
       </div>
-      <div style={{maxWidth:480,margin:"0 auto",padding:"10vh 24px 80px",display:"flex",flexDirection:"column",alignItems:"center"}}>
-        <input ref={sqRef} placeholder="search" value={sq} onChange={e=>sSq(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&sq.trim())doSearch(sq.trim());}} style={{width:"100%",maxWidth:300,background:"transparent",border:"none",borderBottom:"1px solid "+S.txQ,padding:"14px 0",fontFamily:S.sf,fontSize:18,fontWeight:300,color:S.tx,letterSpacing:4,outline:"none",textAlign:"center"}}/>
-        {sq.trim()&&<div style={{fontFamily:S.sf,fontSize:10,letterSpacing:4,color:S.txQ,marginTop:16}}>begin slow</div>}
-        {!sq.trim()&&<button onClick={()=>sShowTags(!showTags)} style={{marginTop:28,fontFamily:S.sf,fontSize:11,letterSpacing:4,color:S.txQ,background:"none",border:"none",cursor:"pointer"}}>{showTags?"hide":"tags"}</button>}
-        {showTags&&!sq.trim()&&<div style={{width:"100%",marginTop:24}}><div style={{display:"grid",gridTemplateColumns:mob?"repeat(3,1fr)":"repeat(4,1fr)",gap:mob?"0 16px":"0 28px"}}>{TAGS.map((t,i)=><button key={t} onClick={()=>doSearch(t)} style={{fontFamily:S.sf,fontSize:12,letterSpacing:2,color:S.txQ,background:"none",border:"none",cursor:"pointer",padding:"18px 0",textAlign:"center",opacity:0,animation:"tagIn .4s ease "+i*.06+"s forwards",transition:"color .3s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>{t}</button>)}</div></div>}
+      <div style={{maxWidth:480,margin:"0 auto",padding:"12vh 24px 80px",display:"flex",flexDirection:"column",alignItems:"center"}}>
+        <input ref={sqRef} placeholder="search" value={sq} onChange={e=>sSq(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&sq.trim())doSearch(sq.trim());}} style={{width:"100%",maxWidth:280,background:"transparent",border:"none",borderBottom:"1px solid "+S.ln,padding:"14px 0",fontFamily:S.sf,fontSize:mob?16:20,fontWeight:300,color:S.tx,letterSpacing:4,outline:"none",textAlign:"center"}}/>
+        {sq.trim()&&<div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txF,marginTop:20}}>begin slow</div>}
+        {!sq.trim()&&<button onClick={()=>sShowTags(!showTags)} style={{marginTop:32,fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txF,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txF}>{showTags?"hide":"tags"}</button>}
+        {showTags&&!sq.trim()&&<div style={{width:"100%",marginTop:28}}><div style={{display:"grid",gridTemplateColumns:mob?"repeat(3,1fr)":"repeat(4,1fr)",gap:mob?"0 16px":"0 24px"}}>{TAGS.map((t,i)=><button key={t} onClick={()=>doSearch(t)} style={{fontFamily:S.bd,fontSize:12,fontWeight:300,letterSpacing:1,color:S.txQ,background:"none",border:"none",cursor:"pointer",padding:"20px 0",textAlign:"center",opacity:0,animation:"tagIn .5s cubic-bezier(.2,0,.3,1) "+i*.07+"s forwards",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>{t}</button>)}</div></div>}
       </div>
     </div>}
 
@@ -257,96 +281,134 @@ export default function Sloist(){
     {view==="home"&&!detail&&<div style={{minHeight:"100vh",display:"flex",flexDirection:"column",background:activeCat==="space"?"#f8f7f4":activeCat==="objet"?"#f7f8f7":activeCat==="scene"?"#f6f5f3":S.bg}}>
       <Nav showCats={true}/>
       <div style={{flex:"1 0 auto"}}>
-        {activeCat&&<div style={{...fd(cVis),textAlign:"center",paddingTop:mob?(activeCat!=="space"?52:12):(activeCat!=="space"?64:16),paddingBottom:mob?4:8}}><span style={{fontFamily:S.sf,fontSize:mob?9:10,letterSpacing:mob?6:10,color:S.txGh}}>{activeCat}</span></div>}
+        {activeCat&&activeCat!=="space"&&<div style={{...fd(cVis),textAlign:"center",paddingTop:mob?56:72,paddingBottom:mob?4:8}}><span style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:mob?6:8,color:S.txGh,textTransform:"lowercase"}}>{activeCat}</span></div>}
 
         {/* ── HOME EDITORIAL ── */}
         {!activeCat&&<div style={fd(cVis)}>
-          {/* 1. Hero quote — massive */}
-          <div style={{padding:mob?"48px 16px 0":"80px 36px 0",maxWidth:1100,margin:"0 auto"}}>
-            <p style={{fontFamily:S.sf,fontSize:mob?42:88,fontWeight:300,lineHeight:1.15,color:S.tx,letterSpacing:mob?-1:-2}}>{DAILY_QUOTES[Math.floor(Date.now()/86400000)%DAILY_QUOTES.length]}</p>
-          </div>
 
-          {/* 2. First item — full bleed image, title overlaid bottom-left */}
-          {h[0]&&<div onClick={()=>openDetail(h[0])} style={{cursor:"pointer",position:"relative",margin:mob?"40px 0 0":"72px 0 0"}}>
-            <SavedDot isSaved={isSaved(h[0].id)}/>
-            <div style={{width:"100%",aspectRatio:mob?"4/3":"21/9",overflow:"hidden",position:"relative"}}>
-              {h[0].photo&&<img src={h[0].photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>}
-              <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(0,0,0,.3),transparent 60%)"}}/>
-              <div style={{position:"absolute",bottom:mob?20:40,left:mob?16:36,right:mob?16:undefined,maxWidth:600}}>
-                <div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:"rgba(255,255,255,.5)",marginBottom:8}}>{h[0].root}</div>
-                <div style={{fontSize:mob?24:40,fontWeight:300,lineHeight:1.3,color:"#fff",letterSpacing:mob?0:.5}}>{h[0].title}</div>
+          {/* ① 커튼 + 뒤에 숨은 패널 A */}
+          <StickyCover
+            curtain={
+              <div style={{height:"100vh",background:S.bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",paddingLeft:mob?32:40,paddingRight:mob?32:40,paddingTop:0,paddingBottom:mob?80:120}}>
+                {h[0]&&<div onClick={()=>openDetail(h[0])} style={{cursor:"pointer",position:"relative",width:"100%",maxWidth:mob?280:480}}>
+                  <SavedDot isSaved={isSaved(h[0].id)}/>
+                  <Img grad={h[0].grad} photo={h[0].photo} aspect="4/5" r={4}/>
+                </div>}
               </div>
-            </div>
+            }
+            reveal={
+              <div style={{height:"100vh",background:S.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:mob?"0 24px":"0 56px"}}>
+                {mob
+                  ?<div style={{width:"100%",display:"flex",flexDirection:"column",alignItems:"center",gap:24}}>
+                    {h.slice(1,3).map((it,i)=>it&&<div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer",position:"relative",width:i===0?"85%":"72%",alignSelf:i===0?"flex-start":"flex-end"}}>
+                      <SavedDot isSaved={isSaved(it.id)}/>
+                      <Img grad={it.grad} photo={it.photo} aspect="4/5" r={4}/>
+                      <div style={{marginTop:10}}>
+                        <div style={{fontFamily:S.sf,fontSize:13,fontWeight:300,lineHeight:1.5,marginBottom:3}}>{it.title}</div>
+                        <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txF}}>{it.root}</div>
+                      </div>
+                    </div>)}
+                  </div>
+                  :<div style={{width:"100%",maxWidth:960,display:"grid",gridTemplateColumns:"1fr 1fr",gap:56}}>
+                    {h.slice(1,3).map((it,i)=>it&&<div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer",position:"relative",marginTop:i===1?60:0}}>
+                      <SavedDot isSaved={isSaved(it.id)}/>
+                      <Img grad={it.grad} photo={it.photo} aspect="4/5" r={4}/>
+                      <div style={{marginTop:20}}>
+                        <div style={{fontFamily:S.sf,fontSize:17,fontWeight:300,lineHeight:1.5,marginBottom:4}}>{it.title}</div>
+                        <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txF}}>{it.root}</div>
+                      </div>
+                    </div>)}
+                  </div>
+                }
+              </div>
+            }
+          />
+
+          {/* ── 전시 패널 ── */}
+          <div style={{position:"relative",zIndex:2,background:S.bg}}>
+
+          {/* 패널 B — 중앙 1점 */}
+          {h[3]&&<div style={{margin:"0 auto",padding:mob?"48px 24px 0":"120px 24px 0",maxWidth:mob?undefined:560}}>
+            <ScrollReveal>
+              <div onClick={()=>openDetail(h[3])} style={{cursor:"pointer",position:"relative",width:mob?"88%":"100%",margin:mob?"0 auto":undefined}}>
+                <SavedDot isSaved={isSaved(h[3].id)}/>
+                <Img grad={h[3].grad} photo={h[3].photo} aspect="3/2" r={4}/>
+                <div style={{marginTop:mob?12:20,textAlign:"center"}}>
+                  <div style={{fontFamily:S.sf,fontSize:mob?15:20,fontWeight:300,lineHeight:1.5,marginBottom:6}}>{h[3].title}</div>
+                  <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txF}}>{h[3].root}{h[3].location?" · "+h[3].location:""}</div>
+                </div>
+              </div>
+            </ScrollReveal>
           </div>}
 
-          {/* 3. Two items — asymmetric: left tall image, right text-dominant */}
-          <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:0,margin:mob?"0":"0"}}>
-            {h[1]&&<div onClick={()=>openDetail(h[1])} style={{cursor:"pointer",position:"relative"}}>
-              <SavedDot isSaved={isSaved(h[1].id)}/>
-              <Img grad={h[1].grad} photo={h[1].photo} aspect={mob?"4/3":"3/4"} r={0}/>
-            </div>}
-            {h[2]&&<div onClick={()=>openDetail(h[2])} style={{cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",padding:mob?32:60,background:"rgba(234,231,224,.15)"}}>
-              <div style={{textAlign:"center",maxWidth:320}}>
-                <div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:S.ac,marginBottom:16}}>{h[2].root}</div>
-                <div style={{fontSize:mob?20:28,fontWeight:300,lineHeight:1.6,marginBottom:12}}>{h[2].title}</div>
-                <div style={{fontSize:12,color:S.txQ,lineHeight:1.8}}>{h[2].note?.slice(0,80)}</div>
-              </div>
-            </div>}
-          </div>
-
-          {/* 4. Three items — tight gallery strip, no text */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:mob?2:4,margin:mob?"0 0 0":"0"}}>
-            {h.slice(3,6).map(it=>it&&<div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer",position:"relative"}}>
-              <SavedDot isSaved={isSaved(it.id)}/>
-              <Img grad={it.grad} photo={it.photo} aspect="1/1" r={0}/>
-            </div>)}
-          </div>
-
-          {/* 5. Statement break — breathing space */}
-          <div style={{padding:mob?"56px 16px":"100px 36px",maxWidth:700,margin:"0 auto",textAlign:"center"}}>
-            <p style={{fontFamily:S.sf,fontSize:mob?14:18,fontWeight:300,lineHeight:2.2,color:S.txQ,letterSpacing:1}}>비워진 공간, 정갈한 기물, 고요한 숨결.</p>
-          </div>
-
-          {/* 6. Two items — left text + small image, right large image */}
-          <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:0}}>
-            {h[6]&&<div onClick={()=>openDetail(h[6])} style={{cursor:"pointer",display:"flex",flexDirection:"column",justifyContent:"flex-end",padding:mob?24:48,background:"rgba(234,231,224,.1)"}}>
-              <div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:S.ac,marginBottom:12}}>{h[6].root}</div>
-              <div style={{fontSize:mob?18:24,fontWeight:300,lineHeight:1.6,marginBottom:16}}>{h[6].title}</div>
-              <div style={{width:mob?"100%":"60%"}}><Img grad={h[6].grad} photo={h[6].photo} aspect="3/2" r={2}/></div>
-            </div>}
-            {h[7]&&<div onClick={()=>openDetail(h[7])} style={{cursor:"pointer",position:"relative"}}>
-              <SavedDot isSaved={isSaved(h[7].id)}/>
-              <Img grad={h[7].grad} photo={h[7].photo} aspect={mob?"4/3":"3/4"} r={0}/>
-            </div>}
-          </div>
-
-          {/* 7. Last item — centered, generous space */}
-          {h[8]&&<div style={{padding:mob?"48px 16px 32px":"80px 36px 48px",maxWidth:800,margin:"0 auto"}}>
-            <div onClick={()=>openDetail(h[8])} style={{cursor:"pointer",textAlign:"center",position:"relative"}}>
-              <SavedDot isSaved={isSaved(h[8].id)}/>
-              <Img grad={h[8].grad} photo={h[8].photo} aspect={mob?"16/10":"21/9"} r={3}/>
-              <div style={{marginTop:mob?16:28}}><div style={{fontSize:mob?16:22,fontWeight:300,lineHeight:1.5}}>{h[8].title}</div><div style={{fontSize:12,color:S.txQ,marginTop:8}}>{h[8].note?.slice(0,60)}</div></div>
+          {/* 패널 C — 3점 */}
+          {mob
+            ?<div style={{padding:"40px 24px 0"}}>
+              {h.slice(4,7).map((it,i)=>it&&<ScrollReveal key={it.id} delay={i*100}>
+                <div onClick={()=>openDetail(it)} style={{cursor:"pointer",position:"relative",width:"88%",marginBottom:40,margin:"0 auto 40px",marginLeft:i===0?"0":i===1?"auto":i===2?"0":undefined}}>
+                  <SavedDot isSaved={isSaved(it.id)}/>
+                  <Img grad={it.grad} photo={it.photo} aspect="4/5" r={4}/>
+                  <div style={{marginTop:10}}>
+                    <div style={{fontFamily:S.sf,fontSize:13,fontWeight:300,lineHeight:1.5,marginBottom:3}}>{it.title}</div>
+                    <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txF}}>{it.root}</div>
+                  </div>
+                </div>
+              </ScrollReveal>)}
             </div>
-          </div>}
+            :<div style={{maxWidth:1140,margin:"0 auto",padding:"120px 56px 0"}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:40}}>
+                {h.slice(4,7).map((it,i)=>it&&<ScrollReveal key={it.id} delay={i*120}>
+                  <div onClick={()=>openDetail(it)} style={{cursor:"pointer",position:"relative"}}>
+                    <SavedDot isSaved={isSaved(it.id)}/>
+                    <Img grad={it.grad} photo={it.photo} aspect="4/5" r={4}/>
+                    <div style={{marginTop:16}}>
+                      <div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,lineHeight:1.5,marginBottom:4}}>{it.title}</div>
+                      <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txF}}>{it.root}</div>
+                    </div>
+                  </div>
+                </ScrollReveal>)}
+              </div>
+            </div>
+          }
+
+          {/* archive 입구 */}
+          <ScrollReveal>
+            <div style={{textAlign:"center",padding:mob?"56px 0 20px":"100px 0 24px"}}>
+              <span onClick={()=>goTo("archive")} style={{fontFamily:S.sf,fontSize:mob?12:14,fontWeight:300,letterSpacing:mob?3:5,color:S.txQ,cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>all sloists are here</span>
+            </div>
+          </ScrollReveal>
+
+          </div>{/* 전시 패널 닫기 */}
         </div>}
 
         {/* ── SPACE ── */}
         {activeCat==="space"&&(()=>{
-          const f=spCat.length>0?items.filter(i=>i.root==="space"&&spCat.includes(i.cat)):SPACE;
-          if(mob)return <div style={{paddingTop:40}}>
-            <div style={{position:"sticky",top:44,zIndex:10,width:"100%",height:"36vh",minHeight:180,maxHeight:320,overflow:"hidden",borderBottom:"1px solid "+S.ln}}>
+          const f0=spCat.length>0?items.filter(i=>i.root==="space"&&spCat.includes(i.cat)):SPACE;
+          const f=userLoc?[...f0].sort((a,b)=>{
+            const da=Math.hypot((a.lat||0)-userLoc.lat,(a.lng||0)-userLoc.lng);
+            const db=Math.hypot((b.lat||0)-userLoc.lat,(b.lng||0)-userLoc.lng);
+            return da-db;
+          }):f0;
+          if(f.length===0)return <div style={{textAlign:"center",padding:"120px 0",fontFamily:S.sn,fontSize:13,fontWeight:300,color:S.txGh}}>등록된 공간이 없습니다</div>;
+          const SpaceFilters=()=><div style={{position:"absolute",top:mob?10:12,left:"50%",transform:"translateX(-50%)",zIndex:5,display:"flex",gap:mob?4:6,flexWrap:"nowrap",justifyContent:"center"}}>
+            {SP_C.map(c=><button key={c} onClick={()=>sSpCat(p=>p.includes(c)?p.filter(x=>x!==c):[...p,c])} style={{fontFamily:S.sn,fontSize:mob?9:10,fontWeight:spCat.includes(c)?400:300,letterSpacing:mob?0:1,color:spCat.includes(c)?S.tx:S.txQ,background:spCat.includes(c)?"rgba(249,248,247,.95)":"rgba(249,248,247,.75)",border:"none",borderRadius:20,padding:mob?"5px 10px":"6px 14px",cursor:"pointer",transition:"all .3s",backdropFilter:"blur(4px)"}}>{c}</button>)}
+          </div>;
+          if(mob)return <div>
+            <div style={{position:"sticky",top:48,zIndex:12,width:"100%",height:"40vh",minHeight:200,maxHeight:360,overflow:"hidden",borderBottom:"1px solid "+S.ln}}>
               <SpaceMap spaces={f} hovId={mobFocus} onHover={id=>sMobFocus(id)} onClick={s=>openDetail(s)} style={{width:"100%",height:"100%"}}/>
+              <SpaceFilters/>
             </div>
-            <div style={{...fd(cVis),background:S.bg,position:"relative",zIndex:11,padding:"8px 16px 40px"}}>{f.map(it=><div key={it.id} onClick={()=>{if(mobFocus===it.id)openDetail(it);else sMobFocus(it.id);}} style={{display:"flex",gap:16,padding:"18px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",position:"relative",background:mobFocus===it.id?"rgba(184,164,140,.03)":"transparent",transition:"background .3s"}}><SavedDot isSaved={isSaved(it.id)}/><div style={{width:80,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="1/1" r={2}/></div><div style={{paddingTop:2,flex:1}}><div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:S.ac,marginBottom:4}}>{it.location}</div><div style={{fontSize:15,fontWeight:300,marginBottom:3}}>{it.title}</div><div style={{fontSize:11,color:S.txF,lineHeight:1.5,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.note}</div></div></div>)}</div>
+            <div style={{background:S.bg,position:"relative",padding:"8px 20px 40px"}}>{f.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{display:"flex",gap:16,padding:"20px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",position:"relative",transition:"background .5s"}}><SavedDot isSaved={isSaved(it.id)}/><div style={{width:80,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="1/1" r={2}/></div><div style={{paddingTop:2,flex:1}}><div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:5}}>{it.location}</div><div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,marginBottom:4}}>{it.title}</div><div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,color:S.txF,lineHeight:1.6,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.note}</div></div></div>)}</div>
           </div>;
           return <div style={{display:"flex",flexDirection:"row",minHeight:"100vh"}}>
             <div style={{width:"42vw",flexShrink:0,position:"sticky",top:0,height:"100vh",overflow:"hidden",borderRight:"1px solid "+S.lnL}}>
               <SpaceMap spaces={f} hovId={spHov} onHover={id=>sSpHov(id)} onClick={s=>openDetail(s)} style={{width:"100%",height:"100%"}}/>
+              <SpaceFilters/>
             </div>
             <div style={{...fd(cVis),flex:1,padding:"48px 40px 100px"}}>
               {(()=>{const cover=f.find(x=>x.isCover)||f[0];const rest=f.filter(x=>x.id!==cover.id);return <>
-                <div onClick={()=>openDetail(cover)} onMouseEnter={()=>sSpHov(cover.id)} onMouseLeave={()=>sSpHov(null)} style={{cursor:"pointer",position:"relative",marginBottom:64}}><SavedDot isSaved={isSaved(cover.id)}/><Img grad={cover.grad} photo={cover.photo} aspect="3/2" r={3}/><div style={{marginTop:28}}><div style={{fontFamily:S.sf,fontSize:10,letterSpacing:5,color:S.ac,marginBottom:12}}>{cover.location}{cover.tags?" \u00B7 "+cover.tags:""}</div><div style={{fontSize:32,fontWeight:300,lineHeight:1.4,letterSpacing:.5,marginBottom:14}}>{cover.title}</div><div style={{fontSize:14,color:S.txM,lineHeight:1.9,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{cover.note}</div></div></div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:36}}>{rest.map(it=><div key={it.id} onClick={()=>openDetail(it)} onMouseEnter={()=>sSpHov(it.id)} onMouseLeave={()=>sSpHov(null)} style={{cursor:"pointer",position:"relative",marginBottom:20}}><SavedDot isSaved={isSaved(it.id)}/><Img grad={it.grad} photo={it.photo} aspect="4/3" r={2}/><div style={{marginTop:12}}><div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:S.ac,marginBottom:4}}>{it.location}</div><div style={{fontSize:15,fontWeight:300,lineHeight:1.5}}>{it.title}</div></div></div>)}</div>
+                <div onClick={()=>openDetail(cover)} onMouseEnter={()=>sSpHov(cover.id)} onMouseLeave={()=>sSpHov(null)} style={{cursor:"pointer",position:"relative",marginBottom:80}}><SavedDot isSaved={isSaved(cover.id)}/><Img grad={cover.grad} photo={cover.photo} aspect="3/2" r={3}/><div style={{marginTop:32}}><div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:14}}>{cover.location}{cover.tags?" · "+cover.tags:""}</div><div style={{fontFamily:S.sf,fontSize:28,fontWeight:300,lineHeight:1.45,letterSpacing:1,marginBottom:16}}>{cover.title}</div><div style={{fontFamily:S.bd,fontSize:14,fontWeight:300,color:S.txM,lineHeight:2.0,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{cover.note}</div></div></div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:40}}>{rest.map(it=><div key={it.id} onClick={()=>openDetail(it)} onMouseEnter={()=>sSpHov(it.id)} onMouseLeave={()=>sSpHov(null)} style={{cursor:"pointer",position:"relative",marginBottom:24}}><SavedDot isSaved={isSaved(it.id)}/><Img grad={it.grad} photo={it.photo} aspect="4/3" r={2}/><div style={{marginTop:14}}><div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:6}}>{it.location}</div><div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,lineHeight:1.5}}>{it.title}</div></div></div>)}</div>
               </>;})()}
             </div>
           </div>;
@@ -355,41 +417,41 @@ export default function Sloist(){
         {/* ── SCENE ── */}
         {activeCat==="scene"&&(()=>{
           const cols=mob?2:3;const hasF=scCat.length>0;
-          return <div style={{...fd(cVis),maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"repeat("+cols+",1fr)",columnGap:mob?20:36,rowGap:mob?40:64,gridAutoFlow:"dense"}}>{catItems.map(it=>{const t=it.type||"";let span=1,aspect="1/1";if(t==="\uC601\uC0C1"){span=cols;aspect="16/9";}else if(t==="\uC7A5\uBA74"||t==="\uB8E8\uD2F4")aspect="3/4";return <div key={it.id} onClick={()=>openDetail(it)} style={{gridColumn:"span "+span,cursor:"pointer",position:"relative"}}><SavedDot isSaved={isSaved(it.id)}/><Img grad={it.grad} photo={it.photo} aspect={aspect} r={2}/><div style={{padding:"14px 0 0"}}>{!hasF&&<div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:S.ac,marginBottom:4}}>{t}</div>}<div style={{fontSize:13,fontWeight:300,lineHeight:1.6}}>{it.title}</div></div></div>;})}</div>;
+          return <div style={{...fd(cVis),maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"repeat("+cols+",1fr)",columnGap:mob?20:40,rowGap:mob?44:72,gridAutoFlow:"dense"}}>{catItems.map(it=>{const t=it.type||"";let span=1,aspect="1/1";if(t==="\uC601\uC0C1"){span=cols;aspect="16/9";}else if(t==="\uC7A5\uBA74"||t==="\uB8E8\uD2F4")aspect="3/4";return <div key={it.id} onClick={()=>openDetail(it)} style={{gridColumn:"span "+span,cursor:"pointer",position:"relative"}}><SavedDot isSaved={isSaved(it.id)}/><Img grad={it.grad} photo={it.photo} aspect={aspect} r={2}/><div style={{padding:"16px 0 0"}}>{!hasF&&<div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:5}}>{t}</div>}<div style={{fontFamily:S.sf,fontSize:13,fontWeight:300,lineHeight:1.6}}>{it.title}</div></div></div>;})}</div>;
         })()}
 
         {/* ── OBJET ── */}
-        {activeCat==="objet"&&<div style={{...fd(cVis),maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:mob?20:36,rowGap:mob?40:64}}>{catItems.map(o=><div key={o.id} onClick={()=>{if(mob&&objHov!==o.id){sObjHov(o.id);return;}openDetail(o);}} onMouseEnter={()=>sObjHov(o.id)} onMouseLeave={()=>sObjHov(null)} style={{cursor:"pointer",position:"relative",overflow:"hidden",borderRadius:2}}><SavedDot isSaved={isSaved(o.id)}/><Img grad={o.grad} photo={o.photo} aspect="3/2" r={2}/><div style={{position:"absolute",bottom:0,left:0,right:0,padding:"24px 16px 14px",background:"linear-gradient(transparent,rgba(0,0,0,.22))",opacity:objHov===o.id?1:0,transition:"opacity .5s"}}><div style={{fontSize:14,color:"rgba(255,255,255,.9)",fontWeight:300,marginBottom:3}}>{o.title}</div><div style={{fontSize:11,color:"rgba(255,255,255,.5)"}}>{o.maker}</div></div></div>)}</div>}
+        {activeCat==="objet"&&<div style={{...fd(cVis),maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:mob?20:40,rowGap:mob?44:72}}>{catItems.map(o=><div key={o.id} onClick={()=>openDetail(o)} onMouseEnter={()=>sObjHov(o.id)} onMouseLeave={()=>sObjHov(null)} style={{cursor:"pointer",position:"relative",overflow:"hidden",borderRadius:2}}><SavedDot isSaved={isSaved(o.id)}/><Img grad={o.grad} photo={o.photo} aspect="3/2" r={2}/><div style={{position:"absolute",bottom:0,left:0,right:0,padding:"28px 18px 16px",background:"linear-gradient(transparent,rgba(0,0,0,.28))",opacity:mob?1:(objHov===o.id?1:0),transition:"opacity .6s cubic-bezier(.2,0,.3,1)"}}><div style={{fontFamily:S.sf,fontSize:14,color:"rgba(255,255,255,.9)",fontWeight:300,marginBottom:4}}>{o.title}</div><div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:"rgba(255,255,255,.5)",letterSpacing:1}}>{o.maker}</div></div></div>)}</div>}
       </div>
       <Foot/>
     </div>}
     {view==="home"&&detail&&<DetailView/>}
 
     {/* SEARCH RESULTS */}
-    {view==="search"&&!detail&&<div style={{...fd(cVis,"0.6s"),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/><div style={{padding:px,flex:"1 0 auto"}}><div onClick={()=>sSov(true)} style={{fontFamily:S.sf,fontSize:16,letterSpacing:3,color:S.tx,textAlign:"center",margin:"28px 0 44px",fontWeight:300,cursor:"pointer"}}>{"\u2022 "+searchQ+" \u2022"}</div><div style={{maxWidth:860,margin:"0 auto"}}>{searchR.length>0?searchR.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{display:"flex",gap:mob?16:28,padding:(mob?18:28)+"px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",position:"relative"}}><SavedDot isSaved={isSaved(it.id)}/><div style={{width:mob?88:160,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="4/3" r={2}/></div><div style={{flex:1,paddingTop:mob?0:6}}><div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:S.ac,marginBottom:6}}>{it.root}</div><div style={{fontSize:mob?14:17,fontWeight:300,lineHeight:1.6,marginBottom:6}}>{it.title}</div><div style={{fontSize:12,color:S.txF,lineHeight:1.5,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.note}</div></div></div>):<div style={{textAlign:"center",padding:"100px 0",fontSize:14,color:S.txGh}}>{"\uACB0\uACFC\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4"}</div>}</div></div><Foot/></div>}
+    {view==="search"&&!detail&&<div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/><div style={{padding:mob?"0 20px":"0 40px",flex:"1 0 auto"}}><div onClick={()=>sSov(true)} style={{fontFamily:S.sf,fontSize:mob?16:18,fontWeight:300,letterSpacing:2,color:S.tx,textAlign:"center",margin:"32px 0 48px",cursor:"pointer"}}>{searchQ}</div><div style={{maxWidth:860,margin:"0 auto"}}>{searchR.length>0?searchR.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{display:"flex",gap:mob?16:28,padding:(mob?20:32)+"px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",position:"relative"}}><SavedDot isSaved={isSaved(it.id)}/><div style={{width:mob?88:160,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="4/3" r={2}/></div><div style={{flex:1,paddingTop:mob?0:8}}><div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:8}}>{it.root}</div><div style={{fontFamily:S.sf,fontSize:mob?14:17,fontWeight:300,lineHeight:1.6,marginBottom:6}}>{it.title}</div><div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,color:S.txF,lineHeight:1.6,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.note}</div></div></div>):<div style={{textAlign:"center",padding:"120px 0",fontFamily:S.sn,fontSize:13,fontWeight:300,color:S.txGh}}>결과가 없습니다</div>}</div></div><Foot/></div>}
     {view==="search"&&detail&&<DetailView/>}
 
     {/* ABOUT */}
-    {view==="about"&&<div style={{...fd(cVis,"0.8s"),minHeight:"100vh",display:"flex",flexDirection:"column"}}>
+    {view==="about"&&<div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}>
       <Nav/>
-      <div style={{flex:"1 0 auto",maxWidth:mob?undefined:800,margin:"0 auto",padding:mob?"32px 16px 60px":"72px 48px 80px"}}>
-        <div style={{display:"flex",justifyContent:"flex-end",marginBottom:mob?24:40}}><button onClick={goBack} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,background:"none",border:"none",cursor:"pointer"}}>back</button></div>
-        <p style={{fontFamily:S.sf,fontSize:mob?22:38,fontWeight:300,lineHeight:1.7,color:S.tx,letterSpacing:mob?0:1,marginBottom:mob?40:64}}>{"\uB290\uB9AC\uAC8C \uAC77\uB294 \uC0AC\uB78C\uB4E4\uC758 \uC2DC\uC120"}</p>
-        <div style={{marginBottom:mob?56:100,maxWidth:560}}>
-          <p style={{fontSize:mob?13:15,fontWeight:400,lineHeight:2.6,color:S.txM}}>{"\uBE44\uC6CC\uC9C4 \uACF5\uAC04, \uC815\uAC08\uD55C \uAE30\uBB3C, \uACE0\uC694\uD55C \uC228\uACB0."}</p>
-          <p style={{fontSize:mob?13:15,fontWeight:400,lineHeight:2.6,color:S.txM,marginTop:mob?8:12}}>{"\uC290\uB85C\uC774\uC2A4\uD2B8\uB294 \uC790\uAE30\uB9CC\uC758 \uC18D\uB3C4\uB85C \uC0B4\uC544\uAC00\uB294 \uC0AC\uB78C\uB4E4\uC758 \uC7A5\uC18C, \uBB3C\uAC74, \uC7A5\uBA74\uC744 \uAE30\uB85D\uD569\uB2C8\uB2E4. \uC9C1\uC811 \uACBD\uD5D8\uD55C \uAC83\uB4E4\uB9CC\uC744 \uB0A8\uAE30\uACE0, \uADF8 \uC2DC\uC120\uC744 \uD558\uB098\uC758 \uD750\uB984\uC73C\uB85C \uC5EE\uC2B5\uB2C8\uB2E4."}</p>
+      <div style={{flex:"1 0 auto",maxWidth:mob?undefined:720,margin:"0 auto",padding:mob?"36px 20px 60px":"80px 48px 100px"}}>
+        <div style={{display:"flex",justifyContent:"flex-end",marginBottom:mob?28:48}}><button onClick={goBack} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>back</button></div>
+        <p style={{fontFamily:S.sf,fontSize:mob?24:40,fontWeight:300,lineHeight:1.6,color:S.tx,letterSpacing:mob?0:1,marginBottom:mob?48:80}}>{"\uB290\uB9AC\uAC8C \uAC77\uB294 \uC0AC\uB78C\uB4E4\uC758 \uC2DC\uC120"}</p>
+        <div style={{marginBottom:mob?64:120,maxWidth:520}}>
+          <p style={{fontFamily:S.bd,fontSize:mob?13:15,fontWeight:400,lineHeight:2.2,color:S.txM}}>{"\uBE44\uC6CC\uC9C4 \uACF5\uAC04, \uC815\uAC08\uD55C \uAE30\uBB3C, \uACE0\uC694\uD55C \uC228\uACB0."}</p>
+          <p style={{fontFamily:S.bd,fontSize:mob?13:15,fontWeight:400,lineHeight:2.2,color:S.txM,marginTop:mob?12:16}}>{"\uC290\uB85C\uC774\uC2A4\uD2B8\uB294 \uC790\uAE30\uB9CC\uC758 \uC18D\uB3C4\uB85C \uC0B4\uC544\uAC00\uB294 \uC0AC\uB78C\uB4E4\uC758 \uC7A5\uC18C, \uBB3C\uAC74, \uC7A5\uBA74\uC744 \uAE30\uB85D\uD569\uB2C8\uB2E4. \uC9C1\uC811 \uACBD\uD5D8\uD55C \uAC83\uB4E4\uB9CC\uC744 \uB0A8\uAE30\uACE0, \uADF8 \uC2DC\uC120\uC744 \uD558\uB098\uC758 \uD750\uB984\uC73C\uB85C \uC5EE\uC2B5\uB2C8\uB2E4."}</p>
         </div>
         <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:mob?48:0,marginBottom:mob?56:100}}>
           <div>
-            <div style={{fontFamily:S.sf,fontSize:10,letterSpacing:5,color:S.txGh,marginBottom:24}}>what we record</div>
-            <div style={{fontSize:mob?13:14,lineHeight:2.8}}>
-              <div><span style={{color:S.tx,letterSpacing:1}}>space</span> <span style={{color:S.txGh,margin:"0 10px"}}>{"\u2014"}</span> <span style={{color:S.txQ}}>{"\uC7A5\uC18C\uC758 \uAE30\uB85D"}</span></div>
+            <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:28}}>what we record</div>
+            <div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:2.6}}>
+              <div><span style={{color:S.tx,letterSpacing:2}}>space</span> <span style={{color:S.txGh,margin:"0 10px"}}>{"\u2014"}</span> <span style={{color:S.txQ}}>{"\uC7A5\uC18C\uC758 \uAE30\uB85D"}</span></div>
               <div><span style={{color:S.tx,letterSpacing:1}}>objet</span> <span style={{color:S.txGh,margin:"0 10px"}}>{"\u2014"}</span> <span style={{color:S.txQ}}>{"\uBB3C\uAC74\uC758 \uAE30\uB85D"}</span></div>
               <div><span style={{color:S.tx,letterSpacing:1}}>scene</span> <span style={{color:S.txGh,margin:"0 10px"}}>{"\u2014"}</span> <span style={{color:S.txQ}}>{"\uC7A5\uBA74\uC758 \uAE30\uB85D"}</span></div>
             </div>
           </div>
           <div>
-            <div style={{fontFamily:S.sf,fontSize:10,letterSpacing:5,color:S.txGh,marginBottom:24}}>how we choose</div>
+            <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:28}}>how we choose</div>
             <div style={{fontSize:mob?12:13,color:S.txQ,lineHeight:2.8}}>
               <div>{"\uC5EC\uAE30\uC5D0 \uAC00\uBA74 \uC228\uC774 \uB290\uB824\uC9D1\uB2C8\uB2E4."}</div>
               <div>{"\uC774\uAC83\uC744 \uACC1\uC5D0 \uB450\uBA74 \uD558\uB8E8\uAC00 \uACE0\uC694\uD574\uC9D1\uB2C8\uB2E4."}</div>
@@ -399,7 +461,7 @@ export default function Sloist(){
         </div>
         <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:mob?48:0,marginBottom:mob?56:100}}>
           <div>
-            <div style={{fontFamily:S.sf,fontSize:10,letterSpacing:5,color:S.txGh,marginBottom:24}}>from sloist</div>
+            <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:28}}>from sloist</div>
             <div style={{fontSize:mob?13:14,lineHeight:2.8}}>
               <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.tx,letterSpacing:1,width:mob?80:100,flexShrink:0}}>magazine</span><span style={{color:S.txGh,fontSize:11,cursor:"pointer"}} onClick={()=>flash("coming soon")}>coming soon</span></div>
               <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.tx,letterSpacing:1,width:mob?80:100,flexShrink:0}}>stay</span><span style={{color:S.txGh,fontSize:11,cursor:"pointer"}} onClick={()=>flash("coming soon")}>coming soon</span></div>
@@ -407,7 +469,7 @@ export default function Sloist(){
             </div>
           </div>
           <div>
-            <div style={{fontFamily:S.sf,fontSize:10,letterSpacing:5,color:S.txGh,marginBottom:24}}>contact</div>
+            <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:28}}>contact</div>
             <div style={{fontSize:mob?13:14,lineHeight:2.8}}>
               <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.txQ,fontSize:11,letterSpacing:1,width:mob?80:100,flexShrink:0}}>mail</span><a href="mailto:slistkr@gmail.com" style={{color:S.txM,textDecoration:"none",borderBottom:"1px solid "+S.lnL}}>slistkr@gmail.com</a></div>
               <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.txQ,fontSize:11,letterSpacing:1,width:mob?80:100,flexShrink:0}}>social</span><a href="https://instagram.com/sloists" target="_blank" rel="noopener noreferrer" style={{color:S.txM,textDecoration:"none",borderBottom:"1px solid "+S.lnL}}>@sloists</a></div>
@@ -416,46 +478,82 @@ export default function Sloist(){
           </div>
         </div>
         <div style={{textAlign:"center",marginBottom:mob?48:72}}><span onClick={()=>goTo("archive")} style={{fontFamily:S.sf,fontSize:mob?12:14,fontWeight:300,letterSpacing:mob?3:5,color:S.txQ,cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>all sloists are here</span></div>
-        <div style={{borderTop:"1px solid "+S.ln,paddingTop:mob?28:40,display:"flex",justifyContent:"space-between",alignItems:mob?"flex-start":"center",flexDirection:mob?"column":"row",gap:mob?20:0}}>
-          <div style={{fontSize:10,color:S.txGh,lineHeight:2,letterSpacing:.5}}>{"\u00A9 2026 sloist. all rights reserved."}<br/><span style={{fontSize:9}}>all content and images are the property of sloist and their respective creators.</span></div>
-          <div style={{display:"flex",gap:24}}>{["terms","privacy"].map(l=><button key={l} onClick={()=>sLeg(l)} style={{fontFamily:S.sf,fontSize:10,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .3s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txF} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>{l}</button>)}</div>
+        <div style={{borderTop:"1px solid "+S.ln,paddingTop:mob?28:40}}>
+          <div style={{display:"flex",justifyContent:"center",gap:24,marginBottom:mob?16:20}}>
+            {["terms","privacy"].map(l=><button key={l} onClick={()=>sLeg(l)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .3s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txF} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>{l}</button>)}
+          </div>
+          <div style={{textAlign:"center",fontSize:10,color:S.txGh,lineHeight:2,letterSpacing:.5}}>&copy; 2026 sloist. all rights reserved.</div>
         </div>
       </div>
-      {legalOpen&&<div onClick={()=>sLeg(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.06)",zIndex:190,display:"flex",justifyContent:"center",alignItems:"center"}}><div onClick={e=>e.stopPropagation()} style={{background:S.bg,padding:mob?32:56,maxWidth:520,width:"90%",border:"1px solid "+S.ln}}>
-        <div style={{fontFamily:S.sf,fontSize:mob?14:16,letterSpacing:4,marginBottom:28,fontWeight:300}}>{legalOpen}</div>
-        <p style={{fontSize:13,lineHeight:2.2,color:S.txM}}>{legalOpen==="terms"?"\uC290\uB85C\uC774\uC2A4\uD2B8\uC758 \uBAA8\uB4E0 \uCF58\uD150\uCE20\uB294 \uC5D0\uB514\uD130\uC758 \uC2DC\uC120\uC73C\uB85C \uAE30\uB85D\uB41C \uAC83\uC774\uBA70, \uBB34\uB2E8 \uBCF5\uC81C \uBC0F \uC0C1\uC5C5\uC801 \uC774\uC6A9\uC744 \uAE08\uD569\uB2C8\uB2E4.":"\uC290\uB85C\uC774\uC2A4\uD2B8\uB294 \uC0AC\uC6A9\uC790\uC758 \uAC1C\uC778\uC815\uBCF4\uB97C \uC18C\uC911\uD788 \uB2E4\uB8F9\uB2C8\uB2E4."}</p>
-        <button onClick={()=>sLeg(null)} style={{marginTop:24,fontFamily:S.sf,fontSize:10,letterSpacing:3,color:S.txF,background:"none",border:"none",cursor:"pointer"}}>close</button>
+      {legalOpen&&<div onClick={()=>sLeg(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.08)",zIndex:190,display:"flex",justifyContent:"center",alignItems:"flex-start",overflowY:"auto",padding:mob?"60px 0":"80px 0"}}><div onClick={e=>e.stopPropagation()} style={{background:S.bg,padding:mob?"36px 24px 48px":"48px 56px 64px",maxWidth:640,width:"92%",border:"1px solid "+S.ln}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:mob?28:36}}>
+          <div style={{fontFamily:S.sf,fontSize:mob?16:20,letterSpacing:4,fontWeight:300}}>{legalOpen==="terms"?"Terms of Service":"Privacy Policy"}</div>
+          <button onClick={()=>sLeg(null)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txF,background:"none",border:"none",cursor:"pointer",transition:"color .3s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txF}>close</button>
+        </div>
+        <div style={{fontSize:13,lineHeight:2.2,color:S.txM}}>
+          {legalOpen==="terms"?<>
+            <p style={{fontWeight:400,marginBottom:20}}>제1조 (목적)</p>
+            <p style={{marginBottom:24}}>이 약관은 슬로이스트(이하 "회사")가 제공하는 웹사이트 및 관련 서비스(이하 "서비스")의 이용과 관련하여, 회사와 이용자 간의 권리, 의무 및 책임 사항, 기타 필요한 사항을 규정함을 목적으로 합니다.</p>
+            <p style={{fontWeight:400,marginBottom:20}}>제2조 (정의)</p>
+            <p style={{marginBottom:24}}>① "서비스"란 회사가 운영하는 슬로이스트 웹사이트(sloist.com)를 통해 제공하는 모든 콘텐츠 열람, 저장, 검색, 에디터 기능 등 일체의 서비스를 의미합니다.<br/>② "이용자"란 본 약관에 따라 서비스를 이용하는 회원 및 비회원을 말합니다.<br/>③ "회원"이란 회사에 개인정보를 제공하고 회원 등록을 한 자로서, 서비스를 지속적으로 이용할 수 있는 자를 말합니다.<br/>④ "에디터"란 회사의 승인을 받아 콘텐츠를 직접 작성하고 게시할 수 있는 권한을 부여받은 회원을 말합니다.</p>
+            <p style={{fontWeight:400,marginBottom:20}}>제3조 (약관의 효력 및 변경)</p>
+            <p style={{marginBottom:24}}>① 본 약관은 서비스 화면에 게시하거나 기타의 방법으로 이용자에게 공지함으로써 효력이 발생합니다.<br/>② 회사는 관련 법령에 위배되지 않는 범위에서 본 약관을 변경할 수 있으며, 변경 시 적용일자 및 변경 사유를 명시하여 최소 7일 전에 공지합니다. 다만, 이용자에게 불리한 변경의 경우 30일 전에 공지합니다.</p>
+            <p style={{fontWeight:400,marginBottom:20}}>제4조 (서비스의 제공 및 변경)</p>
+            <p style={{marginBottom:24}}>① 회사는 다음의 서비스를 제공합니다: 장소(space), 물건(objet), 장면(scene)에 대한 에디토리얼 콘텐츠의 열람, 콘텐츠 저장(keep) 기능, 에디터 팔로우 기능, 검색 기능, 회원 관리 기능.<br/>② 회사는 서비스의 내용을 기술적 사양의 변경 등의 사유로 변경할 수 있으며, 변경 시 변경 내용과 적용일자를 공지합니다.</p>
+            <p style={{fontWeight:400,marginBottom:20}}>제5조 (콘텐츠의 저작권)</p>
+            <p style={{marginBottom:24}}>① 서비스에 게시된 모든 콘텐츠(텍스트, 사진, 편집물 등)의 저작권은 회사 또는 해당 콘텐츠를 작성한 에디터에게 귀속됩니다.<br/>② 이용자는 서비스를 통해 얻은 콘텐츠를 회사의 사전 동의 없이 복제, 전송, 출판, 배포, 방송, 기타 방법에 의하여 영리 목적으로 이용하거나 제3자에게 이용하게 해서는 안 됩니다.<br/>③ 이용자가 서비스 내에서 작성한 게시물의 저작권은 해당 이용자에게 귀속되며, 회사는 서비스 운영, 홍보 등의 목적으로 이를 사용할 수 있습니다.</p>
+            <p style={{fontWeight:400,marginBottom:20}}>제6조 (이용자의 의무)</p>
+            <p style={{marginBottom:24}}>이용자는 다음 행위를 해서는 안 됩니다: 허위 정보의 등록, 타인의 정보 도용, 서비스에 게시된 정보의 무단 변경, 회사가 정한 정보 이외의 정보(컴퓨터 프로그램 등)의 송신 또는 게시, 회사 및 기타 제3자의 저작권 등 지적재산권에 대한 침해, 회사 및 기타 제3자의 명예를 손상시키거나 업무를 방해하는 행위.</p>
+            <p style={{fontWeight:400,marginBottom:20}}>제7조 (서비스 이용의 제한 및 중지)</p>
+            <p>회사는 다음 각 호에 해당하는 경우 서비스 이용을 제한하거나 중지할 수 있습니다: 서비스용 설비의 보수 등 공사로 인한 부득이한 경우, 전기통신사업법에 규정된 기간통신사업자가 전기통신 서비스를 중지한 경우, 기타 불가항력적 사유가 있는 경우.</p>
+          </>:<>
+            <p style={{fontWeight:400,marginBottom:20}}>1. 개인정보의 수집 및 이용 목적</p>
+            <p style={{marginBottom:24}}>슬로이스트(이하 "회사")는 수집한 개인정보를 다음의 목적을 위해 활용합니다: 회원 가입 의사 확인, 회원 식별 및 본인 인증, 서비스 제공에 관한 계약 이행 및 요금 정산, 서비스 이용 기록 분석을 통한 서비스 개선, 신규 서비스 개발 및 맞춤 서비스 제공, 이벤트 및 광고성 정보 전달(선택 동의 시).</p>
+            <p style={{fontWeight:400,marginBottom:20}}>2. 수집하는 개인정보의 항목</p>
+            <p style={{marginBottom:24}}>① 필수항목: 이메일 주소, 비밀번호, 이름(닉네임).<br/>② 서비스 이용 과정에서 자동으로 생성·수집되는 정보: 접속 IP 주소, 브라우저 종류 및 버전, 서비스 이용 기록, 접속 로그, 쿠키 정보.<br/>③ 에디터 신청 시 추가 수집항목: 프로필 사진, 자기소개, 관심 분야 태그.</p>
+            <p style={{fontWeight:400,marginBottom:20}}>3. 개인정보의 보유 및 이용 기간</p>
+            <p style={{marginBottom:24}}>회사는 원칙적으로 개인정보 수집 및 이용 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다. 단, 관련 법령에 의하여 보존할 필요가 있는 경우 아래와 같이 일정 기간 동안 회원정보를 보관합니다:<br/>- 계약 또는 청약철회 등에 관한 기록: 5년 (전자상거래등에서의 소비자보호에 관한 법률)<br/>- 대금결제 및 재화 등의 공급에 관한 기록: 5년<br/>- 소비자의 불만 또는 분쟁처리에 관한 기록: 3년<br/>- 웹사이트 방문기록: 3개월 (통신비밀보호법)</p>
+            <p style={{fontWeight:400,marginBottom:20}}>4. 개인정보의 파기 절차 및 방법</p>
+            <p style={{marginBottom:24}}>회사는 개인정보 보유기간의 경과, 처리 목적 달성 등 개인정보가 불필요하게 되었을 때에는 지체 없이 해당 개인정보를 파기합니다. 전자적 파일 형태의 정보는 복구할 수 없는 방법을 사용하여 삭제하며, 종이에 출력된 개인정보는 분쇄기로 분쇄하거나 소각하여 파기합니다.</p>
+            <p style={{fontWeight:400,marginBottom:20}}>5. 개인정보의 제3자 제공</p>
+            <p style={{marginBottom:24}}>회사는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다. 다만, 다음의 경우에는 예외로 합니다: 이용자가 사전에 동의한 경우, 법령의 규정에 의하거나 수사 목적으로 법령에 정해진 절차와 방법에 따라 수사기관의 요구가 있는 경우.</p>
+            <p style={{fontWeight:400,marginBottom:20}}>6. 이용자의 권리와 행사 방법</p>
+            <p style={{marginBottom:24}}>① 이용자는 언제든지 자신의 개인정보를 조회하거나 수정할 수 있으며, 회원 탈퇴를 통해 개인정보의 수집 및 이용 동의를 철회할 수 있습니다.<br/>② 개인정보의 오류에 대한 정정을 요청한 경우에는 정정을 완료하기 전까지 해당 개인정보를 이용 또는 제공하지 않습니다.</p>
+            <p style={{fontWeight:400,marginBottom:20}}>7. 개인정보 보호책임자</p>
+            <p>회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 이용자의 개인정보 관련 불만 처리 및 피해 구제 등을 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다. 개인정보 보호책임자에게 문의하실 수 있으며, 회사는 이용자의 문의에 대해 지체 없이 답변 및 처리해드리겠습니다.<br/>연락처: slistkr@gmail.com</p>
+          </>}
+        </div>
       </div></div>}
     </div>}
 
     {/* ARCHIVE */}
-    {view==="archive"&&<div style={{...fd(cVis,"0.9s"),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/><div style={{padding:mob?"48px 16px":"96px 36px",flex:"1 0 auto"}}><div style={{display:"flex",justifyContent:"flex-end",marginBottom:mob?20:32}}><button onClick={goBack} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,background:"none",border:"none",cursor:"pointer"}}>back</button></div><div style={{textAlign:"center",marginBottom:mob?56:100}}><p style={{fontFamily:S.sf,fontSize:mob?14:16,lineHeight:2.6,color:S.txQ,letterSpacing:1}}>{"\uB290\uB9B0 \uC0B6\uC744 \uC0AC\uB294 \uC0AC\uB78C\uB4E4,"}<br/>{"\uADF8\uB9AC\uACE0 \uADF8\uB4E4\uC774 \uB0A8\uAE34 \uAE30\uB85D"}</p></div>
+    {view==="archive"&&<div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/><div style={{padding:mob?"48px 16px":"96px 36px",flex:"1 0 auto"}}><div style={{display:"flex",justifyContent:"flex-end",marginBottom:mob?20:32}}><button onClick={goBack} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,background:"none",border:"none",cursor:"pointer"}}>back</button></div><div style={{textAlign:"center",marginBottom:mob?56:100}}><p style={{fontFamily:S.sf,fontSize:mob?14:16,lineHeight:2.6,color:S.txQ,letterSpacing:1}}>{"\uB290\uB9B0 \uC0B6\uC744 \uC0AC\uB294 \uC0AC\uB78C\uB4E4,"}<br/>{"\uADF8\uB9AC\uACE0 \uADF8\uB4E4\uC774 \uB0A8\uAE34 \uAE30\uB85D"}</p></div>
       <div style={{display:"grid",gridTemplateColumns:mob?"1fr":tab?"repeat(2,1fr)":"repeat(3,1fr)",gap:mob?"56px 0":tab?"64px 40px":"80px 56px"}}>{Object.entries(ED).map(([eid,ed],idx)=><div key={eid} style={{opacity:0,animation:"stg .7s ease "+idx*.1+"s both"}} onClick={()=>openRoom(eid)}>
         <div style={{cursor:"pointer",textAlign:"center"}}><div style={{width:"100%",aspectRatio:"3/4",background:ed.grad,borderRadius:2,marginBottom:24,overflow:"hidden"}}>{ed.img&&<img src={ed.img} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>}</div>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,marginBottom:10}}><span style={{fontFamily:S.sf,fontSize:mob?16:18,letterSpacing:3,fontWeight:300}}>{ed.name}</span><span style={{fontSize:10,color:S.txGh,letterSpacing:1}}>{ed.tags.join(" \u00B7 ")}</span></div>
-        <div style={{fontSize:12,color:S.txQ,lineHeight:1.7}}>{ed.bio}</div></div>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,marginBottom:12}}><span style={{fontFamily:S.sf,fontSize:mob?16:18,letterSpacing:3,fontWeight:300}}>{ed.name}</span><span style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txGh,letterSpacing:1}}>{ed.tags.join(" · ")}</span></div>
+        <div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,color:S.txQ,lineHeight:1.8}}>{ed.bio}</div></div>
       </div>)}</div></div><Foot/></div>}
 
     {/* ROOM */}
-    {view==="room"&&edRoom&&ED[edRoom]&&!detail&&(()=>{const ed=ED[edRoom],ei=edItems(edRoom);return <div style={{...fd(cVis,"0.6s"),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/>
-      <div style={{padding:mob?"0 16px":"0 36px",flex:"1 0 auto"}}>
-        <div style={{display:"flex",justifyContent:"flex-end",padding:mob?"16px 0 0":"24px 0 0"}}><button onClick={goBack} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,background:"none",border:"none",cursor:"pointer"}}>back</button></div>
-        <div style={{textAlign:"center",padding:"24px 0 24px"}}>
-          <div style={{width:80,height:80,borderRadius:"50%",overflow:"hidden",margin:"0 auto 16px",background:ed.grad}}>{ed.img&&<img src={ed.img} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>}</div>
-          <div style={{fontFamily:S.sf,fontSize:22,fontWeight:300,letterSpacing:6,marginBottom:10}}>{"sloist "+ed.name}</div>
-          <div style={{fontSize:11,color:S.txGh,letterSpacing:2,marginBottom:12}}>{ed.tags.join(" \u00B7 ")}</div>
-          <div style={{fontSize:13,color:S.txQ,marginBottom:16,lineHeight:1.7}}>{ed.bio}</div>
-          <button onClick={()=>toggleFol(edRoom)} style={{fontFamily:S.sf,fontSize:10,letterSpacing:4,color:following.includes(edRoom)?S.ac:S.txGh,background:"none",border:"none",borderBottom:following.includes(edRoom)?"1px solid "+S.ac:"1px solid "+S.lnL,padding:"4px 0",cursor:"pointer",transition:"all .3s"}}>{following.includes(edRoom)?"following":"follow"}</button>
+    {view==="room"&&edRoom&&ED[edRoom]&&!detail&&(()=>{const ed=ED[edRoom],ei=edItems(edRoom);return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/>
+      <div style={{padding:mob?"0 20px":"0 40px",flex:"1 0 auto"}}>
+        <div style={{display:"flex",justifyContent:"flex-end",padding:mob?"16px 0 0":"24px 0 0"}}><button onClick={goBack} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>back</button></div>
+        <div style={{textAlign:"center",padding:"28px 0 28px"}}>
+          <div style={{width:80,height:80,borderRadius:"50%",overflow:"hidden",margin:"0 auto 20px",background:ed.grad}}>{ed.img&&<img src={ed.img} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>}</div>
+          <div style={{fontFamily:S.sf,fontSize:20,fontWeight:300,letterSpacing:5,marginBottom:12}}>{"sloist "+ed.name}</div>
+          <div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txGh,letterSpacing:2,marginBottom:14}}>{ed.tags.join(" · ")}</div>
+          <div style={{fontFamily:S.sn,fontSize:12,fontWeight:300,color:S.txQ,marginBottom:20,lineHeight:1.8}}>{ed.bio}</div>
+          <button onClick={()=>toggleFol(edRoom)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:following.includes(edRoom)?S.ac:S.txGh,background:"none",border:"none",borderBottom:following.includes(edRoom)?"1px solid "+S.ac:"1px solid "+S.lnL,padding:"4px 0",cursor:"pointer",transition:"all .5s"}}>{following.includes(edRoom)?"following":"follow"}</button>
         </div>
         <div style={{display:"grid",gridTemplateColumns:mob?"repeat(2,1fr)":"repeat(3,1fr)",gap:mob?12:16,gridAutoFlow:"dense",marginTop:28}}>{ei.map(it=>{const isWide=it.root==="scene"&&it.type==="\uC601\uC0C1";const cols=mob?2:3;const aspect=it.root==="scene"?(it.type==="\uC7A5\uBA74"||it.type==="\uB8E8\uD2F4"?"3/4":"1/1"):(it.root==="objet"?"4/5":"4/3");return <div key={it.id} style={{gridColumn:isWide?"span "+cols:"span 1",cursor:"pointer",position:"relative"}} onClick={()=>{scrollSave.current=window.scrollY;lt(()=>sDetail(it));}}><SavedDot isSaved={isSaved(it.id)}/><Img grad={it.grad} photo={it.photo} aspect={isWide?"16/9":aspect} r={2}/><div style={{fontSize:12,fontWeight:300,marginTop:8}}>{it.title}</div></div>;})}</div>
       </div><Foot/></div>;})()}
     {view==="room"&&detail&&<DetailView hideEditor={true}/>}
 
     {/* MY PAGE */}
-    {view==="mypage"&&!detail&&<div style={{...fd(cVis,"0.6s"),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/>
+    {view==="mypage"&&!detail&&<div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/>
       <div style={{padding:px,flex:"1 0 auto"}}>
-        <div style={{textAlign:"center",padding:"28px 0 12px"}}><div style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,marginBottom:10}}>{"sloist "+(auth.profile?.name||"guest")}</div><div style={{fontFamily:S.sf,fontSize:mob?20:26,fontWeight:300,letterSpacing:4}}>my archive</div></div>
-        <div style={{display:"flex",justifyContent:"center",gap:mob?28:48,margin:"32px 0 44px"}}>{[...(auth.isEditor?["posts"]:[]),"saved","following","account"].map(k=><button key={k} onClick={()=>lt(()=>sMyTab(k))} style={{fontFamily:S.sf,fontSize:14,letterSpacing:mob?3:5,textTransform:"lowercase",color:myTab===k?S.tx:S.txGh,fontWeight:myTab===k?400:300,background:"none",border:"none",borderBottom:myTab===k?"2px solid "+S.tx:"2px solid transparent",padding:"10px 0",cursor:"pointer",transition:"all .25s"}}>{k}</button>)}</div>
+        <div style={{textAlign:"center",padding:"32px 0 12px"}}><div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:12}}>{"sloist "+(auth.profile?.name||"guest")}</div><div style={{fontFamily:S.sf,fontSize:mob?20:24,fontWeight:300,letterSpacing:3}}>my archive</div></div>
+        <div style={{display:"flex",justifyContent:"center",gap:mob?28:48,margin:"36px 0 48px"}}>{[...(auth.isEditor?["posts"]:[]),"saved","following","account"].map(k=><button key={k} onClick={()=>lt(()=>sMyTab(k))} style={{fontFamily:S.sn,fontSize:11,fontWeight:myTab===k?400:300,letterSpacing:mob?3:4,textTransform:"lowercase",color:myTab===k?S.tx:S.txGh,background:"none",border:"none",borderBottom:myTab===k?"1px solid "+S.tx:"1px solid transparent",padding:"10px 0",cursor:"pointer",transition:"all .5s"}}>{k}</button>)}</div>
         <div style={fd(cVis)}>
           {myTab==="posts"&&auth.isEditor&&(()=>{const myPosts=items.filter(i=>auth.isAdmin?true:i.editor===auth.editorId);return myPosts.length>0?<div style={{maxWidth:860,margin:"0 auto"}}>{myPosts.map(it=><div key={it.id} style={{display:"flex",gap:mob?12:20,padding:"20px 0",borderBottom:"1px solid "+S.lnL,alignItems:"center"}}>
             <div style={{width:mob?72:120,flexShrink:0,cursor:"pointer"}} onClick={()=>openDetail(it)}><Img grad={it.grad} photo={it.photo} aspect="4/3" r={2}/></div>
@@ -477,8 +575,8 @@ export default function Sloist(){
     </div>}
     {view==="mypage"&&detail&&<DetailView/>}
 
-    {showTop&&<button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:mob?28:36,right:mob?16:36,fontFamily:S.sf,fontSize:10,letterSpacing:4,color:S.txGh,background:S.bg,border:"none",cursor:"pointer",padding:"8px 0",transition:"opacity .4s",opacity:.7,zIndex:100}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity=".7"}>top</button>}
-    {toast&&<div style={{position:"fixed",bottom:36,left:"50%",transform:"translateX(-50%)",color:S.txM,fontSize:12,fontWeight:300,letterSpacing:4,zIndex:300,fontFamily:S.sf}}>{toast}</div>}
+    {showTop&&<button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:mob?28:40,right:mob?20:40,fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txGh,background:S.bg,border:"none",cursor:"pointer",padding:"8px 0",transition:"opacity .5s",opacity:.6,zIndex:100}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity=".6"}>top</button>}
+    {toast&&<div style={{position:"fixed",bottom:40,left:"50%",transform:"translateX(-50%)",color:S.txM,fontSize:11,fontWeight:300,letterSpacing:3,zIndex:300,fontFamily:S.sn}}>{toast}</div>}
 
     {/* 로그인/회원가입 — 독립 페이지 */}
     {view==="login"&&<Auth onAuth={()=>goHome()} signIn={auth.signIn} signUp={auth.signUp}/>}
