@@ -1,9 +1,10 @@
 // ── 로그인 / 회원가입 ──
 import { useState } from "react";
 import S from "../styles/tokens";
+import { supabase } from "../lib/supabase";
 
 export default function Auth({ onAuth, signIn, signUp }) {
-  const [mode, setMode] = useState("login"); // login | signup
+  const [mode, setMode] = useState("login"); // login | signup | reset
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [name, setName] = useState("");
@@ -27,6 +28,10 @@ export default function Auth({ onAuth, signIn, signUp }) {
         else setMsg("가입 실패: 다시 시도해주세요");
       }
       else setMsg("가입 완료. 이메일을 확인하세요.");
+    } else if (mode === "reset") {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) setMsg("전송 실패: 이메일을 확인하세요");
+      else setMsg("비밀번호 재설정 링크를 이메일로 전송했습니다.");
     } else {
       const { error } = await signIn(email, pw);
       if (error) {
@@ -54,88 +59,108 @@ export default function Auth({ onAuth, signIn, signUp }) {
   };
 
   return (
-    <div style={{
-      minHeight: "100vh", background: S.bg, display: "flex",
-      alignItems: "center", justifyContent: "center", padding: 24,
-    }}>
-      <div style={{ width: "100%", maxWidth: 360 }}>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <div style={{
-            fontFamily: S.sf, fontSize: mob ? 24 : 32, fontWeight: 300,
-            letterSpacing: 12, color: S.tx, marginBottom: 12,
-          }}>sloist</div>
-          <div style={{ fontSize: 12, color: S.txGh, letterSpacing: 2 }}>
-            {mode === "login" ? "다시 만나서 반갑습니다" : "느리게 걷는 사람들의 시선"}
-          </div>
-        </div>
+    <div style={{ minHeight: "100vh", background: S.bg, display: "flex", flexDirection: "column" }}>
+      {/* 헤더 — 사이트 Nav와 동일한 구조 */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        height: mob ? 44 : 56, padding: mob ? "0 16px" : "0 36px", flexShrink: 0,
+      }}>
+        <div
+          onClick={onAuth}
+          style={{ fontFamily: S.sf, fontSize: mob ? 20 : 28, fontWeight: 300, letterSpacing: mob ? 8 : 16, color: S.tx, cursor: "pointer" }}
+        >sloist</div>
+        <button
+          onClick={onAuth}
+          style={{ fontFamily: S.sf, fontSize: 10, letterSpacing: 4, color: S.txGh, background: "none", border: "none", cursor: "pointer" }}
+        >close</button>
+      </div>
 
-        <div onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          {mode === "signup" && (
+      {/* 폼 — 중앙 정렬 */}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ width: "100%", maxWidth: 340 }}>
+          {/* 타이틀 */}
+          <div style={{
+            fontFamily: S.sf, fontSize: mob ? 18 : 22, fontWeight: 300,
+            letterSpacing: mob ? 4 : 6, color: S.tx, marginBottom: mob ? 36 : 48,
+          }}>
+            {mode === "login" ? "로그인" : mode === "signup" ? "가입하기" : "비밀번호 찾기"}
+          </div>
+
+          {/* 입력 필드 */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            {mode === "signup" && (
+              <input
+                placeholder="이름"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                style={inputStyle}
+              />
+            )}
             <input
-              placeholder="이름"
-              value={name}
-              onChange={e => setName(e.target.value)}
+              type="email"
+              placeholder="이메일"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               style={inputStyle}
             />
-          )}
-          <input
-            type="email"
-            placeholder="이메일"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            style={inputStyle}
-          />
-          <input
-            type="password"
-            placeholder="비밀번호"
-            value={pw}
-            onChange={e => setPw(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter") handleSubmit(e); }}
-            style={inputStyle}
-          />
+            {mode !== "reset" && (
+              <input
+                type="password"
+                placeholder="비밀번호"
+                value={pw}
+                onChange={e => setPw(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") handleSubmit(e); }}
+                style={inputStyle}
+              />
+            )}
 
-          {msg && (
-            <div style={{ fontSize: 12, color: msg.includes("완료") ? S.ac : "#c47", lineHeight: 1.6 }}>
-              {msg}
-            </div>
-          )}
+            {msg && (
+              <div style={{ fontSize: 12, color: msg.includes("완료") || msg.includes("전송했습니다") ? S.ac : "#c47", lineHeight: 1.6 }}>
+                {msg}
+              </div>
+            )}
 
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            style={{
-              fontFamily: S.sf, fontSize: 12, letterSpacing: 4,
-              color: "#fff", background: S.tx, border: "none",
-              padding: "14px 0", cursor: "pointer", marginTop: 12,
-              opacity: loading ? 0.5 : 1, transition: "opacity .3s",
-            }}
-          >
-            {loading ? "..." : mode === "login" ? "로그인" : "가입하기"}
-          </button>
-        </div>
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              style={{
+                fontFamily: S.sf, fontSize: 12, letterSpacing: 4,
+                color: "#fff", background: S.tx, border: "none",
+                padding: "14px 0", cursor: "pointer", marginTop: 8,
+                opacity: loading ? 0.5 : 1, transition: "opacity .3s",
+              }}
+            >
+              {loading ? "..." : mode === "login" ? "로그인" : mode === "signup" ? "가입하기" : "전송"}
+            </button>
+          </div>
 
-        <div style={{ textAlign: "center", marginTop: 32 }}>
-          <button
-            onClick={() => { setMode(mode === "login" ? "signup" : "login"); setMsg(null); }}
-            style={{
-              fontFamily: S.sf, fontSize: 11, letterSpacing: 3,
-              color: S.txQ, background: "none", border: "none", cursor: "pointer",
-            }}
-          >
-            {mode === "login" ? "계정이 없으신가요? 가입하기" : "이미 계정이 있으신가요? 로그인"}
-          </button>
-        </div>
-
-        <div style={{ textAlign: "center", marginTop: 48 }}>
-          <button
-            onClick={onAuth}
-            style={{
-              fontFamily: S.sf, fontSize: 10, letterSpacing: 4,
-              color: S.txGh, background: "none", border: "none", cursor: "pointer",
-            }}
-          >
-            둘러보기
-          </button>
+          {/* 보조 링크 */}
+          <div style={{ marginTop: 28, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14 }}>
+            {mode === "login" && (
+              <>
+                <button
+                  onClick={() => { setMode("reset"); setMsg(null); }}
+                  style={{ fontFamily: S.sf, fontSize: 11, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                >비밀번호 찾기</button>
+                <button
+                  onClick={() => { setMode("signup"); setMsg(null); }}
+                  style={{ fontFamily: S.sf, fontSize: 11, letterSpacing: 2, color: S.txQ, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                >가입하기</button>
+              </>
+            )}
+            {mode === "signup" && (
+              <button
+                onClick={() => { setMode("login"); setMsg(null); }}
+                style={{ fontFamily: S.sf, fontSize: 11, letterSpacing: 2, color: S.txQ, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+              >로그인으로 돌아가기</button>
+            )}
+            {mode === "reset" && (
+              <button
+                onClick={() => { setMode("login"); setMsg(null); }}
+                style={{ fontFamily: S.sf, fontSize: 11, letterSpacing: 2, color: S.txQ, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+              >로그인으로 돌아가기</button>
+            )}
+          </div>
         </div>
       </div>
     </div>
