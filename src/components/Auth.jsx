@@ -60,7 +60,10 @@ export default function Auth({ onAuth, signIn, signUp }) {
 
   return (
     <div style={{ minHeight: "100vh", background: S.bg, display: "flex", flexDirection: "column" }}>
-      {/* 헤더 — 사이트 Nav와 동일한 구조 */}
+      {/* 자동완성 파란 배경 제거 */}
+      <style>{`input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px ${S.bg} inset !important;-webkit-text-fill-color:${S.tx} !important;caret-color:${S.tx};transition:background-color 5000s ease-in-out 0s;}`}</style>
+
+      {/* 헤더 */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         height: mob ? 44 : 56, padding: mob ? "0 16px" : "0 36px", flexShrink: 0,
@@ -75,8 +78,8 @@ export default function Auth({ onAuth, signIn, signUp }) {
         >close</button>
       </div>
 
-      {/* 폼 — 중앙 정렬 */}
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      {/* 폼 — 상단 40% 위치 고정 */}
+      <div style={{ flex: 1, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: 24, paddingTop: mob ? "15vh" : "18vh" }}>
         <div style={{ width: "100%", maxWidth: 340 }}>
           {/* 타이틀 */}
           <div style={{
