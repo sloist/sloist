@@ -2,6 +2,7 @@
 import { useState } from "react";
 import S from "../styles/tokens";
 import { supabase } from "../lib/supabase";
+import ImageUpload from "./ImageUpload";
 
 export default function EditorProfile({ userId, existingEditor, onClose, onSaved }) {
   const mob = typeof window !== "undefined" && window.innerWidth < 768;
@@ -14,7 +15,6 @@ export default function EditorProfile({ userId, existingEditor, onClose, onSaved
   const [tag3, setTag3] = useState(existingEditor?.tags?.[2] || "");
   const [img, setImg] = useState(existingEditor?.img || "");
 
-  // 링크 3개까지
   const initLinks = existingEditor?.links || [];
   const [link1Label, setLink1Label] = useState(initLinks[0]?.label || "");
   const [link1Url, setLink1Url] = useState(initLinks[0]?.url || "");
@@ -39,14 +39,14 @@ export default function EditorProfile({ userId, existingEditor, onClose, onSaved
       { label: link3Label.trim(), url: link3Url.trim() },
     ].filter(l => l.label && l.url);
 
-    const editorId = existingEditor?.id || name.trim().toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "") || "ed_" + Date.now();
+    const editorId = existingEditor?.id || name.trim().toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_가-힣]/g, "") || "ed_" + Date.now();
 
     const row = {
       id: editorId,
       name: name.trim(),
       bio: bio.trim(),
       tags,
-      img: img.trim() || null,
+      img: img || null,
       links,
       user_id: userId,
       status: isEdit && existingEditor?.status === "approved" ? "approved" : "pending",
@@ -59,8 +59,6 @@ export default function EditorProfile({ userId, existingEditor, onClose, onSaved
     } else {
       const { error: e } = await supabase.from("editors").insert(row);
       error = e;
-
-      // 프로필 생성 후 profiles 테이블에 editor_id 연결
       if (!e) {
         await supabase.from("profiles").update({ editor_id: editorId }).eq("id", userId);
       }
@@ -80,56 +78,23 @@ export default function EditorProfile({ userId, existingEditor, onClose, onSaved
     borderBottom: "1px solid " + S.ln, padding: "12px 0",
     fontFamily: S.bd, fontSize: 14, color: S.tx, outline: "none",
   };
-
-  const labelStyle = {
-    fontSize: 10, letterSpacing: 4, color: S.txGh, marginBottom: 6, display: "block",
-  };
+  const labelStyle = { fontSize: 10, letterSpacing: 4, color: S.txGh, marginBottom: 6, display: "block" };
 
   return (
-    <div style={{
-      minHeight: "100vh", background: S.bg,
-      display: "flex", flexDirection: "column",
-    }}>
-      <div style={{
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        padding: mob ? "16px" : "20px 36px",
-        borderBottom: "1px solid " + S.lnL,
-      }}>
-        <span style={{ fontFamily: S.sf, fontSize: mob ? 14 : 16, letterSpacing: 4, fontWeight: 300 }}>
-          {isEdit ? "프로필 수정" : "슬로이스트 프로필 만들기"}
-        </span>
-        <button onClick={onClose} style={{
-          fontFamily: S.sf, fontSize: 10, letterSpacing: 6,
-          color: S.txGh, background: "none", border: "none", cursor: "pointer",
-        }}>닫기</button>
+    <div style={{ minHeight: "100vh", background: S.bg, display: "flex", flexDirection: "column" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: mob ? "16px" : "20px 36px", borderBottom: "1px solid " + S.lnL }}>
+        <span style={{ fontFamily: S.sf, fontSize: mob ? 14 : 16, letterSpacing: 4, fontWeight: 300 }}>{isEdit ? "프로필 수정" : "슬로이스트 프로필 만들기"}</span>
+        <button onClick={onClose} style={{ fontFamily: S.sf, fontSize: 10, letterSpacing: 6, color: S.txGh, background: "none", border: "none", cursor: "pointer" }}>닫기</button>
       </div>
-
       <div style={{ maxWidth: 520, margin: "0 auto", width: "100%", padding: mob ? "28px 16px" : "48px 24px" }}>
+        {!isEdit && <div style={{ marginBottom: 36, padding: "20px 0", borderBottom: "1px solid " + S.lnL }}><p style={{ fontSize: 13, color: S.txQ, lineHeight: 2 }}>슬로이스트는 자기만의 속도로 살아가는 사람들의 시선을 기록합니다.<br/>당신의 시선을 알려주세요.</p></div>}
 
-        {!isEdit && (
-          <div style={{ marginBottom: 36, padding: "20px 0", borderBottom: "1px solid " + S.lnL }}>
-            <p style={{ fontSize: 13, color: S.txQ, lineHeight: 2 }}>
-              슬로이스트는 자기만의 속도로 살아가는 사람들의 시선을 기록합니다.
-              <br />당신의 시선을 알려주세요.
-            </p>
-          </div>
-        )}
-
-        {/* 이름 */}
         <div style={{ marginBottom: 28 }}>
-          <span style={labelStyle}>슬로이스트 이름</span>
-          <input value={name} onChange={e => setName(e.target.value)}
-            placeholder="당신을 부를 이름" style={inputStyle} />
+          <span style={labelStyle}>프로필 사진</span>
+          <ImageUpload value={img} onChange={setImg} folder="profiles" shape="circle" />
         </div>
-
-        {/* 소개 */}
-        <div style={{ marginBottom: 28 }}>
-          <span style={labelStyle}>한 줄 소개</span>
-          <input value={bio} onChange={e => setBio(e.target.value)}
-            placeholder="당신의 시선을 한 문장으로" style={inputStyle} />
-        </div>
-
-        {/* 태그 */}
+        <div style={{ marginBottom: 28 }}><span style={labelStyle}>슬로이스트 이름</span><input value={name} onChange={e => setName(e.target.value)} placeholder="당신을 부를 이름" style={inputStyle} /></div>
+        <div style={{ marginBottom: 28 }}><span style={labelStyle}>한 줄 소개</span><input value={bio} onChange={e => setBio(e.target.value)} placeholder="당신의 시선을 한 문장으로" style={inputStyle} /></div>
         <div style={{ marginBottom: 28 }}>
           <span style={labelStyle}>관심 태그 (최대 3개)</span>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
@@ -138,21 +103,6 @@ export default function EditorProfile({ userId, existingEditor, onClose, onSaved
             <input value={tag3} onChange={e => setTag3(e.target.value)} placeholder="태그 3" style={inputStyle} />
           </div>
         </div>
-
-        {/* 프로필 사진 */}
-        <div style={{ marginBottom: 28 }}>
-          <span style={labelStyle}>프로필 사진 URL</span>
-          <input value={img} onChange={e => setImg(e.target.value)}
-            placeholder="https://..." style={inputStyle} />
-          {img && (
-            <div style={{ marginTop: 12, width: 80, height: 80, borderRadius: "50%", overflow: "hidden" }}>
-              <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                onError={e => e.target.style.display = "none"} />
-            </div>
-          )}
-        </div>
-
-        {/* 링크 */}
         <div style={{ marginBottom: 36 }}>
           <span style={labelStyle}>외부 링크 (최대 3개, 선택)</span>
           {[
@@ -161,31 +111,13 @@ export default function EditorProfile({ userId, existingEditor, onClose, onSaved
             { label: link3Label, url: link3Url, setLabel: setLink3Label, setUrl: setLink3Url },
           ].map((l, i) => (
             <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 12, marginBottom: 12 }}>
-              <input value={l.label} onChange={e => l.setLabel(e.target.value)}
-                placeholder={"라벨 (예: instagram)"} style={{ ...inputStyle, fontSize: 12 }} />
-              <input value={l.url} onChange={e => l.setUrl(e.target.value)}
-                placeholder={"https://..."} style={{ ...inputStyle, fontSize: 12 }} />
+              <input value={l.label} onChange={e => l.setLabel(e.target.value)} placeholder="라벨 (예: instagram)" style={{ ...inputStyle, fontSize: 12 }} />
+              <input value={l.url} onChange={e => l.setUrl(e.target.value)} placeholder="https://..." style={{ ...inputStyle, fontSize: 12 }} />
             </div>
           ))}
         </div>
-
-        {/* 메시지 */}
-        {msg && (
-          <div style={{
-            fontSize: 12, letterSpacing: 2, marginBottom: 20, textAlign: "center",
-            color: msg.includes("실패") ? "#c47" : S.ac, lineHeight: 1.8,
-          }}>{msg}</div>
-        )}
-
-        {/* 저장 */}
-        <button onClick={handleSave} disabled={saving}
-          style={{
-            width: "100%", fontFamily: S.sf, fontSize: 12, letterSpacing: 4,
-            color: "#fff", background: S.tx, border: "none",
-            padding: "14px 0", cursor: "pointer",
-            opacity: saving ? 0.5 : 1, transition: "opacity .3s",
-            marginBottom: 60,
-          }}>
+        {msg && <div style={{ fontSize: 12, letterSpacing: 2, marginBottom: 20, textAlign: "center", color: msg.includes("실패") ? "#c47" : S.ac, lineHeight: 1.8 }}>{msg}</div>}
+        <button onClick={handleSave} disabled={saving} style={{ width: "100%", fontFamily: S.sf, fontSize: 12, letterSpacing: 4, color: "#fff", background: S.tx, border: "none", padding: "14px 0", cursor: "pointer", opacity: saving ? 0.5 : 1, marginBottom: 60 }}>
           {saving ? "저장 중..." : isEdit ? "수정하기" : "제출하기"}
         </button>
       </div>

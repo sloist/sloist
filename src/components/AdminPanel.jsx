@@ -88,13 +88,16 @@ export default function AdminPanel({ onClose }) {
             <div style={{ flex: 1, minWidth: 140 }}>
               <div style={{ fontSize: 14, fontWeight: 300, marginBottom: 2 }}>{u.name || "이름 없음"}</div>
               <div style={{ fontSize: 11, color: S.txQ }}>{u.email}</div>
-              {u.editor_id && <div style={{ fontSize: 10, color: S.ac, marginTop: 2 }}>sloist: {u.editor_id}</div>}
             </div>
             <select value={u.role} onChange={e => changeRole(u.id, e.target.value)} style={{ fontFamily: S.sf, fontSize: 11, color: S.tx, background: S.bg, border: "1px solid " + S.ln, padding: "6px 12px", cursor: "pointer" }}>
               <option value="user">user</option>
               <option value="editor">editor</option>
               <option value="admin">admin</option>
             </select>
+            {(u.role === "editor" || u.role === "admin") && <select value={u.editor_id || ""} onChange={async e => { const val = e.target.value || null; const { error } = await supabase.from("profiles").update({ editor_id: val }).eq("id", u.id); if (error) flash("연결 실패: " + error.message); else { flash(val ? "슬로이스트 연결 완료" : "슬로이스트 연결 해제"); load(); } }} style={{ fontFamily: S.sf, fontSize: 11, color: S.tx, background: S.bg, border: "1px solid " + S.ln, padding: "6px 12px", cursor: "pointer" }}>
+              <option value="">슬로이스트 없음</option>
+              {editors.map(ed => <option key={ed.id} value={ed.id}>{ed.name} ({ed.id})</option>)}
+            </select>}
           </div>)}</div>}
           {tab === "editors" && <div>{approved.length === 0 ? <div style={{ textAlign: "center", padding: "60px 0", color: S.txGh, fontSize: 13 }}>아직 승인된 슬로이스트 없음</div> : approved.map(ed => <div key={ed.id} style={{ display: "flex", gap: 16, alignItems: "center", padding: "16px 0", borderBottom: "1px solid " + S.lnL }}>
             {ed.img && <div style={{ width: 40, height: 40, borderRadius: "50%", overflow: "hidden", flexShrink: 0 }}><img src={ed.img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div>}
