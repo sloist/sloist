@@ -19,11 +19,22 @@ export default function Auth({ onAuth, signIn, signUp }) {
 
     if (mode === "signup") {
       const { error } = await signUp(email, pw, name);
-      if (error) setMsg(error.message);
+      if (error) {
+        const m = error.message;
+        if (m.includes("already registered")) setMsg("이미 가입된 이메일입니다");
+        else if (m.includes("valid email")) setMsg("올바른 이메일을 입력하세요");
+        else if (m.includes("at least")) setMsg("비밀번호는 6자 이상이어야 합니다");
+        else setMsg("가입 실패: 다시 시도해주세요");
+      }
       else setMsg("가입 완료. 이메일을 확인하세요.");
     } else {
       const { error } = await signIn(email, pw);
-      if (error) setMsg("로그인 실패: " + error.message);
+      if (error) {
+        const m = error.message;
+        if (m.includes("Invalid login")) setMsg("이메일 또는 비밀번호를 확인하세요");
+        else if (m.includes("Email not confirmed")) setMsg("이메일 인증을 완료해주세요");
+        else setMsg("로그인 실패: 다시 시도해주세요");
+      }
       else if (onAuth) onAuth();
     }
     setLoading(false);
