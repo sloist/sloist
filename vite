@@ -1,4 +1,0 @@
-cd ~/Downloads
-tar -xzf sloist-v3.tar.gz
-cd sloist
-npm run dev
