@@ -62,7 +62,7 @@ export default function Auth({ onAuth, signIn, signUp }) {
   const hiddenInput = { ...inputStyle, visibility: "hidden", height: 0, padding: 0, margin: 0, borderBottom: "none", overflow: "hidden" };
 
   return (
-    <div style={{ height: "100vh", background: S.bg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", height: "100vh", background: S.bg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {/* 자동완성 파란 배경 제거 */}
       <style>{`input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px ${S.bg} inset !important;-webkit-text-fill-color:${S.tx} !important;caret-color:${S.tx};transition:background-color 5000s ease-in-out 0s;}`}</style>
 
