@@ -35,7 +35,7 @@ export const SIcon = () => (
 // 유저 아이콘
 export const UIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke={S.txQ} strokeWidth="1.4">
-    <circle cx="12" cy="8" r="4" /><path d="M4 21v-1a6 6 0 0112 0v1" />
+    <circle cx="12" cy="8" r="4" /><path d="M4 21 v-1 a 8 8 0 0 1 16 0 v1" />
   </svg>
 );
 
