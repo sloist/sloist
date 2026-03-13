@@ -137,27 +137,22 @@ export default function Auth({ onAuth, signIn, signUp }) {
             </button>
           </div>
 
-          {/* 보조 링크 */}
-          <div style={{ marginTop: 28, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14 }}>
+          {/* 보조 링크 — 하단 고정 */}
+          <div style={{ position: "fixed", bottom: mob ? 32 : 40, left: 0, right: 0, display: "flex", justifyContent: "center", gap: mob ? 20 : 28 }}>
             {mode === "login" && (
               <>
                 <button
                   onClick={() => { setMode("reset"); setMsg(null); }}
                   style={{ fontFamily: S.sf, fontSize: 11, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: 0 }}
                 >비밀번호 찾기</button>
+                <span style={{ color: S.lnL }}>|</span>
                 <button
                   onClick={() => { setMode("signup"); setMsg(null); }}
                   style={{ fontFamily: S.sf, fontSize: 11, letterSpacing: 2, color: S.txQ, background: "none", border: "none", cursor: "pointer", padding: 0 }}
                 >가입하기</button>
               </>
             )}
-            {mode === "signup" && (
-              <button
-                onClick={() => { setMode("login"); setMsg(null); }}
-                style={{ fontFamily: S.sf, fontSize: 11, letterSpacing: 2, color: S.txQ, background: "none", border: "none", cursor: "pointer", padding: 0 }}
-              >로그인으로 돌아가기</button>
-            )}
-            {mode === "reset" && (
+            {(mode === "signup" || mode === "reset") && (
               <button
                 onClick={() => { setMode("login"); setMsg(null); }}
                 style={{ fontFamily: S.sf, fontSize: 11, letterSpacing: 2, color: S.txQ, background: "none", border: "none", cursor: "pointer", padding: 0 }}
