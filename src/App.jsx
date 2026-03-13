@@ -69,10 +69,10 @@ export default function Sloist(){
   useEffect(()=>{
     if(ALL&&ALL.length>0&&!dataLoaded){sItems(ALL);setDataLoaded(true);}
   },[ALL,dataLoaded]);
-  // 사용자 위치 한 번만
+  // 사용자 위치 — space 카테고리 진입 시에만
   useEffect(()=>{
-    if(navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>sUserLoc({lat:p.coords.latitude,lng:p.coords.longitude}),()=>{});
-  },[]);
+    if(activeCat==="space"&&!userLoc&&navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>sUserLoc({lat:p.coords.latitude,lng:p.coords.longitude}),()=>{});
+  },[activeCat,userLoc]);
 
   const flash=useCallback(m=>{sToast(m);setTimeout(()=>sToast(null),1400);},[]);
   const keep=useCallback(id=>{const was=items.find(i=>i.id===id)?.saved;sItems(p=>p.map(i=>i.id===id?{...i,saved:!i.saved}:i));flash(was?"removed":"saved");},[items,flash]);

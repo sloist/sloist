@@ -141,23 +141,6 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
         if (s) callbacksRef.current.onClick?.(s);
       });
 
-      // 위치 기반
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => {
-          const uLat = pos.coords.latitude;
-          const uLng = pos.coords.longitude;
-          const nearby = valid.filter(s => distKm(uLat, uLng, s.lat, s.lng) <= 50);
-          if (nearby.length > 0) {
-            const nLats = nearby.map(s => s.lat);
-            const nLngs = nearby.map(s => s.lng);
-            map.fitBounds(
-              [[Math.min(...nLngs) - 0.05, Math.min(...nLats) - 0.05],
-               [Math.max(...nLngs) + 0.05, Math.max(...nLats) + 0.05]],
-              { padding: 60, duration: 1200 }
-            );
-          }
-        }, () => {});
-      }
     });
 
     // 스타일 주입
