@@ -255,11 +255,11 @@ export default function Sloist(){
     {/* ═══ HOME ═══ */}
     {view==="home"&&!detail&&<div style={{minHeight:"100vh",display:"flex",flexDirection:"column",background:activeCat==="space"?"#f8f7f4":activeCat==="objet"?"#f7f8f7":activeCat==="scene"?"#f6f5f3":S.bg}}>
       <Nav showCats={true}/>
-      <div style={{...fd(cVis),flex:"1 0 auto"}}>
-        {activeCat&&<div style={{textAlign:"center",padding:mob?"12px 0":"16px 0"}}><span style={{fontFamily:S.sf,fontSize:mob?9:10,letterSpacing:mob?6:10,color:S.txGh}}>{activeCat}</span></div>}
+      <div style={{flex:"1 0 auto"}}>
+        {activeCat&&<div style={{...fd(cVis),textAlign:"center",paddingTop:mob?(activeCat!=="space"?52:12):(activeCat!=="space"?64:16),paddingBottom:mob?4:8}}><span style={{fontFamily:S.sf,fontSize:mob?9:10,letterSpacing:mob?6:10,color:S.txGh}}>{activeCat}</span></div>}
 
         {/* ── HOME EDITORIAL ── */}
-        {!activeCat&&<div>
+        {!activeCat&&<div style={fd(cVis)}>
           {/* 1. Hero quote — massive */}
           <div style={{padding:mob?"48px 16px 0":"80px 36px 0",maxWidth:1100,margin:"0 auto"}}>
             <p style={{fontFamily:S.sf,fontSize:mob?42:88,fontWeight:300,lineHeight:1.15,color:S.tx,letterSpacing:mob?-1:-2}}>{DAILY_QUOTES[Math.floor(Date.now()/86400000)%DAILY_QUOTES.length]}</p>
@@ -332,17 +332,17 @@ export default function Sloist(){
         {/* ── SPACE ── */}
         {activeCat==="space"&&(()=>{
           const f=spCat.length>0?items.filter(i=>i.root==="space"&&spCat.includes(i.cat)):SPACE;
-          if(mob)return <div>
-            <div style={{position:"sticky",top:44,zIndex:10,width:"100%",height:"40vh",minHeight:200,maxHeight:360,overflow:"hidden",borderBottom:"2px solid "+S.ac,flexShrink:0}}>
+          if(mob)return <div style={{paddingTop:40}}>
+            <div style={{position:"sticky",top:44,zIndex:10,width:"100%",height:"36vh",minHeight:180,maxHeight:320,overflow:"hidden",borderBottom:"1px solid "+S.ln}}>
               <SpaceMap spaces={f} hovId={mobFocus} onHover={id=>sMobFocus(id)} onClick={s=>openDetail(s)} style={{width:"100%",height:"100%"}}/>
             </div>
-            <div style={{background:S.bg,position:"relative",zIndex:11,padding:"8px 16px 40px"}}>{f.map(it=><div key={it.id} onClick={()=>{if(mobFocus===it.id)openDetail(it);else sMobFocus(it.id);}} style={{display:"flex",gap:16,padding:"18px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",position:"relative",background:mobFocus===it.id?"rgba(184,164,140,.03)":"transparent",transition:"background .3s"}}><SavedDot isSaved={isSaved(it.id)}/><div style={{width:80,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="1/1" r={2}/></div><div style={{paddingTop:2,flex:1}}><div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:S.ac,marginBottom:4}}>{it.location}</div><div style={{fontSize:15,fontWeight:300,marginBottom:3}}>{it.title}</div><div style={{fontSize:11,color:S.txF,lineHeight:1.5,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.note}</div></div></div>)}</div>
+            <div style={{...fd(cVis),background:S.bg,position:"relative",zIndex:11,padding:"8px 16px 40px"}}>{f.map(it=><div key={it.id} onClick={()=>{if(mobFocus===it.id)openDetail(it);else sMobFocus(it.id);}} style={{display:"flex",gap:16,padding:"18px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",position:"relative",background:mobFocus===it.id?"rgba(184,164,140,.03)":"transparent",transition:"background .3s"}}><SavedDot isSaved={isSaved(it.id)}/><div style={{width:80,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="1/1" r={2}/></div><div style={{paddingTop:2,flex:1}}><div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:S.ac,marginBottom:4}}>{it.location}</div><div style={{fontSize:15,fontWeight:300,marginBottom:3}}>{it.title}</div><div style={{fontSize:11,color:S.txF,lineHeight:1.5,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.note}</div></div></div>)}</div>
           </div>;
           return <div style={{display:"flex",flexDirection:"row",minHeight:"100vh"}}>
             <div style={{width:"42vw",flexShrink:0,position:"sticky",top:0,height:"100vh",overflow:"hidden",borderRight:"1px solid "+S.lnL}}>
               <SpaceMap spaces={f} hovId={spHov} onHover={id=>sSpHov(id)} onClick={s=>openDetail(s)} style={{width:"100%",height:"100%"}}/>
             </div>
-            <div style={{flex:1,padding:"48px 40px 100px"}}>
+            <div style={{...fd(cVis),flex:1,padding:"48px 40px 100px"}}>
               {(()=>{const cover=f.find(x=>x.isCover)||f[0];const rest=f.filter(x=>x.id!==cover.id);return <>
                 <div onClick={()=>openDetail(cover)} onMouseEnter={()=>sSpHov(cover.id)} onMouseLeave={()=>sSpHov(null)} style={{cursor:"pointer",position:"relative",marginBottom:64}}><SavedDot isSaved={isSaved(cover.id)}/><Img grad={cover.grad} photo={cover.photo} aspect="3/2" r={3}/><div style={{marginTop:28}}><div style={{fontFamily:S.sf,fontSize:10,letterSpacing:5,color:S.ac,marginBottom:12}}>{cover.location}{cover.tags?" \u00B7 "+cover.tags:""}</div><div style={{fontSize:32,fontWeight:300,lineHeight:1.4,letterSpacing:.5,marginBottom:14}}>{cover.title}</div><div style={{fontSize:14,color:S.txM,lineHeight:1.9,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{cover.note}</div></div></div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:36}}>{rest.map(it=><div key={it.id} onClick={()=>openDetail(it)} onMouseEnter={()=>sSpHov(it.id)} onMouseLeave={()=>sSpHov(null)} style={{cursor:"pointer",position:"relative",marginBottom:20}}><SavedDot isSaved={isSaved(it.id)}/><Img grad={it.grad} photo={it.photo} aspect="4/3" r={2}/><div style={{marginTop:12}}><div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:S.ac,marginBottom:4}}>{it.location}</div><div style={{fontSize:15,fontWeight:300,lineHeight:1.5}}>{it.title}</div></div></div>)}</div>
@@ -354,11 +354,11 @@ export default function Sloist(){
         {/* ── SCENE ── */}
         {activeCat==="scene"&&(()=>{
           const cols=mob?2:3;const hasF=scCat.length>0;
-          return <div style={{padding:mob?"20px 16px":"32px 40px",display:"grid",gridTemplateColumns:"repeat("+cols+",1fr)",columnGap:mob?16:28,rowGap:mob?32:52,gridAutoFlow:"dense"}}>{catItems.map(it=>{const t=it.type||"";let span=1,aspect="1/1";if(t==="\uC601\uC0C1"){span=cols;aspect="16/9";}else if(t==="\uC7A5\uBA74"||t==="\uB8E8\uD2F4")aspect="3/4";return <div key={it.id} onClick={()=>openDetail(it)} style={{gridColumn:"span "+span,cursor:"pointer",position:"relative"}}><SavedDot isSaved={isSaved(it.id)}/><Img grad={it.grad} photo={it.photo} aspect={aspect} r={2}/><div style={{padding:"12px 0 0"}}>{!hasF&&<div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:S.ac,marginBottom:4}}>{t}</div>}<div style={{fontSize:13,fontWeight:300,lineHeight:1.6}}>{it.title}</div></div></div>;})}</div>;
+          return <div style={{...fd(cVis),maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"repeat("+cols+",1fr)",columnGap:mob?20:36,rowGap:mob?40:64,gridAutoFlow:"dense"}}>{catItems.map(it=>{const t=it.type||"";let span=1,aspect="1/1";if(t==="\uC601\uC0C1"){span=cols;aspect="16/9";}else if(t==="\uC7A5\uBA74"||t==="\uB8E8\uD2F4")aspect="3/4";return <div key={it.id} onClick={()=>openDetail(it)} style={{gridColumn:"span "+span,cursor:"pointer",position:"relative"}}><SavedDot isSaved={isSaved(it.id)}/><Img grad={it.grad} photo={it.photo} aspect={aspect} r={2}/><div style={{padding:"14px 0 0"}}>{!hasF&&<div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:S.ac,marginBottom:4}}>{t}</div>}<div style={{fontSize:13,fontWeight:300,lineHeight:1.6}}>{it.title}</div></div></div>;})}</div>;
         })()}
 
         {/* ── OBJET ── */}
-        {activeCat==="objet"&&<div style={{padding:mob?"20px 16px":"32px 40px",display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:mob?16:32,rowGap:mob?32:56}}>{catItems.map(o=><div key={o.id} onClick={()=>{if(mob&&objHov!==o.id){sObjHov(o.id);return;}openDetail(o);}} onMouseEnter={()=>sObjHov(o.id)} onMouseLeave={()=>sObjHov(null)} style={{cursor:"pointer",position:"relative",overflow:"hidden",borderRadius:2}}><SavedDot isSaved={isSaved(o.id)}/><Img grad={o.grad} photo={o.photo} aspect="3/2" r={2}/><div style={{position:"absolute",bottom:0,left:0,right:0,padding:"24px 16px 14px",background:"linear-gradient(transparent,rgba(0,0,0,.22))",opacity:objHov===o.id?1:0,transition:"opacity .5s"}}><div style={{fontSize:14,color:"rgba(255,255,255,.9)",fontWeight:300,marginBottom:3}}>{o.title}</div><div style={{fontSize:11,color:"rgba(255,255,255,.5)"}}>{o.maker}</div></div></div>)}</div>}
+        {activeCat==="objet"&&<div style={{...fd(cVis),maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:mob?20:36,rowGap:mob?40:64}}>{catItems.map(o=><div key={o.id} onClick={()=>{if(mob&&objHov!==o.id){sObjHov(o.id);return;}openDetail(o);}} onMouseEnter={()=>sObjHov(o.id)} onMouseLeave={()=>sObjHov(null)} style={{cursor:"pointer",position:"relative",overflow:"hidden",borderRadius:2}}><SavedDot isSaved={isSaved(o.id)}/><Img grad={o.grad} photo={o.photo} aspect="3/2" r={2}/><div style={{position:"absolute",bottom:0,left:0,right:0,padding:"24px 16px 14px",background:"linear-gradient(transparent,rgba(0,0,0,.22))",opacity:objHov===o.id?1:0,transition:"opacity .5s"}}><div style={{fontSize:14,color:"rgba(255,255,255,.9)",fontWeight:300,marginBottom:3}}>{o.title}</div><div style={{fontSize:11,color:"rgba(255,255,255,.5)"}}>{o.maker}</div></div></div>)}</div>}
       </div>
       <Foot/>
     </div>}
