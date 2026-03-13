@@ -3,7 +3,7 @@
 // 스타일: src/styles/tokens.js (색상/폰트 변경은 여기서)
 // 공용 컴포넌트: src/components/shared.jsx
 
-import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect, lazy, Suspense } from "react";
 import S from "./styles/tokens";
 import { SP_C, SC_C, OB_C, CATS, TAGS, DAILY_QUOTES } from "./data/constants";
 import { aLabel, lLabel, Img, SIcon, UIcon, SavedDot } from "./components/shared";
@@ -14,6 +14,7 @@ import Auth from "./components/Auth";
 import WriteEditor from "./components/WriteEditor";
 import AdminPanel from "./components/AdminPanel";
 import EditorProfile from "./components/EditorProfile";
+import SpaceMap from "./components/SpaceMap";
 
 export default function Sloist(){
   const { ED: _ED, ALL, SPACE, SCENE, OBJET, loading, error } = useSupabaseData();
@@ -73,13 +74,55 @@ export default function Sloist(){
 
   const lt=fn=>{sCVis(false);setTimeout(()=>{fn();sCVis(true);},180);};
   const mt=fn=>{sCVis(false);setTimeout(()=>{fn();window.scrollTo({top:0});setTimeout(()=>sCVis(true),80);},350);};
-  const goHome=()=>mt(()=>{sView("home");sDetail(null);sEdRoom(null);sActiveCat(null);sSpCat([]);sScCat([]);sObCat([]);});
-  const goTo=v=>{prevState.current={view,activeCat,edRoom,detail,scroll:window.scrollY};mt(()=>{sDetail(null);sEdRoom(null);sView(v);});};
-  const openDetail=it=>{scrollSave.current=window.scrollY;mt(()=>sDetail(it));};
-  const closeDetail=()=>{const y=scrollSave.current;sCVis(false);setTimeout(()=>{sDetail(null);window.scrollTo({top:y});setTimeout(()=>sCVis(true),80);},300);};
-  const openRoom=eid=>{prevState.current={view,activeCat,edRoom,detail,scroll:window.scrollY};mt(()=>{sEdRoom(eid);sDetail(null);sView("room");});};
-  const goBack=()=>{const p=prevState.current;if(p){sCVis(false);setTimeout(()=>{sView(p.view);sActiveCat(p.activeCat||null);sEdRoom(p.edRoom||null);sDetail(p.detail||null);prevState.current=null;setTimeout(()=>{window.scrollTo({top:p.scroll});setTimeout(()=>sCVis(true),80);},50);},350);}else goHome();};
+
+  // ── URL 라우팅 ──
+  const isPopping=useRef(false);
+  const pushUrl=(path)=>{if(!isPopping.current)window.history.pushState(null,"",path);};
+
+  const goHome=()=>{pushUrl("/");mt(()=>{sView("home");sDetail(null);sEdRoom(null);sActiveCat(null);sSpCat([]);sScCat([]);sObCat([]);});};
+  const goTo=v=>{prevState.current={view,activeCat,edRoom,detail,scroll:window.scrollY};pushUrl("/"+v);mt(()=>{sDetail(null);sEdRoom(null);sView(v);});};
+  const openDetail=it=>{scrollSave.current=window.scrollY;pushUrl("/"+it.root+"/"+it.id);mt(()=>sDetail(it));};
+  const closeDetail=()=>{
+    // detail을 닫을 때 현재 view에 맞는 URL로 복귀
+    const base=view==="home"?(activeCat?"/":"/"):(view==="room"&&edRoom?"/room/"+edRoom:"/"+view);
+    if(activeCat)pushUrl("/"+activeCat);else pushUrl(base);
+    const y=scrollSave.current;sCVis(false);setTimeout(()=>{sDetail(null);window.scrollTo({top:y});setTimeout(()=>sCVis(true),80);},300);
+  };
+  const openRoom=eid=>{prevState.current={view,activeCat,edRoom,detail,scroll:window.scrollY};pushUrl("/room/"+eid);mt(()=>{sEdRoom(eid);sDetail(null);sView("room");});};
+  const goBack=()=>{const p=prevState.current;if(p){pushUrl(p.view==="home"?"/":"/"+p.view);sCVis(false);setTimeout(()=>{sView(p.view);sActiveCat(p.activeCat||null);sEdRoom(p.edRoom||null);sDetail(p.detail||null);prevState.current=null;setTimeout(()=>{window.scrollTo({top:p.scroll});setTimeout(()=>sCVis(true),80);},50);},350);}else goHome();};
   const doSearch=q=>{sSearchQ(q);sSov(false);setTimeout(()=>goTo("search"),120);};
+
+  // popstate 핸들러 (브라우저 뒤로/앞으로가기)
+  useEffect(()=>{
+    const onPop=()=>{
+      isPopping.current=true;
+      const path=window.location.pathname;
+      sCVis(false);
+      setTimeout(()=>{
+        if(path==="/"||(path==="")){
+          sView("home");sDetail(null);sEdRoom(null);sActiveCat(null);
+        } else if(path.startsWith("/room/")){
+          const eid=path.replace("/room/","");
+          sEdRoom(eid);sDetail(null);sView("room");
+        } else if(path.match(/^\/(space|scene|objet)\/(.+)$/)){
+          const m=path.match(/^\/(space|scene|objet)\/(.+)$/);
+          const it=items.find(i=>i.id===m[2]);
+          if(it){sDetail(it);} else {sView("home");sDetail(null);}
+        } else if(path==="/search"){sView("search");sDetail(null);}
+        else if(path==="/about"){sView("about");sDetail(null);}
+        else if(path==="/mypage"){sView("mypage");sDetail(null);}
+        else if(path==="/archive"){sView("archive");sDetail(null);}
+        else if(path==="/space"){sView("home");sDetail(null);sActiveCat("space");}
+        else if(path==="/scene"){sView("home");sDetail(null);sActiveCat("scene");}
+        else if(path==="/objet"){sView("home");sDetail(null);sActiveCat("objet");}
+        else {sView("home");sDetail(null);}
+        window.scrollTo({top:0});
+        setTimeout(()=>{sCVis(true);isPopping.current=false;},80);
+      },300);
+    };
+    window.addEventListener("popstate",onPop);
+    return()=>window.removeEventListener("popstate",onPop);
+  },[items]);
 
   const live=id=>items.find(i=>i.id===id)||{};
   const sv=k=>items.filter(i=>i.root===k&&i.saved);
@@ -117,8 +160,8 @@ export default function Sloist(){
   },[items,searchQ]);
 
   const onCatClick=k=>{
-    if(activeCat===k){if(window.scrollY<10){lt(()=>{sActiveCat(null);sSpCat([]);sScCat([]);sObCat([]);});return;}window.scrollTo({top:0,behavior:"smooth"});return;}
-    lt(()=>{sActiveCat(k);sDetail(null);sMobFocus(null);sObjHov(null);sSpCat([]);sScCat([]);sObCat([]);window.scrollTo({top:0});});
+    if(activeCat===k){if(window.scrollY<10){pushUrl("/");lt(()=>{sActiveCat(null);sSpCat([]);sScCat([]);sObCat([]);});return;}window.scrollTo({top:0,behavior:"smooth"});return;}
+    pushUrl("/"+k);lt(()=>{sActiveCat(k);sDetail(null);sMobFocus(null);sObjHov(null);sSpCat([]);sScCat([]);sObCat([]);window.scrollTo({top:0});});
   };
   const FilterBtns=()=>{
     const opts=activeCat==="space"?SP_C:activeCat==="scene"?SC_C:OB_C;
@@ -289,30 +332,15 @@ export default function Sloist(){
         {/* ── SPACE ── */}
         {activeCat==="space"&&(()=>{
           const f=spCat.length>0?items.filter(i=>i.root==="space"&&spCat.includes(i.cat)):SPACE;
-          const W=800,H=900;const las=f.map(s=>s.lat),lns=f.map(s=>s.lng);
-          const pad=.3,sp=v=>v<.01?2:v;
-          const aR=Math.min(...las),bR=Math.max(...las),cR=Math.min(...lns),dR=Math.max(...lns);
-          const a=aR-Math.max(.5,sp(bR-aR)*pad),b=bR+Math.max(.5,sp(bR-aR)*pad),c=cR-Math.max(.5,sp(dR-cR)*pad),d=dR+Math.max(.5,sp(dR-cR)*pad);
-          const X=v=>((v-c)/(d-c))*(W-100)+50,Y=v=>((b-v)/(b-a))*(H-100)+50;
-          const regs=[{n:"\uC11C\uC6B8",la:37.56,ln:127.0},{n:"\uCDA9\uB0A8",la:36.6,ln:126.9},{n:"\uACBD\uAE30",la:37.4,ln:127.2}];
-          const ai=spHov?f.find(s=>s.id===spHov):null;
           if(mob)return <div>
-            <div style={{position:"sticky",top:44,zIndex:10,width:"100%",height:"50vh",minHeight:220,maxHeight:400,background:"rgba(234,231,224,.35)",overflow:"hidden",borderBottom:"2px solid "+S.ac}}>
-              <svg viewBox={"0 0 "+W+" "+H} style={{width:"100%",height:"100%",position:"absolute",inset:0}}>
-                {regs.map(r=><text key={r.n} x={X(r.ln)} y={Y(r.la)} textAnchor="middle" fill="rgba(184,164,140,.18)" fontSize="14" fontFamily={S.sf} letterSpacing="4">{r.n}</text>)}
-                {f.map(s=>{const act=mobFocus===s.id;return <g key={s.id}>{act&&<circle cx={X(s.lng)} cy={Y(s.lat)} r={22} fill="none" stroke="rgba(184,164,140,.12)" strokeWidth="1"/>}<circle cx={X(s.lng)} cy={Y(s.lat)} r={act?8:4} fill={act?"#B8A48C":"rgba(184,164,140,.4)"} stroke="rgba(249,248,247,.9)" strokeWidth={act?2:1} style={{transition:"all .5s"}}/>{act&&<text x={X(s.lng)} y={Y(s.lat)-16} textAnchor="middle" fill={S.txM} fontSize="11" fontFamily={S.sf} letterSpacing="1">{s.title}</text>}</g>;})}
-              </svg>
+            <div style={{position:"sticky",top:44,zIndex:10,width:"100%",height:"50vh",minHeight:220,maxHeight:400,overflow:"hidden",borderBottom:"2px solid "+S.ac}}>
+              <SpaceMap spaces={f} hovId={mobFocus} onHover={id=>sMobFocus(id)} onClick={s=>openDetail(s)} style={{width:"100%",height:"100%"}}/>
             </div>
             <div style={{background:S.bg,position:"relative",zIndex:11,padding:"8px 16px 40px"}}>{f.map(it=><div key={it.id} onClick={()=>{if(mobFocus===it.id)openDetail(it);else sMobFocus(it.id);}} style={{display:"flex",gap:16,padding:"18px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",position:"relative",background:mobFocus===it.id?"rgba(184,164,140,.03)":"transparent",transition:"background .3s"}}><SavedDot isSaved={isSaved(it.id)}/><div style={{width:80,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="1/1" r={2}/></div><div style={{paddingTop:2,flex:1}}><div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:S.ac,marginBottom:4}}>{it.location}</div><div style={{fontSize:15,fontWeight:300,marginBottom:3}}>{it.title}</div><div style={{fontSize:11,color:S.txF,lineHeight:1.5,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.note}</div></div></div>)}</div>
           </div>;
           return <div style={{display:"flex",flexDirection:"row",minHeight:"100vh"}}>
-            <div style={{width:"42vw",flexShrink:0,position:"sticky",top:0,height:"100vh",background:"rgba(234,231,224,.28)",overflow:"hidden",borderRight:"1px solid "+S.lnL}}>
-              <svg viewBox={"0 0 "+W+" "+H} style={{width:"100%",height:"100%",position:"absolute",inset:0}}>
-                {regs.map(r=><text key={r.n} x={X(r.ln)} y={Y(r.la)} textAnchor="middle" fill="rgba(184,164,140,.12)" fontSize="20" fontFamily={S.sf} letterSpacing="8" fontWeight="300">{r.n}</text>)}
-                {f.map((s,i)=>{const nx=f[i+1];if(!nx)return null;const dist=Math.sqrt(Math.pow(s.lat-nx.lat,2)+Math.pow(s.lng-nx.lng,2));if(dist>1.5)return null;return <line key={"c"+i} x1={X(s.lng)} y1={Y(s.lat)} x2={X(nx.lng)} y2={Y(nx.lat)} stroke="rgba(184,164,140,.05)" strokeWidth=".5" strokeDasharray="4 4"/>;})}
-                {f.map(s=>{const hv=spHov===s.id;return <g key={s.id} style={{cursor:"pointer"}} onMouseEnter={()=>sSpHov(s.id)} onMouseLeave={()=>sSpHov(null)} onClick={()=>openDetail(s)}>{hv&&<circle cx={X(s.lng)} cy={Y(s.lat)} r={26} fill="none" stroke="rgba(184,164,140,.1)" strokeWidth="1" style={{transition:"all .6s"}}/>}<circle cx={X(s.lng)} cy={Y(s.lat)} r={hv?9:5} fill={hv?"#B8A48C":"rgba(184,164,140,.35)"} stroke={hv?"rgba(249,248,247,1)":"rgba(249,248,247,.7)"} strokeWidth={hv?2.5:1.2} style={{transition:"all .5s ease"}}/></g>;})}
-                {ai&&<g><text x={X(ai.lng)} y={Y(ai.lat)-26} textAnchor="middle" fill={S.tx} fontSize="14" fontFamily={S.sf} letterSpacing="2" fontWeight="300">{ai.title}</text><text x={X(ai.lng)} y={Y(ai.lat)-10} textAnchor="middle" fill={S.txQ} fontSize="10" fontFamily={S.sf} letterSpacing="1">{ai.location}</text></g>}
-              </svg>
+            <div style={{width:"42vw",flexShrink:0,position:"sticky",top:0,height:"100vh",overflow:"hidden",borderRight:"1px solid "+S.lnL}}>
+              <SpaceMap spaces={f} hovId={spHov} onHover={id=>sSpHov(id)} onClick={s=>openDetail(s)} style={{width:"100%",height:"100%"}}/>
             </div>
             <div style={{flex:1,padding:"48px 40px 100px"}}>
               {(()=>{const cover=f.find(x=>x.isCover)||f[0];const rest=f.filter(x=>x.id!==cover.id);return <>
@@ -326,11 +354,11 @@ export default function Sloist(){
         {/* ── SCENE ── */}
         {activeCat==="scene"&&(()=>{
           const cols=mob?2:3;const hasF=scCat.length>0;
-          return <div style={{padding:px,display:"grid",gridTemplateColumns:"repeat("+cols+",1fr)",gap:mob?8:16,gridAutoFlow:"dense"}}>{catItems.map(it=>{const t=it.type||"";let span=1,aspect="1/1";if(t==="\uC601\uC0C1"){span=cols;aspect="16/9";}else if(t==="\uC7A5\uBA74"||t==="\uB8E8\uD2F4")aspect="3/4";return <div key={it.id} onClick={()=>openDetail(it)} style={{gridColumn:"span "+span,cursor:"pointer",position:"relative"}}><SavedDot isSaved={isSaved(it.id)}/><Img grad={it.grad} photo={it.photo} aspect={aspect} r={2}/><div style={{padding:"8px 0 16px"}}>{!hasF&&<div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:S.ac,marginBottom:3}}>{t}</div>}<div style={{fontSize:13,fontWeight:300}}>{it.title}</div></div></div>;})}</div>;
+          return <div style={{padding:mob?"8px 12px":"16px 32px",display:"grid",gridTemplateColumns:"repeat("+cols+",1fr)",gap:mob?16:28,gridAutoFlow:"dense"}}>{catItems.map(it=>{const t=it.type||"";let span=1,aspect="1/1";if(t==="\uC601\uC0C1"){span=cols;aspect="16/9";}else if(t==="\uC7A5\uBA74"||t==="\uB8E8\uD2F4")aspect="3/4";return <div key={it.id} onClick={()=>openDetail(it)} style={{gridColumn:"span "+span,cursor:"pointer",position:"relative"}}><SavedDot isSaved={isSaved(it.id)}/><Img grad={it.grad} photo={it.photo} aspect={aspect} r={4} padded={span===1}/><div style={{padding:"10px 4px 16px"}}>{!hasF&&<div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:S.ac,marginBottom:3}}>{t}</div>}<div style={{fontSize:13,fontWeight:300}}>{it.title}</div></div></div>;})}</div>;
         })()}
 
         {/* ── OBJET ── */}
-        {activeCat==="objet"&&<div style={{padding:px,display:"grid",gridTemplateColumns:"1fr 1fr",gap:mob?8:28}}>{catItems.map(o=><div key={o.id} onClick={()=>{if(mob&&objHov!==o.id){sObjHov(o.id);return;}openDetail(o);}} onMouseEnter={()=>sObjHov(o.id)} onMouseLeave={()=>sObjHov(null)} style={{cursor:"pointer",position:"relative",overflow:"hidden",borderRadius:2}}><SavedDot isSaved={isSaved(o.id)}/><Img grad={o.grad} photo={o.photo} aspect="3/2" r={2}/><div style={{position:"absolute",bottom:0,left:0,right:0,padding:"24px 16px 14px",background:"linear-gradient(transparent,rgba(0,0,0,.22))",opacity:objHov===o.id?1:0,transition:"opacity .5s"}}><div style={{fontSize:14,color:"rgba(255,255,255,.9)",fontWeight:300,marginBottom:3}}>{o.title}</div><div style={{fontSize:11,color:"rgba(255,255,255,.5)"}}>{o.maker}</div></div></div>)}</div>}
+        {activeCat==="objet"&&<div style={{padding:mob?"8px 12px":"16px 32px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:mob?16:32}}>{catItems.map(o=><div key={o.id} onClick={()=>{if(mob&&objHov!==o.id){sObjHov(o.id);return;}openDetail(o);}} onMouseEnter={()=>sObjHov(o.id)} onMouseLeave={()=>sObjHov(null)} style={{cursor:"pointer",position:"relative",overflow:"hidden",borderRadius:4}}><SavedDot isSaved={isSaved(o.id)}/><Img grad={o.grad} photo={o.photo} aspect="3/2" r={4} padded/><div style={{position:"absolute",bottom:0,left:0,right:0,padding:"24px 16px 14px",background:"linear-gradient(transparent,rgba(0,0,0,.22))",opacity:objHov===o.id?1:0,transition:"opacity .5s"}}><div style={{fontSize:14,color:"rgba(255,255,255,.9)",fontWeight:300,marginBottom:3}}>{o.title}</div><div style={{fontSize:11,color:"rgba(255,255,255,.5)"}}>{o.maker}</div></div></div>)}</div>}
       </div>
       <Foot/>
     </div>}
