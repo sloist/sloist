@@ -1,12 +1,11 @@
 // ── 공용 유틸리티 + 공용 컴포넌트 ──
 
 import S from "../styles/tokens";
-import { ED } from "../data";
 
-// 에디터 라벨
-export function aLabel(it) {
+// 에디터 라벨 (ED를 외부에서 받음)
+export function aLabel(it, ED) {
   if (it.isOfficial) return "by sloist";
-  if (it.editor && ED[it.editor]) return "sloist " + ED[it.editor].name;
+  if (ED && it.editor && ED[it.editor]) return "sloist " + ED[it.editor].name;
   return "";
 }
 

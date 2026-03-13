@@ -1,18 +1,30 @@
 // ── 슬로이스트 메인 앱 ──
-// 데이터: src/data/ (콘텐츠 추가는 여기서)
+// 데이터: Supabase CMS에서 불러옴
 // 스타일: src/styles/tokens.js (색상/폰트 변경은 여기서)
 // 공용 컴포넌트: src/components/shared.jsx
 
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import S from "./styles/tokens";
-import { ED, SPACE, SCENE, OBJET, SP_C, SC_C, OB_C, CATS, TAGS, DAILY_QUOTES } from "./data";
+import { SP_C, SC_C, OB_C, CATS, TAGS, DAILY_QUOTES } from "./data/constants";
 import { aLabel, lLabel, Img, SIcon, UIcon, SavedDot } from "./components/shared";
-
-const ALL = [...SPACE, ...SCENE, ...OBJET];
+import { useSupabaseData } from "./lib/useSupabaseData";
+import { useAuth } from "./lib/useAuth";
+import Auth from "./components/Auth";
+import WriteEditor from "./components/WriteEditor";
+import AdminPanel from "./components/AdminPanel";
 
 export default function Sloist(){
+  const { ED: _ED, ALL, SPACE, SCENE, OBJET, loading, error } = useSupabaseData();
+  const ED = _ED || {};
+  const auth = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
+  const [showWrite, setShowWrite] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [editItem, setEditItem] = useState(null);
+
   const [view,sView]=useState("home");
-  const [items,sItems]=useState(ALL);
+  const [items,sItems]=useState([]);
+  const [dataLoaded,setDataLoaded]=useState(false);
   const [detail,sDetail]=useState(null);
   const [edRoom,sEdRoom]=useState(null);
   const [toast,sToast]=useState(null);
@@ -45,6 +57,11 @@ export default function Sloist(){
     const h=()=>{const y=window.scrollY;sShowTop(y>500);if(y<60)sHeaderVis(true);else if(y>lastScroll.current+8)sHeaderVis(false);else if(y<lastScroll.current-8)sHeaderVis(true);lastScroll.current=y;};
     window.addEventListener("scroll",h,{passive:true});return()=>window.removeEventListener("scroll",h);
   },[]);
+
+  // Supabase 데이터 로드되면 items 초기화
+  useEffect(()=>{
+    if(ALL&&ALL.length>0&&!dataLoaded){sItems(ALL);setDataLoaded(true);}
+  },[ALL,dataLoaded]);
 
   const flash=useCallback(m=>{sToast(m);setTimeout(()=>sToast(null),1400);},[]);
   const keep=useCallback(id=>{const was=items.find(i=>i.id===id)?.saved;sItems(p=>p.map(i=>i.id===id?{...i,saved:!i.saved}:i));flash(was?"removed":"saved");},[items,flash]);
@@ -115,8 +132,10 @@ export default function Sloist(){
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:r1h,padding:mob?"0 16px":"0 36px",background:S.bg,position:"relative",zIndex:2}}>
         <div onClick={goHome} style={{fontFamily:S.sf,fontSize:mob?20:28,fontWeight:300,letterSpacing:mob?8:16,color:S.tx,cursor:"pointer"}}>sloist</div>
         <div style={{display:"flex",alignItems:"center",gap:mob?14:24}}>
+          {auth.isEditor&&<button onClick={()=>{setEditItem(null);setShowWrite(true);}} style={{fontFamily:S.sf,fontSize:10,letterSpacing:3,color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>write</button>}
+          {auth.isAdmin&&<button onClick={()=>setShowAdmin(true)} style={{fontFamily:S.sf,fontSize:10,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:4}}>admin</button>}
           <button onClick={()=>sSov(true)} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><SIcon/></button>
-          <button onClick={()=>{if(view!=="mypage")goTo("mypage");}} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><UIcon/></button>
+          <button onClick={()=>{if(auth.user){if(view!=="mypage")goTo("mypage");}else setShowAuth(true);}} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><UIcon/></button>
         </div>
       </div>
       {showCats&&<div style={{position:"absolute",top:r1h,left:0,right:0,zIndex:1,background:S.bg,transform:headerVis?"translateY(0)":"translateY(-110%)",opacity:headerVis?1:0,transition:"transform .6s cubic-bezier(.4,0,.2,1), opacity .5s ease",pointerEvents:headerVis?"auto":"none"}}>
@@ -157,7 +176,7 @@ export default function Sloist(){
             <button onClick={()=>keep(dl.id)} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:dl.saved?S.ac:S.txGh,background:"none",border:"none",cursor:"pointer"}}>{dl.saved?"kept":"keep"}</button>
             <button onClick={()=>flash("link copied")} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,background:"none",border:"none",cursor:"pointer"}}>share</button>
             {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,textDecoration:"none"}}>{lLabel(dl)}</a>}
-            {!hideEditor&&dl.editor&&ED[dl.editor]&&<span onClick={()=>openRoom(dl.editor)} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txQ,cursor:"pointer"}}>{aLabel(dl)}</span>}
+            {!hideEditor&&dl.editor&&ED[dl.editor]&&<span onClick={()=>openRoom(dl.editor)} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txQ,cursor:"pointer"}}>{aLabel(dl,ED)}</span>}
             {dl.isOfficial&&<span style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh}}>by sloist</span>}
           </div>
         </div>
@@ -167,6 +186,7 @@ export default function Sloist(){
   };
 
   /* ═══ RENDER ═══ */
+  if(loading||!dataLoaded) return <div style={{fontFamily:S.sf,background:S.bg,color:S.txGh,minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,letterSpacing:6,fontWeight:300}}>sloist</div>;
   const h=homeFeed;
   return <div style={{fontFamily:S.bd,background:S.bg,color:S.tx,minHeight:"100vh",WebkitFontSmoothing:"antialiased"}}>
     <style>{`::selection{background:rgba(130,125,118,.15);color:inherit}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0}to{opacity:1}}`}</style>
@@ -400,12 +420,12 @@ export default function Sloist(){
     {/* MY PAGE */}
     {view==="mypage"&&!detail&&<div style={{...fd(cVis,"0.6s"),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/>
       <div style={{padding:px,flex:"1 0 auto"}}>
-        <div style={{textAlign:"center",padding:"28px 0 12px"}}><div style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,marginBottom:10}}>sloist munsu</div><div style={{fontFamily:S.sf,fontSize:mob?20:26,fontWeight:300,letterSpacing:4}}>my archive</div></div>
+        <div style={{textAlign:"center",padding:"28px 0 12px"}}><div style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,marginBottom:10}}>{"sloist "+(auth.profile?.name||"guest")}</div><div style={{fontFamily:S.sf,fontSize:mob?20:26,fontWeight:300,letterSpacing:4}}>my archive</div></div>
         <div style={{display:"flex",justifyContent:"center",gap:mob?28:48,margin:"32px 0 44px"}}>{["saved","following","account"].map(k=><button key={k} onClick={()=>lt(()=>sMyTab(k))} style={{fontFamily:S.sf,fontSize:14,letterSpacing:mob?3:5,textTransform:"lowercase",color:myTab===k?S.tx:S.txGh,fontWeight:myTab===k?400:300,background:"none",border:"none",borderBottom:myTab===k?"2px solid "+S.tx:"2px solid transparent",padding:"10px 0",cursor:"pointer",transition:"all .25s"}}>{k}</button>)}</div>
         <div style={fd(cVis)}>
           {myTab==="saved"&&(()=>{const all=[...sv("space"),...sv("scene"),...sv("objet")];return all.length>0?<div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:mob?16:24,maxWidth:860,margin:"0 auto"}}>{all.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer",position:"relative"}}><Img grad={it.grad} photo={it.photo} aspect="4/3" r={2}/><div style={{marginTop:10}}><div style={{fontSize:14,fontWeight:300,marginBottom:4}}>{it.title}</div><div style={{fontFamily:S.sf,fontSize:9,letterSpacing:5,color:S.ac}}>{it.root}</div></div></div>)}</div>:<div style={{textAlign:"center",padding:"80px 0"}}><div style={{fontSize:14,color:S.txGh,lineHeight:2.2}}>{"\uC544\uC9C1 \uC800\uC7A5\uD55C \uAE30\uB85D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4"}<br/><span style={{fontSize:12}}>{"\uB9C8\uC74C\uC5D0 \uB2FF\uB294 \uAE30\uB85D\uC744 keep \uD574\uBCF4\uC138\uC694"}</span></div></div>;})()}
           {myTab==="following"&&<div style={{maxWidth:640,margin:"0 auto"}}>{following.length>0?following.map(eid=>{const ed=ED[eid];if(!ed)return null;return <div key={eid} style={{display:"flex",alignItems:"center",gap:24,padding:"28px 0",borderBottom:"1px solid "+S.lnL}}><div onClick={()=>openRoom(eid)} style={{width:60,height:60,borderRadius:"50%",overflow:"hidden",flexShrink:0,cursor:"pointer",background:ed.grad}}>{ed.img&&<img src={ed.img} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>}</div><div style={{flex:1}}><div onClick={()=>openRoom(eid)} style={{fontSize:16,fontWeight:300,marginBottom:4,cursor:"pointer"}}>{ed.name}</div><div style={{fontSize:12,color:S.txQ}}>{ed.bio}</div></div></div>;}):<div style={{textAlign:"center",padding:"80px 0",fontSize:14,color:S.txGh}}>{"\uC544\uC9C1 \uD314\uB85C\uC6B0\uD55C \uC290\uB85C\uC774\uC2A4\uD2B8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4"}</div>}</div>}
-          {myTab==="account"&&<div style={{maxWidth:480,margin:"0 auto",padding:"20px 0"}}><div style={{borderBottom:"1px solid "+S.lnL,padding:"24px 0"}}><div style={{fontSize:10,letterSpacing:4,color:S.txGh,marginBottom:10}}>profile</div><div style={{fontSize:16,fontWeight:300,marginBottom:4}}>munsu</div><div style={{fontSize:13,color:S.txQ}}>munsu@sloist.kr</div></div><div style={{borderBottom:"1px solid "+S.lnL,padding:"24px 0"}}><div style={{fontSize:10,letterSpacing:4,color:S.txGh,marginBottom:10}}>preferences</div><div style={{fontSize:13,color:S.txM,lineHeight:2}}>{"\uC54C\uB9BC: \uC0C8 \uAE30\uB85D\uC774 \uC62C\uB77C\uC62C \uB54C"}<br/>{"\uC5B8\uC5B4: \uD55C\uAD6D\uC5B4"}</div></div><div style={{padding:"24px 0"}}><div style={{fontSize:10,letterSpacing:4,color:S.txGh,marginBottom:10}}>support</div><div style={{fontSize:13,color:S.txM,lineHeight:2.4}}><a href="mailto:slistkr@gmail.com" style={{color:S.txM,textDecoration:"none"}}>{"\uBB38\uC758\uD558\uAE30"}</a><br/><span style={{cursor:"pointer"}} onClick={()=>goTo("about")}>{"\uC774\uC6A9\uC57D\uAD00"}</span><br/><span style={{cursor:"pointer"}} onClick={()=>goTo("about")}>{"\uAC1C\uC778\uC815\uBCF4 \uCC98\uB9AC\uBC29\uCE68"}</span></div></div><div style={{textAlign:"center",padding:"40px 0"}}><button onClick={()=>flash("\uB85C\uADF8\uC544\uC6C3")} style={{fontFamily:S.sf,fontSize:11,letterSpacing:4,color:S.txGh,background:"none",border:"1px solid "+S.lnL,borderRadius:4,padding:"8px 24px",cursor:"pointer"}}>logout</button></div></div>}
+          {myTab==="account"&&<div style={{maxWidth:480,margin:"0 auto",padding:"20px 0"}}><div style={{borderBottom:"1px solid "+S.lnL,padding:"24px 0"}}><div style={{fontSize:10,letterSpacing:4,color:S.txGh,marginBottom:10}}>profile</div><div style={{fontSize:16,fontWeight:300,marginBottom:4}}>{auth.profile?.name||"guest"}</div><div style={{fontSize:13,color:S.txQ}}>{auth.user?.email||""}</div><div style={{fontSize:11,color:S.ac,marginTop:6,letterSpacing:2}}>{auth.role}</div></div><div style={{borderBottom:"1px solid "+S.lnL,padding:"24px 0"}}><div style={{fontSize:10,letterSpacing:4,color:S.txGh,marginBottom:10}}>preferences</div><div style={{fontSize:13,color:S.txM,lineHeight:2}}>{"\uC54C\uB9BC: \uC0C8 \uAE30\uB85D\uC774 \uC62C\uB77C\uC62C \uB54C"}<br/>{"\uC5B8\uC5B4: \uD55C\uAD6D\uC5B4"}</div></div><div style={{padding:"24px 0"}}><div style={{fontSize:10,letterSpacing:4,color:S.txGh,marginBottom:10}}>support</div><div style={{fontSize:13,color:S.txM,lineHeight:2.4}}><a href="mailto:slistkr@gmail.com" style={{color:S.txM,textDecoration:"none"}}>{"\uBB38\uC758\uD558\uAE30"}</a><br/><span style={{cursor:"pointer"}} onClick={()=>goTo("about")}>{"\uC774\uC6A9\uC57D\uAD00"}</span><br/><span style={{cursor:"pointer"}} onClick={()=>goTo("about")}>{"\uAC1C\uC778\uC815\uBCF4 \uCC98\uB9AC\uBC29\uCE68"}</span></div></div><div style={{textAlign:"center",padding:"40px 0"}}>{auth.user?<button onClick={()=>{auth.signOut();goHome();}} style={{fontFamily:S.sf,fontSize:11,letterSpacing:4,color:S.txGh,background:"none",border:"1px solid "+S.lnL,borderRadius:4,padding:"8px 24px",cursor:"pointer"}}>logout</button>:<button onClick={()=>setShowAuth(true)} style={{fontFamily:S.sf,fontSize:11,letterSpacing:4,color:S.txGh,background:"none",border:"1px solid "+S.lnL,borderRadius:4,padding:"8px 24px",cursor:"pointer"}}>login</button>}</div></div>}
         </div>
       </div><Foot/>
     </div>}
@@ -413,5 +433,14 @@ export default function Sloist(){
 
     {showTop&&<button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:mob?28:36,right:mob?16:36,fontFamily:S.sf,fontSize:10,letterSpacing:4,color:S.txGh,background:S.bg,border:"none",cursor:"pointer",padding:"8px 0",transition:"opacity .4s",opacity:.7,zIndex:100}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity=".7"}>top</button>}
     {toast&&<div style={{position:"fixed",bottom:36,left:"50%",transform:"translateX(-50%)",color:S.txM,fontSize:12,fontWeight:300,letterSpacing:4,zIndex:300,fontFamily:S.sf}}>{toast}</div>}
+
+    {/* 로그인/회원가입 */}
+    {showAuth&&<div style={{position:"fixed",inset:0,zIndex:500}}><Auth onAuth={()=>setShowAuth(false)} signIn={auth.signIn} signUp={auth.signUp}/></div>}
+
+    {/* 글쓰기 에디터 */}
+    {showWrite&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><WriteEditor editorId={auth.editorId} isAdmin={auth.isAdmin} editItem={editItem} onClose={()=>{setShowWrite(false);setEditItem(null);}} onSaved={()=>{setShowWrite(false);setEditItem(null);window.location.reload();}}/></div>}
+
+    {/* 관리자 패널 */}
+    {showAdmin&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><AdminPanel onClose={()=>setShowAdmin(false)}/></div>}
   </div>;
 }

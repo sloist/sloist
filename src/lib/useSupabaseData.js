@@ -1,0 +1,85 @@
+// ── Supabase 데이터 로딩 훅 ──
+// editors, contents 테이블에서 데이터를 불러와
+// 기존 하드코딩 형식과 동일하게 변환합니다.
+
+import { useState, useEffect } from "react";
+import { supabase } from "./supabase";
+
+export function useSupabaseData() {
+  const [editors, setEditors] = useState(null);    // ED 객체
+  const [contents, setContents] = useState(null);   // 전체 콘텐츠 배열
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        // 에디터 불러오기
+        const { data: edRows, error: edErr } = await supabase
+          .from("editors")
+          .select("*");
+        if (edErr) throw edErr;
+
+        // 콘텐츠 불러오기
+        const { data: ctRows, error: ctErr } = await supabase
+          .from("contents")
+          .select("*")
+          .order("created_at", { ascending: true });
+        if (ctErr) throw ctErr;
+
+        // 에디터를 { hayan: { name, bio, ... }, ... } 형태로 변환
+        const ED = {};
+        edRows.forEach((row) => {
+          ED[row.id] = {
+            name: row.name,
+            bio: row.bio,
+            ig: row.ig,
+            tags: row.tags || [],
+            img: row.img,
+            grad: row.grad,
+          };
+        });
+
+        // 콘텐츠를 기존 형식으로 변환
+        const items = ctRows.map((row) => ({
+          id: row.id,
+          root: row.root,
+          title: row.title,
+          sub: row.sub || undefined,
+          note: row.note || undefined,
+          photo: row.photo || undefined,
+          grad: row.grad || undefined,
+          tags: row.tags || undefined,
+          location: row.location || undefined,
+          cat: row.cat || undefined,
+          type: row.type || undefined,
+          otype: row.otype || undefined,
+          maker: row.maker || undefined,
+          link: row.link || undefined,
+          lat: row.lat || undefined,
+          lng: row.lng || undefined,
+          editor: row.editor || undefined,
+          isOfficial: row.is_official || false,
+          isCover: row.is_cover || false,
+          saved: false,
+        }));
+
+        setEditors(ED);
+        setContents(items);
+      } catch (e) {
+        console.error("Supabase load error:", e);
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  // 카테고리별 분리
+  const SPACE = contents?.filter((i) => i.root === "space") || [];
+  const SCENE = contents?.filter((i) => i.root === "scene") || [];
+  const OBJET = contents?.filter((i) => i.root === "objet") || [];
+
+  return { ED: editors, ALL: contents, SPACE, SCENE, OBJET, loading, error };
+}
