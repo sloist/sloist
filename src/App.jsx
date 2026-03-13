@@ -480,7 +480,7 @@ export default function Sloist(){
     {toast&&<div style={{position:"fixed",bottom:36,left:"50%",transform:"translateX(-50%)",color:S.txM,fontSize:12,fontWeight:300,letterSpacing:4,zIndex:300,fontFamily:S.sf}}>{toast}</div>}
 
     {/* 로그인/회원가입 */}
-    {showAuth&&<div style={{position:"fixed",inset:0,zIndex:500}}><Auth onAuth={()=>setShowAuth(false)} signIn={auth.signIn} signUp={auth.signUp}/></div>}
+    {showAuth&&<div style={{position:"fixed",inset:0,zIndex:500,overflow:"hidden"}}><Auth onAuth={()=>setShowAuth(false)} signIn={auth.signIn} signUp={auth.signUp}/></div>}
 
     {/* 글쓰기 에디터 */}
     {showWrite&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><WriteEditor editorId={auth.editorId} isAdmin={auth.isAdmin} editItem={editItem} onClose={()=>{setShowWrite(false);setEditItem(null);}} onSaved={()=>{setShowWrite(false);setEditItem(null);window.location.reload();}}/></div>}
