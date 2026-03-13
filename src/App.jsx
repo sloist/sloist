@@ -175,7 +175,14 @@ export default function Sloist(){
     const all=items.filter(i=>i.root===activeCat);
     const fv=activeCat==="space"?spCat:activeCat==="scene"?scCat:obCat;
     const fk=activeCat==="space"?"cat":activeCat==="scene"?"type":"otype";
-    return fv.length===0?all:all.filter(i=>fv.includes(i[fk]));
+    const filtered=fv.length===0?all:all.filter(i=>fv.includes(i[fk]));
+    if(activeCat==="space"||fv.length>0)return filtered;
+    // scene/objet: 타입별 라운드로빈
+    const buckets={};filtered.forEach(i=>{const k=i[fk]||"";if(!buckets[k])buckets[k]=[];buckets[k].push(i);});
+    const keys=Object.keys(buckets);if(keys.length<=1)return filtered;
+    const idx=keys.map(()=>0);const result=[];
+    while(result.length<filtered.length){for(let j=0;j<keys.length;j++){if(idx[j]<buckets[keys[j]].length){result.push(buckets[keys[j]][idx[j]]);idx[j]++;}}}
+    return result;
   },[activeCat,items,homeFeed,spCat,scCat,obCat]);
 
   const searchR=useMemo(()=>{
