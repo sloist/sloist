@@ -289,7 +289,7 @@ export default function Sloist(){
           {/* ① 커튼 + 뒤에 숨은 패널 A */}
           <StickyCover
             curtain={
-              <div style={{height:"100vh",background:S.bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",paddingLeft:mob?32:40,paddingRight:mob?32:40,paddingTop:0,paddingBottom:mob?80:120}}>
+              <div style={{height:"calc(100 * var(--dvh, 1vh))",background:S.bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",paddingLeft:mob?32:40,paddingRight:mob?32:40,paddingTop:0,paddingBottom:mob?80:120}}>
                 {h[0]&&<div onClick={()=>openDetail(h[0])} style={{cursor:"pointer",position:"relative",width:"100%",maxWidth:mob?280:480}}>
                   <SavedDot isSaved={isSaved(h[0].id)}/>
                   <Img grad={h[0].grad} photo={h[0].photo} aspect="4/5" r={4}/>
@@ -297,7 +297,7 @@ export default function Sloist(){
               </div>
             }
             reveal={
-              <div style={{height:"100vh",background:S.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:mob?"0 24px":"0 56px"}}>
+              <div style={{height:"calc(100 * var(--dvh, 1vh))",background:S.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:mob?"0 24px":"0 56px"}}>
                 {mob
                   ?<div style={{width:"100%",display:"flex",flexDirection:"column",alignItems:"center",gap:24}}>
                     {h.slice(1,3).map((it,i)=>it&&<div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer",position:"relative",width:i===0?"85%":"72%",alignSelf:i===0?"flex-start":"flex-end"}}>
@@ -401,7 +401,7 @@ export default function Sloist(){
             <div style={{background:S.bg,position:"relative",padding:"8px 20px 40px"}}>{f.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{display:"flex",gap:16,padding:"20px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",position:"relative",transition:"background .5s"}}><SavedDot isSaved={isSaved(it.id)}/><div style={{width:80,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="1/1" r={2}/></div><div style={{paddingTop:2,flex:1}}><div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:5}}>{it.location}</div><div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,marginBottom:4}}>{it.title}</div><div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,color:S.txF,lineHeight:1.6,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.note}</div></div></div>)}</div>
           </div>;
           return <div style={{display:"flex",flexDirection:"row",minHeight:"100vh"}}>
-            <div style={{width:"42vw",flexShrink:0,position:"sticky",top:0,height:"100vh",overflow:"hidden",borderRight:"1px solid "+S.lnL}}>
+            <div style={{width:"42vw",flexShrink:0,position:"sticky",top:0,height:"calc(100 * var(--dvh, 1vh))",overflow:"hidden",borderRight:"1px solid "+S.lnL}}>
               <SpaceMap spaces={f} hovId={spHov} onHover={id=>sSpHov(id)} onClick={s=>openDetail(s)} style={{width:"100%",height:"100%"}}/>
               <SpaceFilters/>
             </div>

@@ -22,10 +22,12 @@ export default function StickyCover({ curtain, reveal }) {
   }, []);
 
   const revealOpacity = Math.min(1, progress * 1.5);
+  const h = "calc(100 * var(--dvh, 1vh))";
+  const h2 = "calc(200 * var(--dvh, 1vh))";
 
   return (
-    <div ref={wrapRef} style={{ position: "relative", height: "200vh" }}>
-      <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden" }}>
+    <div ref={wrapRef} style={{ position: "relative", height: h2 }}>
+      <div style={{ position: "sticky", top: 0, height: h, overflow: "hidden" }}>
         {/* 뒤: 서서히 드러나는 콘텐츠 */}
         <div
           style={{
