@@ -123,6 +123,7 @@ export default function WriteEditor({ editorId, isAdmin, onClose, onSaved, editI
           </div>
           <div style={{ marginBottom: 28 }}><span style={labelStyle}>태그</span><input value={tags} onChange={e => setTags(e.target.value)} placeholder="카페 · 핸드드립" style={inputStyle} /></div>
         </>}
+        {root === "scene" && (type === "장면" || type === "루틴") && <div style={{ marginBottom: 28 }}><span style={labelStyle}>태그</span><input value={tags} onChange={e => setTags(e.target.value)} placeholder="빛 · 창가 · 새벽" style={inputStyle} /></div>}
         {root === "objet" && <div style={{ marginBottom: 28 }}><span style={labelStyle}>제작자</span><input value={maker} onChange={e => setMaker(e.target.value)} placeholder="공방 이름" style={inputStyle} /></div>}
         <div style={{ marginBottom: 36 }}><span style={labelStyle}>링크 (선택)</span><input value={link} onChange={e => setLink(e.target.value)} placeholder="https://..." style={inputStyle} /></div>
         {msg && <div style={{ fontSize: 12, letterSpacing: 2, marginBottom: 20, textAlign: "center", color: msg.includes("완료") ? S.ac : "#c47" }}>{msg}</div>}
