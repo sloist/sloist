@@ -50,7 +50,7 @@ export default function Auth({ onAuth, signIn, signUp }) {
     background: "transparent",
     border: "none",
     borderBottom: "1px solid " + S.ln,
-    padding: "16px 0",
+    padding: "14px 0",
     fontFamily: S.sn,
     fontSize: 13,
     fontWeight: 300,
@@ -62,103 +62,89 @@ export default function Auth({ onAuth, signIn, signUp }) {
 
   return (
     <div style={{ minHeight: "calc(100 * var(--dvh, 1vh))", height: "calc(100 * var(--dvh, 1vh))", background: S.bg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      {/* 자동완성 파란 배경 제거 */}
       <style>{`input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px ${S.bg} inset !important;-webkit-text-fill-color:${S.tx} !important;caret-color:${S.tx};transition:background-color 5000s ease-in-out 0s;}input::placeholder{color:${S.txGh};font-weight:300;}`}</style>
 
-      {/* 헤더 */}
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        height: mob ? 48 : 60, padding: mob ? "0 20px" : "0 40px", flexShrink: 0,
-      }}>
-        <div
-          onClick={onAuth}
-          style={{ fontFamily: S.sf, fontSize: mob ? 18 : 24, fontWeight: 300, letterSpacing: mob ? 8 : 14, color: S.tx, cursor: "pointer", transition: "opacity .5s" }}
-          onMouseEnter={e => e.currentTarget.style.opacity = ".6"}
-          onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-        >sloist</div>
-        <button
-          onClick={onAuth}
-          style={{ fontFamily: S.sn, fontSize: 9, fontWeight: 300, letterSpacing: 3, color: S.txGh, background: "none", border: "none", cursor: "pointer", transition: "color .5s" }}
-          onMouseEnter={e => e.currentTarget.style.color = S.txQ}
-          onMouseLeave={e => e.currentTarget.style.color = S.txGh}
-        >close</button>
-      </div>
+      {/* 중앙 — 로고 + 문장 + 폼 */}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 24px" }}>
+        <div style={{ width: "100%", maxWidth: 280, textAlign: "center" }}>
 
-      {/* 폼 */}
-      <div style={{ flex: 1, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "0 24px", paddingTop: mob ? "12vh" : "16vh" }}>
-        <div style={{ width: "100%", maxWidth: 320 }}>
-          {/* 타이틀 */}
-          <div style={{
-            fontFamily: S.sf, fontSize: mob ? 20 : 24, fontWeight: 300,             letterSpacing: mob ? 2 : 3, color: S.tx, marginBottom: mob ? 40 : 56,
-          }}>
-            {mode === "login" ? "로그인" : mode === "signup" ? "가입하기" : "비밀번호 찾기"}
+          {/* 로고 — 화면의 주인공 */}
+          <div
+            onClick={onAuth}
+            style={{ fontFamily: S.sf, fontSize: mob ? 32 : 40, fontWeight: 300, letterSpacing: mob ? 12 : 18, color: S.tx, cursor: "pointer", transition: "opacity .5s" }}
+            onMouseEnter={e => e.currentTarget.style.opacity = ".6"}
+            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+          >sloist</div>
+
+          {/* 고정 문장 */}
+          <div style={{ fontFamily: S.sn, fontSize: 10, fontWeight: 300, letterSpacing: 3, color: S.txF, marginTop: 14 }}>
+            멈춰야 보이는 것들
           </div>
 
-          {/* 입력 필드 — 항상 3칸 높이 확보 */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-            {mode === "signup"
-              ? <input placeholder="이름" value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
-              : <div style={{ height: 0 }} />
-            }
-            <input
-              type="email"
-              placeholder="이메일"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter" && mode === "reset") handleSubmit(e); }}
-              style={inputStyle}
-            />
-            {mode !== "reset"
-              ? <input type="password" placeholder="비밀번호" value={pw} onChange={e => setPw(e.target.value)} onKeyDown={e => { if (e.key === "Enter") handleSubmit(e); }} style={inputStyle} />
-              : <div style={{ height: 0 }} />
-            }
+          {/* 폼 */}
+          <div style={{ marginTop: mob ? 48 : 64, textAlign: "left" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {mode === "signup" &&
+                <input placeholder="이름" value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
+              }
+              <input
+                type="email"
+                placeholder="이메일"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter" && mode === "reset") handleSubmit(e); }}
+                style={inputStyle}
+              />
+              {mode !== "reset" &&
+                <input type="password" placeholder="비밀번호" value={pw} onChange={e => setPw(e.target.value)} onKeyDown={e => { if (e.key === "Enter") handleSubmit(e); }} style={inputStyle} />
+              }
 
-            {/* 메시지 — 고정 높이 확보 */}
-            <div style={{ minHeight: 20 }}>
-              {msg && <div style={{ fontFamily: S.sn, fontSize: 11, fontWeight: 300, color: msg.includes("완료") || msg.includes("전송했습니다") ? S.ac : "#c47", lineHeight: 1.7 }}>{msg}</div>}
+              {/* 메시지 */}
+              <div style={{ minHeight: 18 }}>
+                {msg && <div style={{ fontFamily: S.sn, fontSize: 11, fontWeight: 300, color: msg.includes("완료") || msg.includes("전송했습니다") ? S.ac : "#c47", lineHeight: 1.7, textAlign: "center" }}>{msg}</div>}
+              </div>
+
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                style={{
+                  fontFamily: S.sn, fontSize: 11, fontWeight: 300, letterSpacing: 4,
+                  color: "#fff", background: "#4A4844", border: "none", borderRadius: 3,
+                  padding: "13px 0", cursor: "pointer",
+                  opacity: loading ? 0.5 : 1, transition: "opacity .5s",
+                }}
+              >
+                {loading ? "..." : mode === "login" ? "로그인" : mode === "signup" ? "가입하기" : "전송"}
+              </button>
             </div>
-
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              style={{
-                fontFamily: S.sn, fontSize: 11, fontWeight: 300, letterSpacing: 3,
-                color: "#fff", background: S.tx, border: "none",
-                padding: "15px 0", cursor: "pointer",
-                opacity: loading ? 0.5 : 1, transition: "opacity .5s",
-              }}
-            >
-              {loading ? "..." : mode === "login" ? "로그인" : mode === "signup" ? "가입하기" : "전송"}
-            </button>
           </div>
         </div>
       </div>
 
-      {/* 보조 링크 — 하단 고정 */}
-      <div style={{ flexShrink: 0, padding: mob ? "0 0 36px" : "0 0 44px", display: "flex", justifyContent: "center", gap: mob ? 20 : 28 }}>
+      {/* 보조 링크 — 하단 */}
+      <div style={{ flexShrink: 0, padding: mob ? "0 0 36px" : "0 0 48px", display: "flex", justifyContent: "center", gap: mob ? 20 : 28 }}>
         {mode === "login" && (
           <>
             <button
               onClick={() => { setMode("reset"); setMsg(null); }}
-              style={{ fontFamily: S.sn, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: 0, transition: "color .5s" }}
-              onMouseEnter={e => e.currentTarget.style.color = S.txQ}
-              onMouseLeave={e => e.currentTarget.style.color = S.txF}
+              style={{ fontFamily: S.sn, fontSize: 9, fontWeight: 300, letterSpacing: 2, color: S.txGh, background: "none", border: "none", cursor: "pointer", padding: 0, transition: "color .5s" }}
+              onMouseEnter={e => e.currentTarget.style.color = S.txF}
+              onMouseLeave={e => e.currentTarget.style.color = S.txGh}
             >비밀번호 찾기</button>
-            <span style={{ color: S.lnL }}>|</span>
             <button
               onClick={() => { setMode("signup"); setMsg(null); }}
-              style={{ fontFamily: S.sn, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txQ, background: "none", border: "none", cursor: "pointer", padding: 0, transition: "color .5s" }}
-              onMouseEnter={e => e.currentTarget.style.color = S.tx}
-              onMouseLeave={e => e.currentTarget.style.color = S.txQ}
+              style={{ fontFamily: S.sn, fontSize: 9, fontWeight: 300, letterSpacing: 2, color: S.txGh, background: "none", border: "none", cursor: "pointer", padding: 0, transition: "color .5s" }}
+              onMouseEnter={e => e.currentTarget.style.color = S.txF}
+              onMouseLeave={e => e.currentTarget.style.color = S.txGh}
             >가입하기</button>
           </>
         )}
         {(mode === "signup" || mode === "reset") && (
           <button
             onClick={() => { setMode("login"); setMsg(null); }}
-            style={{ fontFamily: S.sn, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txQ, background: "none", border: "none", cursor: "pointer", padding: 0, transition: "color .5s" }}
-            onMouseEnter={e => e.currentTarget.style.color = S.tx}
-            onMouseLeave={e => e.currentTarget.style.color = S.txQ}
+            style={{ fontFamily: S.sn, fontSize: 9, fontWeight: 300, letterSpacing: 2, color: S.txGh, background: "none", border: "none", cursor: "pointer", padding: 0, transition: "color .5s" }}
+            onMouseEnter={e => e.currentTarget.style.color = S.txF}
+            onMouseLeave={e => e.currentTarget.style.color = S.txGh}
           >로그인으로 돌아가기</button>
         )}
       </div>
