@@ -87,8 +87,9 @@ export default function Sloist(){
 
   // ── Lenis smooth scroll ──
   const lenisRef=useRef(null);
-  useEffect(()=>{
-    if(!splashDone)return;
+  const rafRef=useRef(null);
+  function startLenis(){
+    if(lenisRef.current)return;
     const lenis=new Lenis({
       duration:0.8,
       easing:t=>1-Math.pow(1-t,2.5),
@@ -96,24 +97,28 @@ export default function Sloist(){
       touchMultiplier:1.2,
     });
     lenisRef.current=lenis;
-    function raf(time){lenis.raf(time);requestAnimationFrame(raf);}
-    requestAnimationFrame(raf);
-    return()=>{lenis.destroy();lenisRef.current=null;};
+    function raf(time){lenis.raf(time);rafRef.current=requestAnimationFrame(raf);}
+    rafRef.current=requestAnimationFrame(raf);
+  }
+  function stopLenis(){
+    if(lenisRef.current){lenisRef.current.destroy();lenisRef.current=null;}
+    if(rafRef.current){cancelAnimationFrame(rafRef.current);rafRef.current=null;}
+  }
+  useEffect(()=>{
+    if(!splashDone)return;
+    startLenis();
+    return()=>{stopLenis();};
   },[splashDone]);
 
-  // Lenis 정지: 오버레이가 열릴 때
+  // Lenis 파괴/재생성: 오버레이가 열릴 때
   const overlayOpen=sov||view==="login"||showWrite||showAdmin||showEditorProfile||!!confirmDel;
   useEffect(()=>{
-    const l=lenisRef.current;
     if(overlayOpen){
-      if(l)l.stop();
-      document.body.style.overflow="hidden";
-    }else{
-      if(l)l.start();
-      document.body.style.overflow="";
+      stopLenis();
+    }else if(splashDone){
+      startLenis();
     }
-    return()=>{document.body.style.overflow="";};
-  },[overlayOpen]);
+  },[overlayOpen,splashDone]);
 
   useEffect(()=>{
     const h=()=>{const y=window.scrollY;sShowTop(y>500);if(y<60)sHeaderVis(true);else if(y>lastScroll.current+8)sHeaderVis(false);else if(y<lastScroll.current-8)sHeaderVis(true);lastScroll.current=y;};
