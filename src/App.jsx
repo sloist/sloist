@@ -17,12 +17,12 @@ import EditorProfile from "./components/EditorProfile";
 import SpaceMap from "./components/SpaceMap";
 import ScrollReveal from "./components/ScrollReveal";
 import StickyCover from "./components/StickyCover";
+import Lenis from "lenis";
 
 export default function Sloist(){
   const auth = useAuth();
   const { ED: _ED, PF, ALL, SPACE, SCENE, OBJET, savedIds, setSavedIds, followingIds, setFollowingIds, loading, error } = useSupabaseData(auth.user?.id);
   const ED = _ED || {};
-  const [showAuth, setShowAuth] = useState(false); // 레거시 — 이제 view==="login" 사용
   const [showWrite, setShowWrite] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showEditorProfile, setShowEditorProfile] = useState(false);
@@ -32,6 +32,7 @@ export default function Sloist(){
   const [items,sItems]=useState([]);
   const [dataLoaded,setDataLoaded]=useState(false);
   const [splashDone,sSplashDone]=useState(false);
+  const [splashFading,sSplashFading]=useState(false);
   const [detail,sDetail]=useState(null);
   const [edRoom,sEdRoom]=useState(null);
   const [toast,sToast]=useState(null);
@@ -48,6 +49,7 @@ export default function Sloist(){
   const [delStep,sDelStep]=useState(0); // 0:hidden 1:pw확인 2:문구입력
   const [delPw,sDelPw]=useState("");
   const [delConfirm,sDelConfirm]=useState("");
+  const [confirmDel,sConfirmDel]=useState(null); // {id, title} for in-app delete dialog
   const [postsCat,sPostsCat]=useState("");
   const [postsAuthor,sPostsAuthor]=useState("");
   const [rpw,setRpw]=useState("");
@@ -75,7 +77,34 @@ export default function Sloist(){
   useEffect(()=>{const h=()=>sWw(window.innerWidth);window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h);},[]);
   const mob=ww<768,tab=ww<1024;
   const isFirstVisit=useRef(!sessionStorage.getItem("sloist_v"));
-  useEffect(()=>{if(!isFirstVisit.current){const t=setTimeout(()=>{sSplashDone(true);},600);return()=>clearTimeout(t);}},[]);
+  useEffect(()=>{
+    const fadeStart=isFirstVisit.current?3200:1200;
+    const t1=setTimeout(()=>{sSplashFading(true);},fadeStart);
+    const t2=setTimeout(()=>{sSplashDone(true);if(isFirstVisit.current)sessionStorage.setItem("sloist_v","1");},fadeStart+1200);
+    return()=>{clearTimeout(t1);clearTimeout(t2);};
+  },[]);
+
+  // ── Lenis smooth scroll ──
+  const lenisRef=useRef(null);
+  useEffect(()=>{
+    if(!splashDone)return;
+    const lenis=new Lenis({
+      duration:0.8,
+      easing:t=>1-Math.pow(1-t,2.5),
+      smoothWheel:true,
+      touchMultiplier:1.2,
+    });
+    lenisRef.current=lenis;
+    function raf(time){lenis.raf(time);requestAnimationFrame(raf);}
+    requestAnimationFrame(raf);
+    return()=>{lenis.destroy();lenisRef.current=null;};
+  },[splashDone]);
+
+  // Lenis 정지: 오버레이가 열릴 때
+  useEffect(()=>{
+    const l=lenisRef.current;if(!l)return;
+    if(sov||view==="login")l.stop();else l.start();
+  },[sov,view]);
 
   useEffect(()=>{
     const h=()=>{const y=window.scrollY;sShowTop(y>500);if(y<60)sHeaderVis(true);else if(y>lastScroll.current+8)sHeaderVis(false);else if(y<lastScroll.current-8)sHeaderVis(true);lastScroll.current=y;};
@@ -263,15 +292,15 @@ export default function Sloist(){
   },[items,searchQ]);
 
   const onCatClick=k=>{
-    if(activeCat===k){if(window.scrollY<10){pushUrl("/");lt(()=>{sActiveCat(null);sSpCat([]);sScCat([]);sObCat([]);});return;}window.scrollTo({top:0,behavior:"smooth"});return;}
-    pushUrl("/"+k);lt(()=>{sActiveCat(k);sDetail(null);sMobFocus(null);sObjHov(null);sSpCat([]);sScCat([]);sObCat([]);window.scrollTo({top:0});});
+    if(activeCat===k){if(window.scrollY<10){pushUrl("/");if(k==="space"){sActiveCat(null);sSpCat([]);}else lt(()=>{sActiveCat(null);sSpCat([]);sScCat([]);sObCat([]);});return;}window.scrollTo({top:0,behavior:"smooth"});return;}
+    pushUrl("/"+k);if(k==="space"){sActiveCat(k);sDetail(null);sMobFocus(null);sSpCat([]);window.scrollTo({top:0});}else lt(()=>{sActiveCat(k);sDetail(null);sMobFocus(null);sObjHov(null);sSpCat([]);sScCat([]);sObCat([]);window.scrollTo({top:0});});
   };
   const FilterBtns=()=>{
     const opts=activeCat==="space"?SP_C:activeCat==="scene"?SC_C:OB_C;
     const fv=activeCat==="space"?spCat:activeCat==="scene"?scCat:obCat;
     const fs=activeCat==="space"?sSpCat:activeCat==="scene"?sScCat:sObCat;
     const multi=activeCat==="space";
-    return <>{opts.map(o=>{const a=fv.includes(o);return <button key={o} onClick={()=>{window.scrollTo({top:0,behavior:"smooth"});lt(()=>{multi?fs(a?fv.filter(x=>x!==o):[...fv,o]):fs(a?[]:[o]);});}} style={{fontFamily:S.sn,fontSize:mob?10:11,fontWeight:a?400:300,letterSpacing:2,color:a?S.tx:S.txGh,background:"none",border:"none",borderBottom:a?"1px solid "+S.ac:"1px solid transparent",padding:mob?"6px 0":"8px 0",cursor:"pointer",transition:"all .5s"}}>{o}</button>;})}</>;
+    return <>{opts.map(o=>{const a=fv.includes(o);return <button key={o} onClick={()=>{if(multi){fs(a?fv.filter(x=>x!==o):[...fv,o]);}else{window.scrollTo({top:0,behavior:"smooth"});lt(()=>{fs(a?[]:[o]);});}}} style={{fontFamily:S.sn,fontSize:mob?10:11,fontWeight:a?400:300,letterSpacing:2,color:a?S.tx:S.txGh,background:"none",border:"none",borderBottom:a?"1px solid "+S.ac:"1px solid transparent",padding:mob?"6px 0":"8px 0",cursor:"pointer",transition:"all .5s"}}>{o}</button>;})}</>;
   };
 
   /* ── Nav ── */
@@ -337,9 +366,9 @@ export default function Sloist(){
       return meta?cat+" · "+meta:cat;
     })();
     const actStyle={fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s"};
-    const deletePost=async()=>{if(!confirm("정말 삭제하시겠습니까?"))return;const{error}=await supabase.from("contents").delete().eq("id",dl.id);if(error){flash("삭제 실패");}else{flash("삭제 완료");sItems(p=>p.filter(x=>x.id!==dl.id));closeDetail();}};
+    const deletePost=()=>sConfirmDel({id:dl.id,title:dl.title,from:"detail"});
     return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}>
-      <Nav backAction={closeDetail}/>
+      <Nav/>
       <div style={{flex:"1 0 auto"}}>
         <div style={{maxWidth:520,margin:"0 auto",padding:mob?"0 20px":"0 24px"}}>
 
@@ -356,7 +385,6 @@ export default function Sloist(){
           </div>
 
           {/* ── 기록 ── */}
-          <ScrollReveal>
           <div style={{paddingTop:mob?32:48}}>
             {dl.note&&<div style={bodyStyle}>{dl.note}</div>}
 
@@ -382,7 +410,6 @@ export default function Sloist(){
               </div>}
             </div>
           </div>
-          </ScrollReveal>
 
         </div>
 
@@ -414,26 +441,32 @@ export default function Sloist(){
   };
 
   /* ═══ RENDER ═══ */
-  if(loading||!dataLoaded||!splashDone){const ready=!loading&&dataLoaded;return <div onClick={()=>{if(isFirstVisit.current&&ready){sSplashDone(true);sessionStorage.setItem("sloist_v","1");}}} style={{fontFamily:S.sf,background:S.bg,minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:isFirstVisit.current&&ready?"pointer":"default"}}>
-    <style>{`@keyframes sIn{0%{opacity:0;letter-spacing:${mob?14:20}px}100%{opacity:1;letter-spacing:${mob?8:14}px}}@keyframes sSub{0%{opacity:0}100%{opacity:1}}`}</style>
-    <div style={{fontSize:mob?24:36,fontWeight:300,color:S.tx,animation:"sIn 1s cubic-bezier(.2,0,.3,1) forwards",opacity:0}}>sloist</div>
-    {isFirstVisit.current&&<div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,marginTop:14,animation:"sSub .6s cubic-bezier(.2,0,.3,1) .5s forwards",opacity:0}}>멈춰야 보이는 것들</div>}
-    {isFirstVisit.current&&ready&&<div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,marginTop:mob?48:64,animation:"sSub .5s cubic-bezier(.2,0,.3,1) 1.2s forwards",opacity:0}}>입장</div>}
+  if(loading||!dataLoaded||!splashDone){return <div style={{fontFamily:S.sf,background:S.bg,minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",opacity:splashFading?0:1,transition:"opacity 1.2s cubic-bezier(.2,0,.3,1)"}}>
+    <style>{`@keyframes sloistIn{0%{opacity:0}100%{opacity:1}}@keyframes sloistSub{0%{opacity:0}100%{opacity:.6}}`}</style>
+    <div style={{fontSize:mob?24:36,fontWeight:300,letterSpacing:mob?8:14,color:S.tx,animation:`sloistIn ${isFirstVisit.current?"2.4s":"1s"} cubic-bezier(.2,0,.3,1) ${isFirstVisit.current?"1s":".3s"} forwards`,opacity:0}}>sloist</div>
+    {isFirstVisit.current&&<div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,marginTop:14,animation:"sloistSub 1.6s cubic-bezier(.2,0,.3,1) 2.2s forwards",opacity:0}}>멈춰야 보이는 것들</div>}
   </div>;}
   const h=homeFeed;
-  return <div style={{fontFamily:S.bd,background:S.bg,color:S.tx,minHeight:"100vh",WebkitFontSmoothing:"antialiased"}}>
-    <style>{`::selection{background:rgba(130,125,118,.15);color:inherit}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0}to{opacity:1}}`}</style>
+  return <div style={{fontFamily:S.bd,background:S.bg,color:S.tx,minHeight:"100vh",WebkitFontSmoothing:"antialiased",animation:"mainIn 1s cubic-bezier(.2,0,.3,1) forwards"}}>
+    <style>{`::selection{background:rgba(130,125,118,.15);color:inherit}button:focus-visible,a:focus-visible,input:focus-visible{outline:1px solid rgba(130,125,118,.3);outline-offset:2px}@keyframes mainIn{from{opacity:0}to{opacity:1}}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0}to{opacity:1}}`}</style>
 
     {/* SEARCH */}
     {sov&&<div style={{position:"fixed",inset:0,background:"rgba(249,248,247,.97)",backdropFilter:"blur(32px)",zIndex:200,overflowY:"auto",animation:"fi .8s cubic-bezier(.2,0,.3,1)"}}>
       <div style={{display:"flex",justifyContent:"flex-end",padding:mob?"16px 20px":"20px 40px"}}>
         <button onClick={()=>sSov(false)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>닫기</button>
       </div>
-      <div style={{maxWidth:480,margin:"0 auto",padding:"12vh 24px 80px",display:"flex",flexDirection:"column",alignItems:"center"}}>
+      <div style={{maxWidth:480,margin:"0 auto",padding:mob?"6vh 20px 40px":"12vh 24px 80px",display:"flex",flexDirection:"column",alignItems:"center"}}>
         <input ref={sqRef} placeholder="검색" value={sq} onChange={e=>sSq(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&sq.trim())doSearch(sq.trim());}} style={{width:"100%",maxWidth:280,background:"transparent",border:"none",borderBottom:"1px solid "+S.ln,padding:"14px 0",fontFamily:S.sf,fontSize:mob?16:20,fontWeight:300,color:S.tx,letterSpacing:4,outline:"none",textAlign:"center"}}/>
         {sq.trim()&&<div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txF,marginTop:20}}>느리게 찾기</div>}
-        {!sq.trim()&&<button onClick={()=>sShowTags(!showTags)} style={{marginTop:32,fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txF,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txF}>{showTags?"숨기기":"태그"}</button>}
-        {showTags&&!sq.trim()&&<div style={{width:"100%",marginTop:28}}>{Object.entries(TAG_GROUPS).map(([group,items],gi)=><div key={group} style={{marginBottom:20}}><div style={{fontFamily:S.sn,fontSize:8,fontWeight:300,letterSpacing:3,color:S.txGh,marginBottom:8,textAlign:"center"}}>{group}</div><div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:mob?"4px 8px":"4px 12px"}}>{items.map((t,ti)=><button key={t} onClick={()=>doSearch(t)} style={{fontFamily:S.bd,fontSize:12,fontWeight:300,letterSpacing:1,color:S.txQ,background:"none",border:"none",cursor:"pointer",padding:"8px 4px",opacity:0,animation:"tagIn .5s cubic-bezier(.2,0,.3,1) "+(gi*.12+ti*.05)+"s forwards",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>{t}</button>)}</div></div>)}</div>}
+        {!sq.trim()&&<button onClick={()=>sShowTags(!showTags)} style={{marginTop:mob?24:32,fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txF,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txF}>{showTags?"숨기기":"태그"}</button>}
+        <div style={{width:"100%",maxWidth:mob?340:400,marginTop:mob?20:28,overflow:"hidden",maxHeight:showTags&&!sq.trim()?800:0,opacity:showTags&&!sq.trim()?1:0,transition:"max-height .6s cubic-bezier(.4,0,.2,1), opacity .5s cubic-bezier(.2,0,.3,1)"}}>
+          <div style={{display:"grid",gridTemplateColumns:mob?"1fr 1fr 1fr":"1fr 1fr 1fr",gap:mob?"20px 12px":"32px 28px"}}>
+          {Object.entries(TAG_GROUPS).map(([group,tags],gi)=><div key={group} style={{opacity:showTags?1:0,transform:showTags?"translateY(0)":"translateY(10px)",transition:`opacity .5s cubic-bezier(.2,0,.3,1) ${gi*.08}s, transform .5s cubic-bezier(.2,0,.3,1) ${gi*.08}s`,textAlign:"center"}}>
+            <div style={{fontFamily:S.sn,fontSize:8,fontWeight:300,letterSpacing:3,color:S.txGh,marginBottom:mob?6:10}}>{group}</div>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:0}}>{tags.map(t=><button key={t} onClick={()=>doSearch(t)} style={{fontFamily:S.bd,fontSize:mob?11:12,fontWeight:300,letterSpacing:1.5,color:S.txQ,background:"none",border:"none",cursor:"pointer",padding:mob?"7px 12px":"5px 8px",margin:0,transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>{t}</button>)}</div>
+          </div>)}
+          </div>
+        </div>
       </div>
     </div>}
 
@@ -555,11 +588,11 @@ export default function Sloist(){
             <div style={{background:S.bg,position:"relative",padding:"8px 20px 40px"}}>{f.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{display:"flex",gap:16,padding:"20px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",position:"relative",transition:"background .5s"}}><div style={{width:80,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="1/1" r={2} saved={isSaved(it.id)}/></div><div style={{paddingTop:2,flex:1}}><div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:5}}>{it.location}</div><div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,marginBottom:4}}>{it.title}</div><div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,color:S.txF,lineHeight:1.6,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.note}</div></div></div>)}</div>
           </div>;
           return <div style={{display:"flex",flexDirection:"row",minHeight:"100vh"}}>
-            <div style={{width:"42vw",flexShrink:0,position:"sticky",top:60,height:"calc(100 * var(--dvh, 1vh) - 60px)",borderRight:"1px solid "+S.lnL}}>
+            <div style={{width:"42vw",flexShrink:0,position:"fixed",left:0,top:60,height:"calc(100 * var(--dvh, 1vh) - 60px)",borderRight:"1px solid "+S.lnL,zIndex:2}}>
               <SpaceMap spaces={f} hovId={spHov} onHover={id=>sSpHov(id)} onClick={s=>openDetail(s)} style={{width:"100%",height:"100%"}}/>
               <SpaceFilters/>
             </div>
-            <div style={{...fd(cVis),flex:1,padding:"48px 40px 100px"}}>
+            <div style={{flex:1,padding:"48px 40px 100px",marginLeft:"42vw",minHeight:"calc(100 * var(--dvh, 1vh) - 60px)"}}>
               {(()=>{const cover=f.find(x=>x.isCover)||f[0];const rest=f.filter(x=>x.id!==cover.id);return <>
                 <div onClick={()=>openDetail(cover)} onMouseEnter={()=>sSpHov(cover.id)} onMouseLeave={()=>sSpHov(null)} style={{cursor:"pointer",position:"relative",marginBottom:80}}><Img saved={isSaved(cover.id)} grad={cover.grad} photo={cover.photo} aspect="3/2" r={3}/><div style={{marginTop:32}}><div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:14}}>{cover.location}{cover.tags?" · "+cover.tags:""}</div><div style={{fontFamily:S.sf,fontSize:28,fontWeight:300,lineHeight:1.45,letterSpacing:1,marginBottom:16}}>{cover.title}</div><div style={{fontFamily:S.bd,fontSize:14,fontWeight:300,color:S.txM,lineHeight:2.0,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{cover.note}</div></div></div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:40}}>{rest.map(it=><div key={it.id} onClick={()=>openDetail(it)} onMouseEnter={()=>sSpHov(it.id)} onMouseLeave={()=>sSpHov(null)} style={{cursor:"pointer",position:"relative",marginBottom:24}}><Img saved={isSaved(it.id)} grad={it.grad} photo={it.photo} aspect="4/3" r={2}/><div style={{marginTop:14}}><div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:6}}>{it.location}</div><div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,lineHeight:1.5}}>{it.title}</div></div></div>)}</div>
@@ -580,7 +613,7 @@ export default function Sloist(){
           return <div style={{...fd(cVis),maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:mob?24:48,rowGap:mob?48:80,alignItems:"start"}}>{catItems.map((o,i)=><div key={o.id} onClick={()=>openDetail(o)} onMouseEnter={()=>sObjHov(o.id)} onMouseLeave={()=>sObjHov(null)} style={{cursor:"pointer",position:"relative"}}><div style={{overflow:"hidden",borderRadius:2}}><Img saved={isSaved(o.id)} grad={o.grad} photo={o.photo} aspect={getRatio(o,i)} r={2}/></div><div style={{padding:"14px 0 0"}}><div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:1.6}}>{o.title}</div>{o.maker&&<div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txQ,marginTop:4,letterSpacing:1}}>{o.maker}</div>}</div></div>)}</div>;
         })()}
       </div>
-      <Foot/>
+      <div style={{position:"relative",zIndex:3,background:S.bg}}><Foot/></div>
     </div>}
     {view==="home"&&detail&&<DetailView/>}
 
@@ -619,9 +652,9 @@ export default function Sloist(){
           <div>
             <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:28}}>from sloist</div>
             <div style={{fontSize:mob?13:14,lineHeight:2.8}}>
-              <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.tx,letterSpacing:1,width:mob?80:100,flexShrink:0}}>magazine</span><span style={{color:S.txGh,fontSize:11,cursor:"pointer"}} onClick={()=>flash("coming soon")}>coming soon</span></div>
-              <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.tx,letterSpacing:1,width:mob?80:100,flexShrink:0}}>stay</span><span style={{color:S.txGh,fontSize:11,cursor:"pointer"}} onClick={()=>flash("coming soon")}>coming soon</span></div>
-              <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.tx,letterSpacing:1,width:mob?80:100,flexShrink:0}}>goods</span><span style={{color:S.txGh,fontSize:11,cursor:"pointer"}} onClick={()=>flash("coming soon")}>coming soon</span></div>
+              <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.tx,letterSpacing:1,width:mob?80:100,flexShrink:0}}>magazine</span><span style={{color:S.lnL,fontSize:11,letterSpacing:1}}>coming soon</span></div>
+              <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.tx,letterSpacing:1,width:mob?80:100,flexShrink:0}}>stay</span><span style={{color:S.lnL,fontSize:11,letterSpacing:1}}>coming soon</span></div>
+              <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.tx,letterSpacing:1,width:mob?80:100,flexShrink:0}}>goods</span><span style={{color:S.lnL,fontSize:11,letterSpacing:1}}>coming soon</span></div>
             </div>
           </div>
           <div>
@@ -629,7 +662,7 @@ export default function Sloist(){
             <div style={{fontSize:mob?13:14,lineHeight:2.8}}>
               <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.txQ,fontSize:11,letterSpacing:1,width:mob?80:100,flexShrink:0}}>mail</span><a href="mailto:slow@sloist.com" style={{color:S.txM,textDecoration:"none",borderBottom:"1px solid "+S.lnL}}>slow@sloist.com</a></div>
               <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.txQ,fontSize:11,letterSpacing:1,width:mob?80:100,flexShrink:0}}>social</span><a href="https://instagram.com/sloists" target="_blank" rel="noopener noreferrer" style={{color:S.txM,textDecoration:"none",borderBottom:"1px solid "+S.lnL}}>@sloists</a></div>
-              <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.txQ,fontSize:11,letterSpacing:1,width:mob?80:100,flexShrink:0}}>letter</span><span style={{color:S.txM,cursor:"pointer",borderBottom:"1px solid "+S.lnL}} onClick={()=>flash("coming soon")}>subscribe</span></div>
+              <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.txQ,fontSize:11,letterSpacing:1,width:mob?80:100,flexShrink:0}}>letter</span><span style={{color:S.lnL,letterSpacing:1}}>coming soon</span></div>
             </div>
           </div>
         </div>
@@ -758,13 +791,13 @@ export default function Sloist(){
               </div>
               {canEdit(it)&&<div style={{display:"flex",gap:14,flexShrink:0}}>
                 <button onClick={()=>{setEditItem(it);setShowWrite(true);}} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>수정</button>
-                <button onClick={async()=>{if(!confirm("정말 삭제하시겠습니까?")){return;}const{error}=await supabase.from("contents").delete().eq("id",it.id);if(error){flash("삭제 실패: "+error.message);}else{flash("삭제 완료");sItems(p=>p.filter(x=>x.id!==it.id));}}} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>삭제</button>
+                <button onClick={()=>sConfirmDel({id:it.id,title:it.title,from:"list"})} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>삭제</button>
               </div>}
             </div>;}):
             <div style={{textAlign:"center",padding:"80px 0",fontFamily:S.sn,fontSize:12,fontWeight:300,color:S.txGh,letterSpacing:1}}>아직 남겨진 기록이 없습니다</div>}</div>;})()}
 
           {/* keep — 콘텐츠 카드 */}
-          {myTab==="saved"&&(()=>{const all=[...sv("space"),...sv("scene"),...sv("objet")];const savedAsp=(it)=>it.aspect||(it.root==="scene"?(it.type==="영상"?"16/9":"3/4"):(it.root==="objet"?"4/5":"4/3"));return all.length>0?<div style={{maxWidth:860,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:mob?20:40,rowGap:mob?44:64,alignItems:"start"}}>{all.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer"}}><Img grad={it.grad} photo={it.photo} aspect={savedAsp(it)} r={2}/><div style={{marginTop:mob?10:14}}><div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:1.5,marginBottom:4}}>{it.title}</div><div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh}}>{it.root}</div></div></div>)}</div>:<div style={{textAlign:"center",padding:"80px 0",fontFamily:S.sn,fontSize:12,fontWeight:300,color:S.txGh,letterSpacing:1}}>아직 저장된 기록이 없습니다</div>;})()}
+          {myTab==="saved"&&(()=>{const all=[...sv("space"),...sv("scene"),...sv("objet")];const savedAsp=(it)=>it.aspect||(it.root==="scene"?(it.type==="영상"?"16/9":"3/4"):(it.root==="objet"?"4/5":"4/3"));return all.length>0?<div style={{maxWidth:860,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:mob?20:40,rowGap:mob?44:64,alignItems:"start"}}>{all.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer"}}><Img grad={it.grad} photo={it.photo} aspect={savedAsp(it)} r={2}/><div style={{marginTop:mob?10:14}}><div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:1.5,marginBottom:4}}>{it.title}</div><div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh}}>{it.root}</div></div></div>)}</div>:<div style={{textAlign:"center",padding:"80px 0",fontFamily:S.sn,fontSize:12,fontWeight:300,color:S.txGh,letterSpacing:1}}>아직 보관한 기록이 없습니다</div>;})()}
 
           {/* following — 기록자 카드 */}
           {myTab==="following"&&<div style={{maxWidth:860,margin:"0 auto",padding:mob?"0 20px":"0 48px"}}>{following.length>0?<div style={{display:"flex",flexDirection:"column",gap:mob?36:48}}>
@@ -832,11 +865,27 @@ export default function Sloist(){
     {showTop&&<button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:mob?28:40,right:mob?20:40,fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txGh,background:S.bg,border:"none",cursor:"pointer",padding:"8px 0",transition:"opacity .5s",opacity:.6,zIndex:100}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity=".6"}>top</button>}
     {toast&&<div style={{position:"fixed",bottom:40,left:"50%",transform:"translateX(-50%)",color:S.txM,fontSize:11,fontWeight:300,letterSpacing:3,zIndex:300,fontFamily:S.sn}}>{toast}</div>}
 
+    {/* 삭제 확인 다이얼로그 */}
+    {confirmDel&&<div style={{position:"fixed",inset:0,zIndex:400,background:"rgba(249,248,247,.92)",backdropFilter:"blur(24px)",display:"flex",alignItems:"center",justifyContent:"center",animation:"fi .4s cubic-bezier(.2,0,.3,1)"}}>
+      <div style={{textAlign:"center",maxWidth:280,padding:"0 24px"}}>
+        <div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,color:S.txQ,lineHeight:1.8,marginBottom:8}}>이 기록을 삭제할까요?</div>
+        <div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,color:S.tx,lineHeight:1.6,marginBottom:32}}>{confirmDel.title}</div>
+        <div style={{display:"flex",justifyContent:"center",gap:32}}>
+          <button onClick={async()=>{const{error}=await supabase.from("contents").delete().eq("id",confirmDel.id);if(error){flash("삭제 실패");}else{flash("삭제 완료");sItems(p=>p.filter(x=>x.id!==confirmDel.id));if(confirmDel.from==="detail")closeDetail();}sConfirmDel(null);}} style={{fontFamily:S.sn,fontSize:11,fontWeight:400,letterSpacing:3,color:S.tx,background:"none",border:"none",cursor:"pointer",padding:"8px 4px"}}>삭제</button>
+          <button onClick={()=>sConfirmDel(null)} style={{fontFamily:S.sn,fontSize:11,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"8px 4px"}}>취소</button>
+        </div>
+      </div>
+    </div>}
+
     {/* 로그인/회원가입 — 독립 페이지 */}
     {view==="login"&&!auth.isRecovery&&<Auth onAuth={()=>goHome()} signIn={auth.signIn} signUp={auth.signUp}/>}
 
     {/* 비밀번호 재설정 화면 */}
-    {auth.isRecovery&&(()=>{const doReset=async()=>{const pwErr=validatePw(rpw,auth.user?.email);if(pwErr){setRmsg(pwErr);return;}if(rpw!==rpw2){setRmsg("비밀번호가 일치하지 않습니다");return;}setRsaving(true);const{error}=await auth.updatePassword(rpw);if(error)setRmsg("변경 실패: "+error.message);else{flash("비밀번호가 변경되었습니다");goHome();}setRsaving(false);};return <div style={{position:"fixed",inset:0,zIndex:600,background:S.bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"0 24px"}}>
+    {auth.isRecovery&&(()=>{const doReset=async()=>{const pwErr=validatePw(rpw,auth.user?.email);if(pwErr){setRmsg(pwErr);return;}if(rpw!==rpw2){setRmsg("비밀번호가 일치하지 않습니다");return;}setRsaving(true);const{error}=await auth.updatePassword(rpw);if(error)setRmsg("변경 실패: "+error.message);else{flash("비밀번호가 변경되었습니다");goHome();}setRsaving(false);};return <div style={{position:"fixed",inset:0,zIndex:600,background:S.bg,display:"flex",flexDirection:"column",padding:"0 24px"}}>
+      <div style={{display:"flex",justifyContent:"flex-end",padding:mob?"16px 4px 0":"20px 16px 0",flexShrink:0}}>
+        <button onClick={()=>goHome()} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:2,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"8px 0"}}>닫기</button>
+      </div>
+      <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center"}}>
       <div style={{width:"100%",maxWidth:300,textAlign:"center"}}>
         <div style={{fontFamily:S.sf,fontSize:mob?28:36,fontWeight:300,letterSpacing:mob?10:16,color:S.tx,marginBottom:12}}>sloist</div>
         <div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,letterSpacing:3,color:S.txF,marginBottom:mob?40:56}}>새 비밀번호 설정</div>
@@ -844,8 +893,9 @@ export default function Sloist(){
           <input type="password" placeholder="새 비밀번호" value={rpw} onChange={e=>setRpw(e.target.value)} style={{width:"100%",background:"transparent",border:"none",borderBottom:"1px solid "+S.ln,padding:"14px 0",fontFamily:S.sn,fontSize:mob?15:14,fontWeight:300,color:S.tx,outline:"none",letterSpacing:1}}/>
           <input type="password" placeholder="새 비밀번호 확인" value={rpw2} onChange={e=>setRpw2(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")doReset();}} style={{width:"100%",background:"transparent",border:"none",borderBottom:"1px solid "+S.ln,padding:"14px 0",fontFamily:S.sn,fontSize:mob?15:14,fontWeight:300,color:S.tx,outline:"none",letterSpacing:1}}/>
           <div style={{minHeight:18}}>{rmsg&&<div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,color:"#c47",lineHeight:1.7,textAlign:"center"}}>{rmsg}</div>}</div>
-          <button onClick={doReset} disabled={rsaving} style={{fontFamily:S.sn,fontSize:12,fontWeight:400,letterSpacing:4,color:"#fff",background:"#4A4844",border:"none",borderRadius:3,padding:"14px 0",cursor:"pointer",opacity:rsaving?.5:1,transition:"opacity .5s"}}>{rsaving?"...":"변경하기"}</button>
+          <button onClick={doReset} disabled={rsaving} style={{fontFamily:S.sn,fontSize:12,fontWeight:400,letterSpacing:4,color:"#fff",background:S.txM,border:"none",borderRadius:3,padding:"14px 0",cursor:"pointer",opacity:rsaving?.5:1,transition:"opacity .5s"}}>{rsaving?"...":"변경하기"}</button>
         </div>
+      </div>
       </div>
     </div>;})()}
 

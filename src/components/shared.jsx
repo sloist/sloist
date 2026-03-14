@@ -17,10 +17,39 @@ export function lLabel(it) {
 }
 
 // 이미지 컴포넌트
+import { useState, useRef, useEffect } from "react";
+
+const _imgCache = new Set();
+
 export function Img({ grad, photo, aspect = "4/3", r = 2 }) {
+  const cached = photo && _imgCache.has(photo);
+  const [loaded, setLoaded] = useState(cached);
+  const imgRef = useRef(null);
+
+  useEffect(() => {
+    if (!photo) return;
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth > 0) {
+      _imgCache.add(photo);
+      setLoaded(true);
+    }
+  }, [photo]);
+
   return (
-    <div style={{ width: "100%", aspectRatio: aspect, background: grad, borderRadius: r, position: "relative", overflow: "hidden" }}>
-      {photo && <img src={photo} alt="" loading="lazy" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />}
+    <div style={{ width: "100%", aspectRatio: aspect, background: grad || "#eee", borderRadius: r, position: "relative", overflow: "hidden" }}>
+      {photo && <img
+        ref={imgRef}
+        src={photo}
+        alt=""
+        loading="lazy"
+        onLoad={() => { _imgCache.add(photo); setLoaded(true); }}
+        style={{
+          position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+          objectFit: "cover", zIndex: 1,
+          opacity: loaded ? 1 : 0,
+          transition: "opacity .6s cubic-bezier(.2,0,.3,1)",
+        }}
+      />}
     </div>
   );
 }

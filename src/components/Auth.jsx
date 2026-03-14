@@ -71,11 +71,6 @@ export default function Auth({ onAuth, signIn, signUp }) {
     <div style={{ minHeight: "calc(100 * var(--dvh, 1vh))", height: "calc(100 * var(--dvh, 1vh))", background: S.bg, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <style>{`input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px ${S.bg} inset !important;-webkit-text-fill-color:${S.tx} !important;caret-color:${S.tx};transition:background-color 5000s ease-in-out 0s;}input::placeholder{color:${S.txGh};font-weight:300;}`}</style>
 
-      {/* 닫기 버튼 */}
-      <div style={{ display: "flex", justifyContent: "flex-end", padding: mob ? "16px 20px 0" : "20px 40px 0", flexShrink: 0 }}>
-        <button onClick={onAuth} style={{ fontFamily: S.sn, fontSize: 10, fontWeight: 300, letterSpacing: 3, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .4s" }}>닫기</button>
-      </div>
-
       {/* 중앙 — 로고 + 문장 + 폼 */}
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 24px" }}>
         <div style={{ width: "100%", maxWidth: 300, textAlign: "center" }}>
@@ -116,7 +111,7 @@ export default function Auth({ onAuth, signIn, signUp }) {
                 disabled={loading}
                 style={{
                   fontFamily: S.sn, fontSize: 12, fontWeight: 400, letterSpacing: 4,
-                  color: "#fff", background: "#4A4844", border: "none", borderRadius: 3,
+                  color: "#fff", background: S.txM, border: "none", borderRadius: 3,
                   padding: "14px 0", cursor: "pointer",
                   opacity: loading ? 0.5 : 1, transition: "opacity .5s",
                 }}
@@ -148,6 +143,10 @@ export default function Auth({ onAuth, signIn, signUp }) {
             style={{ fontFamily: S.sn, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
           >로그인으로 돌아가기</button>
         )}
+        <button
+          onClick={onAuth}
+          style={{ fontFamily: S.sn, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txGh, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
+        >닫기</button>
       </div>
     </div>
   );
