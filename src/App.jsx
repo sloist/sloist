@@ -354,7 +354,7 @@ export default function Sloist(){
           <button onClick={()=>{if(auth.user){if(view!=="mypage")goTo("mypage");}else goTo("login");}} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><UIcon/></button>
         </div>
       </div>
-      {showCats&&<div style={{position:"absolute",top:r1h,left:0,right:0,zIndex:1,background:S.bg,transform:headerVis?"translateY(0)":"translateY(-110%)",opacity:headerVis?1:0,transition:"transform .8s cubic-bezier(.16,1,.3,1), opacity .6s cubic-bezier(.16,1,.3,1)",pointerEvents:headerVis?"auto":"none"}}>
+      {showCats&&<div style={{position:"absolute",top:r1h,left:0,right:0,zIndex:1,background:S.bg,transform:headerVis?"translateY(0)":"translateY(-100%)",transition:"transform .7s cubic-bezier(.22,1,.36,1)",pointerEvents:headerVis?"auto":"none"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?32:56,padding:mob?"8px 0":"10px 0"}}>
           {CATS.map(k=><button key={k} onClick={()=>onCatClick(k)} style={{fontFamily:S.sn,fontSize:mob?11:12,fontWeight:activeCat===k?400:300,letterSpacing:mob?4:6,textTransform:"lowercase",color:activeCat===k?S.tx:S.txF,background:"none",border:"none",borderBottom:activeCat===k?"1px solid "+S.tx:"1px solid transparent",padding:mob?"6px 0":"8px 0",cursor:"pointer",transition:"all .5s"}}>{k}</button>)}
         </div>
