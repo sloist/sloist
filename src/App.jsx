@@ -85,7 +85,7 @@ export default function Sloist(){
   },[activeCat,userLoc]);
 
   const flash=useCallback(m=>{sToast(m);setTimeout(()=>sToast(null),1400);},[]);
-  const keep=useCallback(id=>{const was=items.find(i=>i.id===id)?.saved;sItems(p=>p.map(i=>i.id===id?{...i,saved:!i.saved}:i));flash(was?"보관 해제":"보관됨");},[items,flash]);
+  const keep=useCallback(id=>{if(!auth.user){goTo("login");return;}const was=items.find(i=>i.id===id)?.saved;sItems(p=>p.map(i=>i.id===id?{...i,saved:!i.saved}:i));flash(was?"보관 해제":"보관됨");},[items,flash,auth.user]);
   const toggleFol=eid=>{const was=following.includes(eid);sFol(p=>was?p.filter(x=>x!==eid):[...p,eid]);flash(was?"팔로우 해제":"팔로우됨");};
   const isSaved=()=>false;
   const setCover=useCallback(async(id)=>{
@@ -137,6 +137,8 @@ export default function Sloist(){
         } else if(path==="/search"){sView("search");sDetail(null);}
         else if(path==="/login"){sView("login");sDetail(null);}
         else if(path==="/about"){sView("about");sDetail(null);}
+        else if(path==="/terms"){sLeg("terms");sView("legal");sDetail(null);}
+        else if(path==="/privacy"){sLeg("privacy");sView("legal");sDetail(null);}
         else if(path==="/mypage"){sView("mypage");sDetail(null);}
         else if(path==="/archive"){sView("archive");sDetail(null);}
         else if(path==="/space"){sView("home");sDetail(null);sActiveCat("space");}
@@ -220,7 +222,7 @@ export default function Sloist(){
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:r1h,padding:mob?"0 20px":"0 40px",background:S.bg,position:"relative",zIndex:2}}>
         {backAction?<button onClick={backAction} style={{fontFamily:S.sn,fontSize:10,fontWeight:400,letterSpacing:4,color:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .3s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>뒤로</button>:<div onClick={goHome} style={{fontFamily:S.sf,fontSize:mob?18:24,fontWeight:300,letterSpacing:mob?8:14,color:S.tx,cursor:"pointer",transition:"opacity .5s"}} onMouseEnter={e=>e.currentTarget.style.opacity=".6"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>sloist</div>}
         <div style={{display:"flex",alignItems:"center",gap:mob?14:24}}>
-          {auth.role==="editor"&&!auth.editorId&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필 만들기</button>}
+          {auth.canWrite&&!auth.editorId&&(auth.role==="editor")&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필 만들기</button>}
           {auth.editorId&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필</button>}
           {(auth.isMaster||auth.isStaff||(auth.role==="editor"&&auth.editorId))&&<button onClick={()=>{setEditItem(null);setShowWrite(true);}} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>글쓰기</button>}
           {auth.isAdmin&&<button onClick={()=>setShowAdmin(true)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:4}}>관리</button>}
@@ -327,7 +329,6 @@ export default function Sloist(){
 
         {/* 관련 기록 */}
         {relatedItems.length>0&&<div style={{maxWidth:520,margin:"0 auto",padding:mob?"0 20px":"0 24px"}}>
-          <ScrollReveal>
           <div style={{marginTop:mob?44:72,borderTop:"1px solid "+S.lnL,paddingTop:mob?28:40}}>
             <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txF,textAlign:"center",marginBottom:mob?24:32}}>{relLabel}</div>
             {mob
@@ -345,7 +346,6 @@ export default function Sloist(){
               </div>
             }
           </div>
-          </ScrollReveal>
         </div>}
 
         <div style={{height:mob?48:72}}/>
@@ -526,9 +526,8 @@ export default function Sloist(){
 
     {/* ABOUT */}
     {view==="about"&&<div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}>
-      <Nav/>
+      <Nav backAction={goBack}/>
       <div style={{flex:"1 0 auto",maxWidth:mob?undefined:720,margin:"0 auto",padding:mob?"36px 20px 60px":"80px 48px 100px"}}>
-        <div style={{display:"flex",justifyContent:"flex-end",marginBottom:mob?28:48}}><button onClick={goBack} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>뒤로</button></div>
         <p style={{fontFamily:S.sf,fontSize:mob?24:40,fontWeight:300,lineHeight:1.6,color:S.tx,letterSpacing:mob?0:1,marginBottom:mob?48:80}}>{"\uB290\uB9AC\uAC8C \uAC77\uB294 \uC0AC\uB78C\uB4E4\uC758 \uC2DC\uC120"}</p>
         <div style={{marginBottom:mob?64:120,maxWidth:520}}>
           <p style={{fontFamily:S.bd,fontSize:mob?13:15,fontWeight:400,lineHeight:2.2,color:S.txM}}>{"\uBE44\uC6CC\uC9C4 \uACF5\uAC04, \uC815\uAC08\uD55C \uAE30\uBB3C, \uACE0\uC694\uD55C \uC228\uACB0."}</p>
@@ -564,7 +563,7 @@ export default function Sloist(){
           <div>
             <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:28}}>contact</div>
             <div style={{fontSize:mob?13:14,lineHeight:2.8}}>
-              <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.txQ,fontSize:11,letterSpacing:1,width:mob?80:100,flexShrink:0}}>mail</span><a href="mailto:slistkr@gmail.com" style={{color:S.txM,textDecoration:"none",borderBottom:"1px solid "+S.lnL}}>slistkr@gmail.com</a></div>
+              <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.txQ,fontSize:11,letterSpacing:1,width:mob?80:100,flexShrink:0}}>mail</span><a href="mailto:slow@sloist.com" style={{color:S.txM,textDecoration:"none",borderBottom:"1px solid "+S.lnL}}>slow@sloist.com</a></div>
               <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.txQ,fontSize:11,letterSpacing:1,width:mob?80:100,flexShrink:0}}>social</span><a href="https://instagram.com/sloists" target="_blank" rel="noopener noreferrer" style={{color:S.txM,textDecoration:"none",borderBottom:"1px solid "+S.lnL}}>@sloists</a></div>
               <div style={{display:"flex",alignItems:"baseline"}}><span style={{color:S.txQ,fontSize:11,letterSpacing:1,width:mob?80:100,flexShrink:0}}>letter</span><span style={{color:S.txM,cursor:"pointer",borderBottom:"1px solid "+S.lnL}} onClick={()=>flash("coming soon")}>subscribe</span></div>
             </div>
@@ -573,16 +572,19 @@ export default function Sloist(){
         <div style={{textAlign:"center",marginBottom:mob?48:72}}><span onClick={()=>goTo("archive")} style={{fontFamily:S.sf,fontSize:mob?12:14,fontWeight:300,letterSpacing:mob?3:5,color:S.txQ,cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>all sloists are here</span></div>
         <div style={{borderTop:"1px solid "+S.ln,paddingTop:mob?28:40}}>
           <div style={{display:"flex",justifyContent:"center",gap:24,marginBottom:mob?16:20}}>
-            {["terms","privacy"].map(l=><button key={l} onClick={()=>sLeg(l)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .3s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txF} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>{l}</button>)}
+            {["terms","privacy"].map(l=><button key={l} onClick={()=>{sLeg(l);prevState.current={view,activeCat,edRoom,detail,scroll:window.scrollY};pushUrl("/"+l);mt(()=>{sDetail(null);sEdRoom(null);sView("legal");});}} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .3s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txF} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>{l}</button>)}
           </div>
           <div style={{textAlign:"center",fontSize:10,color:S.txGh,lineHeight:2,letterSpacing:.5}}>&copy; 2026 sloist. all rights reserved.</div>
         </div>
       </div>
-      {legalOpen&&<div onClick={()=>sLeg(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.08)",zIndex:190,display:"flex",justifyContent:"center",alignItems:"flex-start",overflowY:"auto",padding:mob?"60px 0":"80px 0"}}><div onClick={e=>e.stopPropagation()} style={{background:S.bg,padding:mob?"36px 24px 48px":"48px 56px 64px",maxWidth:640,width:"92%",border:"1px solid "+S.ln}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:mob?28:36}}>
-          <div style={{fontFamily:S.sf,fontSize:mob?16:20,letterSpacing:4,fontWeight:300}}>{legalOpen==="terms"?"Terms of Service":"Privacy Policy"}</div>
-          <button onClick={()=>sLeg(null)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txF,background:"none",border:"none",cursor:"pointer",transition:"color .3s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txF}>close</button>
-        </div>
+      {/* Legal 페이지는 별도 뷰에서 렌더 */}
+    </div>}
+
+    {/* LEGAL — Terms / Privacy 별도 페이지 */}
+    {view==="legal"&&legalOpen&&<div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}>
+      <Nav backAction={goBack}/>
+      <div style={{flex:"1 0 auto",maxWidth:640,margin:"0 auto",padding:mob?"36px 20px 60px":"64px 48px 80px"}}>
+        <div style={{fontFamily:S.sf,fontSize:mob?18:24,letterSpacing:4,fontWeight:300,marginBottom:mob?32:48}}>{legalOpen==="terms"?"이용약관":"개인정보처리방침"}</div>
         <div style={{fontSize:13,lineHeight:2.2,color:S.txM}}>
           {legalOpen==="terms"?<>
             <p style={{fontWeight:400,marginBottom:20}}>제1조 (목적)</p>
@@ -613,10 +615,11 @@ export default function Sloist(){
             <p style={{fontWeight:400,marginBottom:20}}>6. 이용자의 권리와 행사 방법</p>
             <p style={{marginBottom:24}}>① 이용자는 언제든지 자신의 개인정보를 조회하거나 수정할 수 있으며, 회원 탈퇴를 통해 개인정보의 수집 및 이용 동의를 철회할 수 있습니다.<br/>② 개인정보의 오류에 대한 정정을 요청한 경우에는 정정을 완료하기 전까지 해당 개인정보를 이용 또는 제공하지 않습니다.</p>
             <p style={{fontWeight:400,marginBottom:20}}>7. 개인정보 보호책임자</p>
-            <p>회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 이용자의 개인정보 관련 불만 처리 및 피해 구제 등을 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다. 개인정보 보호책임자에게 문의하실 수 있으며, 회사는 이용자의 문의에 대해 지체 없이 답변 및 처리해드리겠습니다.<br/>연락처: slistkr@gmail.com</p>
+            <p>회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 이용자의 개인정보 관련 불만 처리 및 피해 구제 등을 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다. 개인정보 보호책임자에게 문의하실 수 있으며, 회사는 이용자의 문의에 대해 지체 없이 답변 및 처리해드리겠습니다.<br/>연락처: slow@sloist.com</p>
           </>}
         </div>
-      </div></div>}
+      </div>
+      <Foot/>
     </div>}
 
     {/* ARCHIVE */}
