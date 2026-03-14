@@ -5,7 +5,7 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect, lazy, Suspense } from "react";
 import S from "./styles/tokens";
-import { SP_C, SC_C, OB_C, CATS, TAGS, DAILY_QUOTES } from "./data/constants";
+import { SP_C, SC_C, OB_C, CATS, TAGS, TAG_GROUPS, DAILY_QUOTES } from "./data/constants";
 import { aLabel, lLabel, Img, SIcon, UIcon, SavedDot } from "./components/shared";
 import { useSupabaseData } from "./lib/useSupabaseData";
 import { useAuth } from "./lib/useAuth";
@@ -315,7 +315,7 @@ export default function Sloist(){
         <input ref={sqRef} placeholder="search" value={sq} onChange={e=>sSq(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&sq.trim())doSearch(sq.trim());}} style={{width:"100%",maxWidth:280,background:"transparent",border:"none",borderBottom:"1px solid "+S.ln,padding:"14px 0",fontFamily:S.sf,fontSize:mob?16:20,fontWeight:300,color:S.tx,letterSpacing:4,outline:"none",textAlign:"center"}}/>
         {sq.trim()&&<div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txF,marginTop:20}}>begin slow</div>}
         {!sq.trim()&&<button onClick={()=>sShowTags(!showTags)} style={{marginTop:32,fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txF,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txF}>{showTags?"hide":"tags"}</button>}
-        {showTags&&!sq.trim()&&<div style={{width:"100%",marginTop:28}}><div style={{display:"grid",gridTemplateColumns:mob?"repeat(3,1fr)":"repeat(4,1fr)",gap:mob?"0 16px":"0 24px"}}>{TAGS.map((t,i)=><button key={t} onClick={()=>doSearch(t)} style={{fontFamily:S.bd,fontSize:12,fontWeight:300,letterSpacing:1,color:S.txQ,background:"none",border:"none",cursor:"pointer",padding:"20px 0",textAlign:"center",opacity:0,animation:"tagIn .5s cubic-bezier(.2,0,.3,1) "+i*.07+"s forwards",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>{t}</button>)}</div></div>}
+        {showTags&&!sq.trim()&&<div style={{width:"100%",marginTop:28}}>{Object.entries(TAG_GROUPS).map(([group,items],gi)=><div key={group} style={{marginBottom:20}}><div style={{fontFamily:S.sn,fontSize:8,fontWeight:300,letterSpacing:3,color:S.txGh,marginBottom:8,textAlign:"center"}}>{group}</div><div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:mob?"4px 8px":"4px 12px"}}>{items.map((t,ti)=><button key={t} onClick={()=>doSearch(t)} style={{fontFamily:S.bd,fontSize:12,fontWeight:300,letterSpacing:1,color:S.txQ,background:"none",border:"none",cursor:"pointer",padding:"8px 4px",opacity:0,animation:"tagIn .5s cubic-bezier(.2,0,.3,1) "+(gi*.12+ti*.05)+"s forwards",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>{t}</button>)}</div></div>)}</div>}
       </div>
     </div>}
 
@@ -473,7 +473,7 @@ export default function Sloist(){
     {view==="home"&&detail&&<DetailView/>}
 
     {/* SEARCH RESULTS */}
-    {view==="search"&&!detail&&<div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/><div style={{padding:mob?"0 20px":"0 40px",flex:"1 0 auto"}}><div onClick={()=>sSov(true)} style={{fontFamily:S.sf,fontSize:mob?16:18,fontWeight:300,letterSpacing:2,color:S.tx,textAlign:"center",margin:"32px 0 48px",cursor:"pointer"}}>{searchQ}</div><div style={{maxWidth:860,margin:"0 auto"}}>{searchR.length>0?searchR.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{display:"flex",gap:mob?16:28,padding:(mob?20:32)+"px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",position:"relative"}}><SavedDot isSaved={isSaved(it.id)}/><div style={{width:mob?88:160,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="4/3" r={2}/></div><div style={{flex:1,paddingTop:mob?0:8}}><div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:8}}>{it.root}</div><div style={{fontFamily:S.sf,fontSize:mob?14:17,fontWeight:300,lineHeight:1.6,marginBottom:6}}>{it.title}</div><div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,color:S.txF,lineHeight:1.6,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.note}</div></div></div>):<div style={{textAlign:"center",padding:"120px 0",fontFamily:S.sn,fontSize:13,fontWeight:300,color:S.txGh}}>결과가 없습니다</div>}</div></div><Foot/></div>}
+    {view==="search"&&!detail&&<div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/><div style={{padding:mob?"0 20px":"0 40px",flex:"1 0 auto"}}><div onClick={()=>sSov(true)} style={{fontFamily:S.sf,fontSize:mob?16:18,fontWeight:300,letterSpacing:2,color:S.tx,textAlign:"center",margin:"32px 0 48px",cursor:"pointer"}}>{searchQ}</div><div style={{maxWidth:860,margin:"0 auto"}}>{searchR.length>0?searchR.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{display:"flex",gap:mob?16:28,padding:(mob?20:32)+"px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",position:"relative"}}><SavedDot isSaved={isSaved(it.id)}/><div style={{width:mob?88:160,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="4/3" r={2}/></div><div style={{flex:1,paddingTop:mob?0:8}}><div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:8}}>{it.root}</div><div style={{fontFamily:S.sf,fontSize:mob?14:17,fontWeight:300,lineHeight:1.6,marginBottom:6}}>{it.title}</div><div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,color:S.txF,lineHeight:1.6,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.note}</div>{it.tags&&<div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,color:S.txGh,marginTop:6,letterSpacing:1}}>{it.tags}</div>}</div></div>):<div style={{textAlign:"center",padding:"120px 0",fontFamily:S.sn,fontSize:13,fontWeight:300,color:S.txGh}}>결과가 없습니다</div>}</div></div><Foot/></div>}
     {view==="search"&&detail&&<DetailView/>}
 
     {/* ABOUT */}
@@ -581,16 +581,18 @@ export default function Sloist(){
 
     {/* ROOM */}
     {view==="room"&&edRoom&&ED[edRoom]&&!detail&&(()=>{const ed=ED[edRoom],ei=edItems(edRoom);return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/>
-      <div style={{padding:mob?"0 20px":"0 40px",flex:"1 0 auto"}}>
+      <div style={{maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px",flex:"1 0 auto"}}>
         <div style={{display:"flex",justifyContent:"flex-end",padding:mob?"16px 0 0":"24px 0 0"}}><button onClick={goBack} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>back</button></div>
-        <div style={{textAlign:"center",padding:"28px 0 28px"}}>
-          <div style={{width:80,height:80,borderRadius:"50%",overflow:"hidden",margin:"0 auto 20px",background:ed.grad}}>{ed.img&&<img src={ed.img} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>}</div>
-          <div style={{fontFamily:S.sf,fontSize:20,fontWeight:300,letterSpacing:5,marginBottom:12}}>{"sloist "+ed.name}</div>
-          <div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txGh,letterSpacing:2,marginBottom:14}}>{ed.tags.join(" · ")}</div>
-          <div style={{fontFamily:S.sn,fontSize:12,fontWeight:300,color:S.txQ,marginBottom:20,lineHeight:1.8}}>{ed.bio}</div>
+        <div style={{textAlign:"center",padding:mob?"28px 0 36px":"48px 0 56px"}}>
+          <div style={{width:mob?72:88,height:mob?72:88,borderRadius:"50%",overflow:"hidden",margin:"0 auto 24px",background:ed.grad}}>{ed.img&&<img src={ed.img} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>}</div>
+          <div style={{fontFamily:S.sf,fontSize:mob?18:22,fontWeight:300,letterSpacing:mob?4:6,marginBottom:14}}>{"sloist "+ed.name}</div>
+          <div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txGh,letterSpacing:2,marginBottom:16}}>{ed.tags.join(" · ")}</div>
+          <div style={{fontFamily:S.bd,fontSize:12,fontWeight:300,color:S.txQ,marginBottom:24,lineHeight:2.0,maxWidth:400,margin:"0 auto 24px"}}>{ed.bio}</div>
           <button onClick={()=>toggleFol(edRoom)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:following.includes(edRoom)?S.ac:S.txGh,background:"none",border:"none",borderBottom:following.includes(edRoom)?"1px solid "+S.ac:"1px solid "+S.lnL,padding:"4px 0",cursor:"pointer",transition:"all .5s"}}>{following.includes(edRoom)?"following":"follow"}</button>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:mob?"repeat(2,1fr)":"repeat(3,1fr)",gap:mob?12:16,gridAutoFlow:"dense",marginTop:28}}>{ei.map(it=>{const isWide=it.root==="scene"&&it.type==="\uC601\uC0C1";const cols=mob?2:3;const aspect=it.root==="scene"?(it.type==="\uC7A5\uBA74"||it.type==="\uB8E8\uD2F4"?"3/4":"1/1"):(it.root==="objet"?"4/5":"4/3");return <div key={it.id} style={{gridColumn:isWide?"span "+cols:"span 1",cursor:"pointer",position:"relative"}} onClick={()=>{scrollSave.current=window.scrollY;lt(()=>sDetail(it));}}><SavedDot isSaved={isSaved(it.id)}/><Img grad={it.grad} photo={it.photo} aspect={isWide?"16/9":aspect} r={2}/><div style={{fontSize:12,fontWeight:300,marginTop:8}}>{it.title}</div></div>;})}</div>
+        <div style={{borderTop:"1px solid "+S.lnL,paddingTop:mob?32:48}}>
+          <div style={{display:"grid",gridTemplateColumns:mob?"repeat(2,1fr)":"repeat(3,1fr)",columnGap:mob?16:32,rowGap:mob?32:56,gridAutoFlow:"dense"}}>{ei.map(it=>{const isWide=it.root==="scene"&&it.type==="영상";const cols=mob?2:3;const asp=it.aspect||(it.root==="scene"?(isWide?"16/9":"3/4"):(it.root==="objet"?"4/5":"4/3"));return <div key={it.id} style={{gridColumn:isWide?"span "+cols:"span 1",cursor:"pointer",position:"relative"}} onClick={()=>{scrollSave.current=window.scrollY;lt(()=>sDetail(it));}}><SavedDot isSaved={isSaved(it.id)}/><Img grad={it.grad} photo={it.photo} aspect={asp} r={2}/><div style={{marginTop:12}}><div style={{fontFamily:S.sn,fontSize:8,fontWeight:300,letterSpacing:3,color:S.txGh,marginBottom:4}}>{it.root}</div><div style={{fontFamily:S.sf,fontSize:mob?12:13,fontWeight:300,lineHeight:1.5}}>{it.title}</div></div></div>;})}</div>
+        </div>
       </div><Foot/></div>;})()}
     {view==="room"&&detail&&<DetailView hideEditor={true}/>}
 
