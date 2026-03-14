@@ -205,11 +205,11 @@ export default function Sloist(){
   };
 
   /* ── Nav ── */
-  const Nav=({showCats})=>{
+  const Nav=({showCats,backAction})=>{
     const r1h=mob?48:60;
     return <div style={{position:"sticky",top:0,zIndex:50}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:r1h,padding:mob?"0 20px":"0 40px",background:S.bg,position:"relative",zIndex:2}}>
-        <div onClick={goHome} style={{fontFamily:S.sf,fontSize:mob?18:24,fontWeight:300,letterSpacing:mob?8:14,color:S.tx,cursor:"pointer",transition:"opacity .5s"}} onMouseEnter={e=>e.currentTarget.style.opacity=".6"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>sloist</div>
+        {backAction?<button onClick={backAction} style={{fontFamily:S.sn,fontSize:10,fontWeight:400,letterSpacing:4,color:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .3s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>back</button>:<div onClick={goHome} style={{fontFamily:S.sf,fontSize:mob?18:24,fontWeight:300,letterSpacing:mob?8:14,color:S.tx,cursor:"pointer",transition:"opacity .5s"}} onMouseEnter={e=>e.currentTarget.style.opacity=".6"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>sloist</div>}
         <div style={{display:"flex",alignItems:"center",gap:mob?14:24}}>
           {auth.isEditor&&!auth.isAdmin&&!auth.editorId&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필 만들기</button>}
           {auth.editorId&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필</button>}
@@ -259,76 +259,65 @@ export default function Sloist(){
       return "4/5";
     };
     const bodyStyle={fontFamily:S.bd,fontSize:mob?14:15,fontWeight:400,color:S.txM,lineHeight:2.1,letterSpacing:.3};
+    const hasAdmin=auth.isAdmin||(auth.editorId&&dl.editor===auth.editorId);
+    const editorLine=!hideEditor&&dl.editor&&ED[dl.editor]?aLabel(dl,ED):dl.isOfficial?"by sloist":null;
     return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}>
-      <Nav/>
+      <Nav backAction={closeDetail}/>
       <div style={{flex:"1 0 auto"}}>
-        <div style={{position:"relative",width:"100%",aspectRatio:mob?"16/10":"21/9",overflow:"hidden"}}>
+
+        {/* ─── 히어로 ─── */}
+        <div style={{position:"relative",width:"100%",aspectRatio:mob?"4/3":"21/8",overflow:"hidden"}}>
           {dl.photo?<img src={dl.photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",background:dl.grad}}/>}
         </div>
-        <div style={{maxWidth:mob?undefined:720,margin:"0 auto",padding:mob?"48px 20px 80px":"80px 48px 120px"}}>
-          {/* 카테고리 + back */}
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:mob?32:56}}>
-            <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,textTransform:"lowercase",color:S.ac}}>{dl.type||dl.cat||dl.otype||""}</div>
-            <button onClick={closeDetail} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>back</button>
-          </div>
 
-          {/* 제목 */}
-          <h1 style={{fontFamily:S.sf,fontSize:mob?28:48,fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,marginBottom:20,textAlign:"center"}}>{dl.title}</h1>
+        {/* ─── 제목 블록: 카테고리+제목+메타+태그 — 촘촘하게 한 덩어리 ─── */}
+        <div style={{textAlign:"center",maxWidth:mob?undefined:720,margin:"0 auto",padding:mob?"32px 20px":"56px 48px"}}>
+          <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,textTransform:"lowercase",color:S.ac,marginBottom:mob?10:14}}>{dl.type||dl.cat||dl.otype||""}</div>
+          <h1 style={{fontFamily:S.sf,fontSize:mob?26:44,fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,margin:0}}>{dl.title}</h1>
+          {dl.root==="space"&&dl.location&&<div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,letterSpacing:2,color:S.txF,marginTop:12}}>{dl.location}</div>}
+          {dl.root==="scene"&&dl.sub&&<div style={{fontFamily:S.bd,fontSize:14,fontWeight:300,color:S.txQ,marginTop:10,lineHeight:1.8}}>{dl.sub}</div>}
+          {dl.root==="objet"&&dl.maker&&<div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,letterSpacing:3,color:S.txQ,marginTop:10}}>{dl.maker}</div>}
+          {dl.tags&&<div style={{marginTop:12}}><TagLinks tags={dl.tags} size={10} color={S.txGh}/></div>}
+        </div>
 
-          {/* Space 메타 */}
-          {dl.root==="space"&&<>
-            {dl.location&&<div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,letterSpacing:2,color:S.txF,marginBottom:16,textAlign:"center"}}>{dl.location}</div>}
-            {dl.tags&&<div style={{marginBottom:mob?12:20,textAlign:"center"}}><TagLinks tags={dl.tags} size={10} color={S.txGh}/></div>}
+        {/* ─── 본문 ─── */}
+        <div style={{maxWidth:520,margin:"0 auto",padding:mob?"0 20px":"0 24px"}}>
+          {dl.note&&<>
+            <div style={{borderTop:"1px solid "+S.lnL,paddingTop:mob?32:48}}>
+              <div style={bodyStyle}>{dl.note}</div>
+            </div>
           </>}
+          {dl.root==="space"&&dl.lat&&dl.lng&&<div style={{marginTop:mob?40:64,borderRadius:4,overflow:"hidden"}}><SpaceMap spaces={[dl]} hovId={null} onHover={()=>{}} onClick={()=>{}} style={{width:"100%",height:mob?200:240}}/></div>}
 
-          {/* Scene 메타 */}
-          {dl.root==="scene"&&<>
-            {dl.sub&&<p style={{fontFamily:S.bd,fontSize:14,fontWeight:300,color:S.txQ,marginBottom:8,textAlign:"center",lineHeight:1.8}}>{dl.sub}</p>}
-          </>}
-
-          {/* Objet 메타 */}
-          {dl.root==="objet"&&<>
-            {dl.maker&&<div style={{fontFamily:S.sn,fontSize:12,fontWeight:300,letterSpacing:3,color:S.txQ,textAlign:"center"}}>{dl.maker}</div>}
-          </>}
-
-          {/* 구분선 — 제목 영역과 읽기 영역 분리 */}
-          <div style={{maxWidth:520,margin:mob?"40px auto":"72px auto"}}>
-            <div style={{borderTop:"1px solid "+S.lnL}}/>
+          {/* 액션바 — 본문 끝에 자연스럽게 */}
+          <div style={{paddingTop:mob?36:56,display:"flex",alignItems:"center",justifyContent:"center",gap:mob?28:44}}>
+            <button onClick={()=>keep(dl.id)} style={{fontFamily:S.sn,fontSize:9,fontWeight:400,letterSpacing:4,color:dl.saved?S.ac:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}}>{dl.saved?"kept":"keep"}</button>
+            <button onClick={()=>flash("link copied")} style={{fontFamily:S.sn,fontSize:9,fontWeight:400,letterSpacing:4,color:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}}>share</button>
+            {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.sn,fontSize:9,fontWeight:400,letterSpacing:4,color:S.txQ,textDecoration:"none",transition:"color .4s"}}>{lLabel(dl)}</a>}
           </div>
+          {/* 에디터 크레딧 — 액션 아래, 끝자락 */}
+          {editorLine&&<div style={{textAlign:"center",marginTop:mob?20:28}}><span onClick={()=>{if(dl.editor&&ED[dl.editor])openRoom(dl.editor);else if(dl.isOfficial)goTo("about");}} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,cursor:"pointer",transition:"color .4s"}}>{editorLine}</span></div>}
+          {/* 관리자 — 크레딧 아래, 가장 약하게 */}
+          {hasAdmin&&<div style={{display:"flex",justifyContent:"center",gap:24,marginTop:14}}>
+            <button onClick={()=>{setEditItem(dl);setShowWrite(true);}} style={{fontFamily:S.sn,fontSize:8,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer"}}>수정</button>
+            {auth.isAdmin&&<button onClick={()=>setCover(dl.id)} style={{fontFamily:S.sn,fontSize:8,fontWeight:300,letterSpacing:3,color:dl.isCover?S.ac:S.txGh,background:"none",border:"none",cursor:"pointer"}}>{dl.isCover?"홈 커버":"커버 지정"}</button>}
+          </div>}
+        </div>
 
-          {/* 본문 */}
-          <div style={{maxWidth:520,margin:"0 auto"}}>
-            {dl.note&&<div style={bodyStyle}>{dl.note}</div>}
-
-            {/* Space 미니맵 */}
-            {dl.root==="space"&&dl.lat&&dl.lng&&<div style={{marginTop:mob?48:80,borderRadius:4,overflow:"hidden"}}><SpaceMap spaces={[dl]} hovId={null} onHover={()=>{}} onClick={()=>{}} style={{width:"100%",height:mob?200:240}}/></div>}
-          </div>
-
-          {/* 태그 (space 외 — space는 위에서 이미 표시) */}
-          {dl.root!=="space"&&dl.tags&&<div style={{textAlign:"center",marginTop:mob?48:72}}><TagLinks tags={dl.tags} size={10} color={S.txGh}/></div>}
-
-          {/* 액션바 */}
-          <div style={{maxWidth:520,margin:mob?"48px auto 0":"72px auto 0",borderTop:"1px solid "+S.lnL,paddingTop:mob?28:36,display:"flex",alignItems:"center",justifyContent:"center",gap:mob?24:40,flexWrap:"wrap"}}>
-            <button onClick={()=>keep(dl.id)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:dl.saved?S.ac:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}}>{dl.saved?"kept":"keep"}</button>
-            <button onClick={()=>flash("link copied")} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}}>share</button>
-            {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,textDecoration:"none",transition:"color .5s"}}>{lLabel(dl)}</a>}
-            {!hideEditor&&dl.editor&&ED[dl.editor]&&<span onClick={()=>openRoom(dl.editor)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txQ,cursor:"pointer",transition:"color .5s"}}>{aLabel(dl,ED)}</span>}
-            {dl.isOfficial&&<span onClick={()=>goTo("about")} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,cursor:"pointer",transition:"color .5s"}}>by sloist</span>}
-            {(auth.isAdmin||(auth.editorId&&dl.editor===auth.editorId))&&<button onClick={()=>{setEditItem(dl);setShowWrite(true);}} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}}>수정</button>}
-            {auth.isAdmin&&<button onClick={()=>setCover(dl.id)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:dl.isCover?S.ac:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}}>{dl.isCover?"홈 커버":"커버 지정"}</button>}
-          </div>
-
-          {/* 관련 기록 */}
-          {relatedItems.length>0&&<div style={{maxWidth:520,margin:mob?"80px auto 0":"140px auto 0"}}>
-            <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,textAlign:"center",marginBottom:mob?28:40}}>{relLabel}</div>
+        {/* ─── 관련 기록 ─── */}
+        {relatedItems.length>0&&<div style={{maxWidth:520,margin:"0 auto",padding:mob?"0 20px":"0 24px"}}>
+          <div style={{marginTop:mob?80:140,paddingTop:mob?32:48,borderTop:"1px solid "+S.lnL}}>
+            <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txF,textAlign:"center",marginBottom:mob?24:32}}>{relLabel}</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:mob?16:28}}>
               {relatedItems.map(ri=><div key={ri.id} onClick={()=>openDetail(ri)} style={{cursor:"pointer"}}>
                 <Img grad={ri.grad} photo={ri.photo} aspect={relAsp(ri)} r={2}/>
-                <div style={{fontFamily:S.sf,fontSize:mob?12:13,fontWeight:300,lineHeight:1.5,marginTop:mob?10:14,color:S.txM}}>{ri.title}</div>
+                <div style={{fontFamily:S.sf,fontSize:mob?12:13,fontWeight:300,lineHeight:1.5,marginTop:mob?8:12,color:S.txQ}}>{ri.title}</div>
               </div>)}
             </div>
-          </div>}
-        </div>
+          </div>
+        </div>}
+
+        <div style={{height:mob?80:120}}/>
       </div>
       <Foot/>
     </div>;
