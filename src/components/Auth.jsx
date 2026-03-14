@@ -33,8 +33,8 @@ export default function Auth({ onAuth, signIn, signUp }) {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin + "/reset-password",
       });
-      if (error) setMsg("전송 실패: 이메일을 확인하세요");
-      else setMsg("비밀번호 재설정 링크를 이메일로 전송했습니다.");
+      if (error) setMsg("전송 실패: " + error.message);
+      else setMsg("해당 이메일로 가입된 계정이 있다면 재설정 링크가 전송됩니다.");
     } else {
       const { error } = await signIn(email, pw);
       if (error) {
