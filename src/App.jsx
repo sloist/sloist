@@ -70,6 +70,7 @@ export default function Sloist(){
   const [headerVis,sHeaderVis]=useState(true);
   const [showTop,sShowTop]=useState(false);
   const prevState=useRef(null);
+  const pendingAction=useRef(null); // {type:"keep"|"fol", id}
   const scrollSave=useRef(0);
   const sqRef=useRef(null);
   const lastScroll=useRef(0);
@@ -110,6 +111,13 @@ export default function Sloist(){
     const h=()=>{const y=window.scrollY;sShowTop(y>500);if(y<60)sHeaderVis(true);else if(y>lastScroll.current+8)sHeaderVis(false);else if(y<lastScroll.current-8)sHeaderVis(true);lastScroll.current=y;};
     window.addEventListener("scroll",h,{passive:true});return()=>window.removeEventListener("scroll",h);
   },[activeCat]);
+
+  // 로그인 후 pending action 실행
+  useEffect(()=>{
+    if(!auth.user||!pendingAction.current)return;
+    const a=pendingAction.current;pendingAction.current=null;
+    setTimeout(()=>{if(a.type==="keep")keep(a.id);else if(a.type==="fol")toggleFol(a.id);},500);
+  },[auth.user]);
 
   // Supabase 데이터 로드되면 items 초기화
   useEffect(()=>{
@@ -163,7 +171,7 @@ export default function Sloist(){
 
   const flash=useCallback(m=>{sToast(m);setTimeout(()=>sToast(null),1400);},[]);
   const isSaved=useCallback(id=>savedIds.includes(id),[savedIds]);
-  const keep=useCallback(async(id)=>{if(!auth.user){goTo("login");return;}const was=savedIds.includes(id);
+  const keep=useCallback(async(id)=>{if(!auth.user){pendingAction.current={type:"keep",id};goTo("login");return;}const was=savedIds.includes(id);
     setSavedIds(p=>was?p.filter(x=>x!==id):[...p,id]);
     flash(was?"보관 해제":"보관됨");
     const{error}=was
@@ -171,7 +179,7 @@ export default function Sloist(){
       :await supabase.from("saves").insert({user_id:auth.user.id,content_id:id});
     if(error){setSavedIds(p=>was?[...p,id]:p.filter(x=>x!==id));flash("저장 실패");}
   },[savedIds,flash,auth.user,setSavedIds]);
-  const toggleFol=async(eid)=>{if(!auth.user){goTo("login");return;}const was=following.includes(eid);
+  const toggleFol=async(eid)=>{if(!auth.user){pendingAction.current={type:"fol",id:eid};goTo("login");return;}const was=following.includes(eid);
     setFollowingIds(p=>was?p.filter(x=>x!==eid):[...p,eid]);
     flash(was?"팔로우 해제":"팔로우됨");
     const{error}=was
