@@ -108,7 +108,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: mob ? "14px 16px" : "16px 36px", borderBottom: "1px solid " + S.lnL }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span style={{ fontFamily: S.sf, fontSize: mob ? 14 : 15, letterSpacing: 4, fontWeight: 300 }}>{isEdit ? "수정하기" : "새 기록"}</span>
-          {isEdit && <span style={{ fontFamily: S.sn, fontSize: 9, letterSpacing: 2, color: S.txF, background: "rgba(184,164,140,.08)", padding: "3px 10px", borderRadius: 10 }}>{rootLabel}</span>}
+          {isEdit && <span style={{ fontFamily: S.ui, fontSize: 9, letterSpacing: 2, color: S.txF, background: "rgba(184,164,140,.08)", padding: "3px 10px", borderRadius: 10 }}>{rootLabel}</span>}
         </div>
         <button onClick={() => { const hasContent = title.trim() || note.trim() || photo; if (hasContent && !confirm("작성 중인 내용이 있습니다. 닫으시겠습니까?")) return; onClose(); }} style={{ fontFamily: S.sf, fontSize: 10, letterSpacing: 6, color: S.txGh, background: "none", border: "none", cursor: "pointer" }}>닫기</button>
       </div>
@@ -136,7 +136,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
                       transition: "all .3s",
                     }}>
                     <div style={{ fontFamily: S.sf, fontSize: 13, letterSpacing: 3, color: root === k ? S.tx : S.txGh, fontWeight: root === k ? 400 : 300 }}>{label}</div>
-                    <div style={{ fontFamily: S.sn, fontSize: 9, color: S.txF, marginTop: 3, letterSpacing: 1, opacity: root === k ? 1 : 0, transition: "opacity .3s" }}>{desc}</div>
+                    <div style={{ fontFamily: S.ui, fontSize: 9, color: S.txF, marginTop: 3, letterSpacing: 1, opacity: root === k ? 1 : 0, transition: "opacity .3s" }}>{desc}</div>
                   </button>
                 ))}
               </div>
@@ -186,7 +186,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
             <span style={labelStyle}>썸네일 비율</span>
             <div style={{ display: "flex", gap: 14, marginTop: 6 }}>
               {ASPECT_OPTIONS.map(a => <button key={a} onClick={() => setAspect(aspect === a ? "" : a)} style={catBtn(aspect === a)}>{a}</button>)}
-              <span style={{ fontFamily: S.sn, fontSize: 10, color: S.txGh, alignSelf: "center" }}>미선택 시 기본값</span>
+              <span style={{ fontFamily: S.ui, fontSize: 10, color: S.txGh, alignSelf: "center" }}>미선택 시 기본값</span>
             </div>
           </div>
         </div>
@@ -200,9 +200,9 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
               <span style={labelStyle}>위치</span>
               <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
                 <input value={location} onChange={e => setLocation(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); geocodeAddress(location); } }} placeholder="주소 입력 (예: 충남 공주 한옥마을)" style={{ ...inputStyle, flex: 1 }} />
-                <button onClick={() => geocodeAddress(location)} disabled={geoLoading} style={{ fontFamily: S.sn, fontSize: 10, letterSpacing: 2, color: S.txQ, background: "none", border: "none", borderBottom: "1px solid " + S.ln, padding: "10px 0", cursor: "pointer", whiteSpace: "nowrap", opacity: geoLoading ? 0.5 : 1 }}>{geoLoading ? "검색 중..." : "좌표 검색"}</button>
+                <button onClick={() => geocodeAddress(location)} disabled={geoLoading} style={{ fontFamily: S.ui, fontSize: 10, letterSpacing: 2, color: S.txQ, background: "none", border: "none", borderBottom: "1px solid " + S.ln, padding: "10px 0", cursor: "pointer", whiteSpace: "nowrap", opacity: geoLoading ? 0.5 : 1 }}>{geoLoading ? "검색 중..." : "좌표 검색"}</button>
               </div>
-              {(lat && lng) && <div style={{ fontFamily: S.sn, fontSize: 10, color: S.txF, marginTop: 6, letterSpacing: 1 }}>📍 {Number(lat).toFixed(4)}, {Number(lng).toFixed(4)}</div>}
+              {(lat && lng) && <div style={{ fontFamily: S.ui, fontSize: 10, color: S.txF, marginTop: 6, letterSpacing: 1 }}>📍 {Number(lat).toFixed(4)}, {Number(lng).toFixed(4)}</div>}
             </div>
           )}
 
@@ -219,17 +219,17 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
             <span style={labelStyle}>태그 (최대 3개)</span>
             {Object.entries(TAG_GROUPS).map(([group, items]) => (
               <div key={group} style={{ marginTop: 10 }}>
-                <div style={{ fontFamily: S.sn, fontSize: 9, color: S.txGh, letterSpacing: 2, marginBottom: 5 }}>{group}</div>
+                <div style={{ fontFamily: S.ui, fontSize: 9, color: S.txGh, letterSpacing: 2, marginBottom: 5 }}>{group}</div>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   {items.map(t => {
                     const sel = tags.split(" · ").filter(Boolean);
                     const active = sel.includes(t);
-                    return <button key={t} onClick={() => { if (active) setTags(sel.filter(x => x !== t).join(" · ")); else if (sel.length < 3) setTags([...sel, t].join(" · ")); }} style={{ fontFamily: S.sn, fontSize: 11, fontWeight: active ? 400 : 300, color: active ? S.tx : S.txGh, background: active ? "rgba(184,164,140,.12)" : "none", border: "1px solid " + (active ? S.ac : S.lnL), borderRadius: 20, padding: "4px 10px", cursor: sel.length >= 3 && !active ? "default" : "pointer", opacity: sel.length >= 3 && !active ? 0.4 : 1, transition: "all .3s" }}>{t}</button>;
+                    return <button key={t} onClick={() => { if (active) setTags(sel.filter(x => x !== t).join(" · ")); else if (sel.length < 3) setTags([...sel, t].join(" · ")); }} style={{ fontFamily: S.ui, fontSize: 11, fontWeight: active ? 400 : 300, color: active ? S.tx : S.txGh, background: active ? "rgba(184,164,140,.12)" : "none", border: "1px solid " + (active ? S.ac : S.lnL), borderRadius: 20, padding: "4px 10px", cursor: sel.length >= 3 && !active ? "default" : "pointer", opacity: sel.length >= 3 && !active ? 0.4 : 1, transition: "all .3s" }}>{t}</button>;
                   })}
                 </div>
               </div>
             ))}
-            {tags && <div style={{ fontFamily: S.sn, fontSize: 11, color: S.txQ, marginTop: 10, letterSpacing: 1 }}>{tags}</div>}
+            {tags && <div style={{ fontFamily: S.ui, fontSize: 11, color: S.txQ, marginTop: 10, letterSpacing: 1 }}>{tags}</div>}
           </div>
 
           {/* 링크 */}

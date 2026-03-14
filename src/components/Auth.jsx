@@ -58,7 +58,7 @@ export default function Auth({ onAuth, signIn, signUp }) {
     border: "none",
     borderBottom: "1px solid " + S.ln,
     padding: "14px 0",
-    fontFamily: S.sn,
+    fontFamily: S.ui,
     fontSize: mob ? 15 : 14,
     fontWeight: 300,
     color: S.tx,
@@ -79,7 +79,7 @@ export default function Auth({ onAuth, signIn, signUp }) {
           <div style={{ fontFamily: S.sf, fontSize: mob ? 32 : 40, fontWeight: 300, letterSpacing: mob ? 12 : 18, color: S.tx }}>sloist</div>
 
           {/* 고정 문장 */}
-          <div style={{ fontFamily: S.sn, fontSize: 11, fontWeight: 300, letterSpacing: 3, color: S.txF, marginTop: 14 }}>
+          <div style={{ fontFamily: S.ui, fontSize: 11, fontWeight: 300, letterSpacing: 3, color: S.txF, marginTop: 14 }}>
             멈춰야 보이는 것들
           </div>
 
@@ -103,14 +103,14 @@ export default function Auth({ onAuth, signIn, signUp }) {
 
               {/* 메시지 */}
               <div style={{ minHeight: 18 }}>
-                {msg && <div style={{ fontFamily: S.sn, fontSize: 11, fontWeight: 300, color: msg.includes("완료") || msg.includes("전송했습니다") ? S.ac : "#c47", lineHeight: 1.7, textAlign: "center" }}>{msg}</div>}
+                {msg && <div style={{ fontFamily: S.ui, fontSize: 11, fontWeight: 300, color: msg.includes("완료") || msg.includes("전송했습니다") ? S.ac : "#c47", lineHeight: 1.7, textAlign: "center" }}>{msg}</div>}
               </div>
 
               <button
                 onClick={handleSubmit}
                 disabled={loading}
                 style={{
-                  fontFamily: S.sn, fontSize: 12, fontWeight: 400, letterSpacing: 4,
+                  fontFamily: S.ui, fontSize: 12, fontWeight: 400, letterSpacing: 4,
                   color: "#fff", background: S.txM, border: "none", borderRadius: 3,
                   padding: "14px 0", cursor: "pointer",
                   opacity: loading ? 0.5 : 1, transition: "opacity .5s",
@@ -129,23 +129,23 @@ export default function Auth({ onAuth, signIn, signUp }) {
           <>
             <button
               onClick={() => { setMode("reset"); setMsg(null); }}
-              style={{ fontFamily: S.sn, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
+              style={{ fontFamily: S.ui, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
             >비밀번호 찾기</button>
             <button
               onClick={() => { setMode("signup"); setMsg(null); }}
-              style={{ fontFamily: S.sn, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
+              style={{ fontFamily: S.ui, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
             >가입하기</button>
           </>
         )}
         {(mode === "signup" || mode === "reset") && (
           <button
             onClick={() => { setMode("login"); setMsg(null); }}
-            style={{ fontFamily: S.sn, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
+            style={{ fontFamily: S.ui, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
           >로그인으로 돌아가기</button>
         )}
         <button
           onClick={onAuth}
-          style={{ fontFamily: S.sn, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txGh, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
+          style={{ fontFamily: S.ui, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txGh, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
         >닫기</button>
       </div>
     </div>

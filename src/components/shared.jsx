@@ -16,10 +16,19 @@ export function lLabel(it) {
   return t === "음악" ? "듣기" : t === "영상" ? "보기" : t === "서적" ? "읽기" : "방문";
 }
 
+// 카테고리 컬러
+export function catColor(root) {
+  if (root === "space") return S.cSpace;
+  if (root === "scene") return S.cScene;
+  if (root === "objet") return S.cObjet;
+  return S.txF;
+}
+
 // 이미지 컴포넌트
 import { useState, useRef, useEffect } from "react";
 
 const _imgCache = new Set();
+const IMG_FILTER = "saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)";
 
 export function Img({ grad, photo, aspect = "4/3", r = 2 }) {
   const cached = photo && _imgCache.has(photo);
@@ -36,7 +45,7 @@ export function Img({ grad, photo, aspect = "4/3", r = 2 }) {
   }, [photo]);
 
   return (
-    <div style={{ width: "100%", aspectRatio: aspect, background: grad || "#eee", borderRadius: r, position: "relative", overflow: "hidden" }}>
+    <div style={{ width: "100%", aspectRatio: aspect, background: grad || S.bgAlt, borderRadius: r, position: "relative", overflow: "hidden" }}>
       {photo && <img
         ref={imgRef}
         src={photo}
@@ -48,7 +57,7 @@ export function Img({ grad, photo, aspect = "4/3", r = 2 }) {
           objectFit: "cover", zIndex: 1,
           opacity: loaded ? 1 : 0,
           transition: "opacity .6s cubic-bezier(.2,0,.3,1)",
-          filter: "saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)",
+          filter: IMG_FILTER,
         }}
       />}
     </div>
@@ -57,14 +66,14 @@ export function Img({ grad, photo, aspect = "4/3", r = 2 }) {
 
 // 검색 아이콘
 export const SIcon = () => (
-  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke={S.txQ} strokeWidth="1.4">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke={S.txF} strokeWidth="1.4">
     <circle cx="11" cy="11" r="7" /><line x1="16.5" y1="16.5" x2="21" y2="21" />
   </svg>
 );
 
 // 유저 아이콘
 export const UIcon = () => (
-  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke={S.txQ} strokeWidth="1.4">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke={S.txF} strokeWidth="1.4">
     <circle cx="12" cy="8" r="4" /><path d="M4 21 v-1 a 8 8 0 0 1 16 0 v1" />
   </svg>
 );
