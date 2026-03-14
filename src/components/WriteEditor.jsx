@@ -27,10 +27,6 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
   const [geoLoading, setGeoLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null);
-  const [showDetail, setShowDetail] = useState(
-    // 수정 시 상세 항목이 있으면 자동으로 펼침
-    isEdit && !!(editItem?.tags || editItem?.link || editItem?.aspect || editItem?.lat)
-  );
 
   async function geocodeAddress(addr) {
     if (!addr.trim()) return;
@@ -107,8 +103,6 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
   const rootLabel = root === "space" ? "장소" : root === "scene" ? "장면" : "물건";
   const rootIcon = root === "space" ? "◯" : root === "scene" ? "△" : "□";
 
-  // 상세 설정에 입력된 항목 수
-  const detailCount = [tags, aspect, link, root === "space" && location, root === "objet" && maker, root === "scene" && sub].filter(Boolean).length;
 
   return (
     <div style={{ minHeight: "100vh", background: S.bg, display: "flex", flexDirection: "column" }}>
@@ -121,101 +115,78 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
         <button onClick={() => { const hasContent = title.trim() || note.trim() || photo; if (hasContent && !confirm("작성 중인 내용이 있습니다. 닫으시겠습니까?")) return; onClose(); }} style={{ fontFamily: S.sf, fontSize: 10, letterSpacing: 6, color: S.txGh, background: "none", border: "none", cursor: "pointer" }}>닫기</button>
       </div>
 
-      <div style={{ maxWidth: 600, margin: "0 auto", width: "100%", padding: mob ? "28px 16px" : "48px 24px" }}>
+      {/* ─── 모바일: 단일 컬럼 / 데스크톱: 좌우 분할 ─── */}
+      <div style={{ maxWidth: mob ? 600 : 1000, margin: "0 auto", width: "100%", padding: mob ? "28px 16px" : "48px 36px", display: mob ? "block" : "flex", gap: mob ? 0 : 60 }}>
 
-        {/* ─── 섹션 1: 기본 정보 ─── */}
+        {/* ──── 좌측: 핵심 정보 ──── */}
+        <div style={{ flex: mob ? undefined : 1, minWidth: 0 }}>
 
-        {/* 카테고리 선택 (새 글만) */}
-        {!isEdit && (
-          <div style={{ marginBottom: 32 }}>
-            <div style={{ display: "flex", gap: 0 }}>
-              {[
-                { k: "space", label: "space", desc: "장소의 기록" },
-                { k: "scene", label: "scene", desc: "장면의 기록" },
-                { k: "objet", label: "objet", desc: "물건의 기록" },
-              ].map(({ k, label, desc }) => (
-                <button key={k} onClick={() => { setRoot(k); setCat(""); setType(""); setOtype(""); }}
-                  style={{
-                    flex: 1, padding: "16px 0 12px", cursor: "pointer",
-                    background: root === k ? "rgba(184,164,140,.06)" : "none",
-                    border: "none", borderBottom: root === k ? "2px solid " + S.ac : "2px solid transparent",
-                    transition: "all .3s",
-                  }}>
-                  <div style={{ fontFamily: S.sf, fontSize: 13, letterSpacing: 3, color: root === k ? S.tx : S.txGh, fontWeight: root === k ? 400 : 300 }}>{label}</div>
-                  <div style={{ fontFamily: S.sn, fontSize: 9, color: S.txF, marginTop: 4, letterSpacing: 1, opacity: root === k ? 1 : 0, transition: "opacity .3s" }}>{desc}</div>
-                </button>
-              ))}
+          {/* 카테고리 선택 (새 글만) */}
+          {!isEdit && (
+            <div style={{ marginBottom: 32 }}>
+              <div style={{ display: "flex", gap: 0 }}>
+                {[
+                  { k: "space", label: "space", desc: "장소의 기록" },
+                  { k: "scene", label: "scene", desc: "장면의 기록" },
+                  { k: "objet", label: "objet", desc: "물건의 기록" },
+                ].map(({ k, label, desc }) => (
+                  <button key={k} onClick={() => { setRoot(k); setCat(""); setType(""); setOtype(""); }}
+                    style={{
+                      flex: 1, padding: "16px 0 12px", cursor: "pointer",
+                      background: root === k ? "rgba(184,164,140,.06)" : "none",
+                      border: "none", borderBottom: root === k ? "2px solid " + S.ac : "2px solid transparent",
+                      transition: "all .3s",
+                    }}>
+                    <div style={{ fontFamily: S.sf, fontSize: 13, letterSpacing: 3, color: root === k ? S.tx : S.txGh, fontWeight: root === k ? 400 : 300 }}>{label}</div>
+                    <div style={{ fontFamily: S.sn, fontSize: 9, color: S.txF, marginTop: 4, letterSpacing: 1, opacity: root === k ? 1 : 0, transition: "opacity .3s" }}>{desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 분류 */}
+          <div style={{ marginBottom: 28 }}>
+            <span style={labelStyle}>{root === "space" ? "장소 분류" : root === "scene" ? "장면 분류" : "물건 분류"}</span>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginTop: 8 }}>
+              {subCats.map(c => {
+                const val = root === "space" ? cat : root === "scene" ? type : otype;
+                const setter = root === "space" ? setCat : root === "scene" ? setType : setOtype;
+                return <button key={c} onClick={() => setter(val === c ? "" : c)} style={catBtn(val === c)}>{c}</button>;
+              })}
             </div>
           </div>
-        )}
 
-        {/* 분류 */}
-        <div style={{ marginBottom: 28 }}>
-          <span style={labelStyle}>{root === "space" ? "장소 분류" : root === "scene" ? "장면 분류" : "물건 분류"}</span>
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginTop: 8 }}>
-            {subCats.map(c => {
-              const val = root === "space" ? cat : root === "scene" ? type : otype;
-              const setter = root === "space" ? setCat : root === "scene" ? setType : setOtype;
-              return <button key={c} onClick={() => setter(val === c ? "" : c)} style={catBtn(val === c)}>{c}</button>;
-            })}
-          </div>
-        </div>
-
-        {/* 제목 */}
-        <div style={{ marginBottom: 28 }}>
-          <span style={labelStyle}>제목</span>
-          <input value={title} onChange={e => setTitle(e.target.value)} placeholder="기록의 제목" style={inputStyle} />
-        </div>
-
-        {/* 카테고리별 부가 필드 (핵심) — 분류 바로 아래 */}
-        {root === "scene" && (
+          {/* 제목 */}
           <div style={{ marginBottom: 28 }}>
-            <span style={labelStyle}>저자 / 감독</span>
-            <input value={sub} onChange={e => setSub(e.target.value)} placeholder="이름" style={inputStyle} />
+            <span style={labelStyle}>제목</span>
+            <input value={title} onChange={e => setTitle(e.target.value)} placeholder="기록의 제목" style={inputStyle} />
           </div>
-        )}
 
-        {/* 본문 */}
-        <div style={{ marginBottom: 28 }}>
-          <span style={labelStyle}>본문</span>
-          <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="느리게 기록하세요" style={textareaStyle} />
+          {/* scene: 저자/감독 */}
+          {root === "scene" && (
+            <div style={{ marginBottom: 28 }}>
+              <span style={labelStyle}>저자 / 감독</span>
+              <input value={sub} onChange={e => setSub(e.target.value)} placeholder="이름" style={inputStyle} />
+            </div>
+          )}
+
+          {/* 본문 */}
+          <div style={{ marginBottom: mob ? 28 : 0 }}>
+            <span style={labelStyle}>본문</span>
+            <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="느리게 기록하세요" style={{ ...textareaStyle, minHeight: mob ? 120 : 200 }} />
+          </div>
         </div>
 
-        {/* 이미지 */}
-        <div style={{ marginBottom: 32 }}>
-          <span style={labelStyle}>이미지</span>
-          <ImageUpload value={photo} onChange={setPhoto} folder="contents" />
-        </div>
+        {/* ──── 우측 (데스크톱) / 하단 (모바일): 이미지 + 상세 설정 ──── */}
+        <div style={{ flex: mob ? undefined : 1, minWidth: 0, marginTop: mob ? 0 : 0 }}>
 
-        {/* ─── 구분선 ─── */}
-        <div style={{ borderTop: "1px solid " + S.lnL, margin: "8px 0 28px" }} />
-
-        {/* ─── 섹션 2: 상세 설정 (접이식) ─── */}
-        <button
-          onClick={() => setShowDetail(!showDetail)}
-          style={{
-            width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center",
-            background: "none", border: "none", cursor: "pointer", padding: "0 0 20px",
-          }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 10, letterSpacing: 4, color: S.txGh }}>상세 설정</span>
-            {!showDetail && detailCount > 0 && (
-              <span style={{ fontFamily: S.sn, fontSize: 9, color: S.ac, letterSpacing: 1 }}>{detailCount}개 입력됨</span>
-            )}
+          {/* 이미지 */}
+          <div style={{ marginBottom: 32 }}>
+            <span style={labelStyle}>이미지</span>
+            <ImageUpload value={photo} onChange={setPhoto} folder="contents" />
           </div>
-          <span style={{
-            fontFamily: S.sn, fontSize: 10, color: S.txGh,
-            transform: showDetail ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform .3s",
-            display: "inline-block",
-          }}>▾</span>
-        </button>
 
-        <div style={{
-          maxHeight: showDetail ? 1200 : 0,
-          overflow: "hidden",
-          transition: "max-height .4s cubic-bezier(.2,0,.3,1)",
-        }}>
           {/* 썸네일 비율 */}
           <div style={{ marginBottom: 28 }}>
             <span style={labelStyle}>썸네일 비율</span>
@@ -269,10 +240,12 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
             <input value={link} onChange={e => setLink(e.target.value)} placeholder="https://..." style={inputStyle} />
           </div>
         </div>
+      </div>
 
-        {/* ─── 발행 버튼 ─── */}
+      {/* ─── 발행 버튼 (하단 고정) ─── */}
+      <div style={{ maxWidth: mob ? 600 : 1000, margin: "0 auto", width: "100%", padding: mob ? "0 16px 60px" : "0 36px 60px" }}>
         {msg && <div style={{ fontSize: 12, letterSpacing: 2, marginBottom: 20, textAlign: "center", color: msg.includes("완료") ? S.ac : "#c47" }}>{msg}</div>}
-        <button onClick={handleSave} disabled={saving} style={{ width: "100%", fontFamily: S.sf, fontSize: 12, letterSpacing: 4, color: "#fff", background: S.tx, border: "none", padding: "14px 0", cursor: "pointer", opacity: saving ? 0.5 : 1, marginBottom: 60 }}>
+        <button onClick={handleSave} disabled={saving} style={{ width: "100%", fontFamily: S.sf, fontSize: 12, letterSpacing: 4, color: "#fff", background: S.tx, border: "none", padding: "14px 0", cursor: "pointer", opacity: saving ? 0.5 : 1 }}>
           {saving ? "저장 중..." : isEdit ? "수정하기" : "발행하기"}
         </button>
       </div>
