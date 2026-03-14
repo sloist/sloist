@@ -370,15 +370,27 @@ export default function Sloist(){
           <button onClick={()=>{if(auth.user){if(view!=="mypage")goTo("mypage");}else goTo("login");}} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><UIcon/></button>
         </div>
       </div>
-      {/* 카테고리 + 필터 — 한 줄 */}
+      {/* 카테고리 + 필터 */}
       {showCats&&<div style={{position:"absolute",top:r1h,left:0,right:0,background:S.bg,borderTop:"1px solid "+S.lnL,transform:headerVis?"translateY(0)":"translateY(-100%)",transition:"transform .8s cubic-bezier(.22,1,.36,1)",pointerEvents:headerVis?"auto":"none",zIndex:1}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:0,padding:mob?"5px 16px":"6px 40px",flexWrap:"nowrap",overflow:"auto",WebkitOverflowScrolling:"touch",msOverflowStyle:"none",scrollbarWidth:"none"}}>
-          {CATS.map(k=><button key={k} onClick={()=>onCatClick(k)} style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:activeCat===k?500:300,letterSpacing:"0.15em",textTransform:"lowercase",color:activeCat===k?catColor(k):S.txGh,background:"none",border:"none",padding:mob?"4px 10px":"5px 14px",cursor:"pointer",transition:"color .5s, font-weight .5s",flexShrink:0}}>{k}</button>)}
-          {activeCat&&activeCat!=="space"&&<>
-            <span style={{color:S.ln,fontSize:10,padding:"0 4px",flexShrink:0,userSelect:"none"}}>|</span>
-            <FilterBtns/>
-          </>}
-        </div>
+        {mob
+          ?/* 모바일: 카테고리 한 줄, 필터 있으면 아래 한 줄 */
+          <>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:24,padding:"5px 0"}}>
+              {CATS.map(k=><button key={k} onClick={()=>onCatClick(k)} style={{fontFamily:S.ui,fontSize:11,fontWeight:activeCat===k?500:300,letterSpacing:"0.15em",textTransform:"lowercase",color:activeCat===k?catColor(k):S.txGh,background:"none",border:"none",padding:"5px 0",cursor:"pointer",transition:"color .5s, font-weight .5s"}}>{k}</button>)}
+            </div>
+            {activeCat&&activeCat!=="space"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:16,padding:"0 20px 6px"}}>
+              <FilterBtns/>
+            </div>}
+          </>
+          :/* 데스크톱: 한 줄 통합 */
+          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:0,padding:"6px 40px"}}>
+            {CATS.map(k=><button key={k} onClick={()=>onCatClick(k)} style={{fontFamily:S.ui,fontSize:11,fontWeight:activeCat===k?500:300,letterSpacing:"0.15em",textTransform:"lowercase",color:activeCat===k?catColor(k):S.txGh,background:"none",border:"none",padding:"5px 14px",cursor:"pointer",transition:"color .5s, font-weight .5s"}}>{k}</button>)}
+            {activeCat&&activeCat!=="space"&&<>
+              <span style={{color:S.ln,fontSize:10,padding:"0 6px",userSelect:"none"}}>|</span>
+              <FilterBtns/>
+            </>}
+          </div>
+        }
       </div>}
     </div>;
   };
