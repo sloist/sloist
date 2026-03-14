@@ -424,63 +424,76 @@ export default function Sloist(){
       if(it.root==="scene")return (it.type==="영상"?"16/9":"3/4");
       return "4/5";
     };
-    const heroAsp=dl.aspect||(dl.root==="space"?"4/5":dl.root==="scene"?(dl.type==="영상"?"16/9":"3/4"):"1/1");
+    const isSpace=dl.root==="space";
+    const heroAsp=dl.aspect||(isSpace?"3/4":dl.root==="scene"?(dl.type==="영상"?"16/9":"3/4"):"1/1");
     const hasAdmin=auth.isAdmin||(auth.editorId&&dl.editor===auth.editorId);
     const editorLine=!hideEditor&&dl.editor&&ED[dl.editor]?aLabel(dl,ED):dl.isOfficial?"by sloist":null;
     const creditLine=editorLine;
-    const metaSub=dl.root==="space"?dl.location:dl.root==="scene"?dl.sub:dl.root==="objet"?dl.maker:"";
-    const cc=catColor(dl.root);
+    const metaSub=isSpace?dl.location:dl.root==="scene"?dl.sub:dl.root==="objet"?dl.maker:"";
+    const metaParts=[dl.root,metaSub,creditLine].filter(Boolean);
     const deletePost=()=>sConfirmDel({id:dl.id,title:dl.title,from:"detail"});
+    const [showMore,setShowMore]=useState(false);
     return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column",background:S.bg}}>
       <Nav/>
       <div style={{flex:"1 0 auto"}}>
 
-        {/* ── 히어로 이미지 ── */}
-        <div style={{maxWidth:mob?undefined:680,margin:"0 auto",padding:mob?"0 16px":"0 48px",paddingTop:mob?8:36}}>
-          <Img grad={dl.grad} photo={dl.photo} aspect={heroAsp} r={mob?2:3}/>
+        {/* ── 히어로: space는 풀블리드 + 오버레이 제목 ── */}
+        {isSpace?<div style={{position:"relative",width:"100%",maxWidth:mob?undefined:900,margin:"0 auto"}}>
+          <div style={{width:"100%",aspectRatio:heroAsp,position:"relative",overflow:"hidden"}}>
+            {dl.photo&&<img src={dl.photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"}}/>}
+            {!dl.photo&&<div style={{width:"100%",height:"100%",background:dl.grad||S.bgAlt}}/>}
+            <div style={{position:"absolute",bottom:0,left:0,right:0,height:"55%",background:"linear-gradient(to top, rgba(36,35,32,.5), transparent)",pointerEvents:"none"}}/>
+            <div style={{position:"absolute",bottom:mob?24:40,left:mob?24:48,right:mob?24:48}}>
+              <h1 style={{fontFamily:S.sf,fontSize:mob?24:36,fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,margin:0,color:"#fff"}}>{dl.title}</h1>
+              {metaParts.length>0&&<div style={{fontFamily:S.ui,fontSize:mob?11:12,fontWeight:300,letterSpacing:"0.06em",color:"rgba(255,255,255,.65)",marginTop:mob?6:10}}>{metaParts.join("  ·  ")}</div>}
+            </div>
+          </div>
         </div>
+        :<div style={{maxWidth:mob?undefined:680,margin:"0 auto",padding:mob?"0 16px":"0 48px",paddingTop:mob?8:36}}>
+          <Img grad={dl.grad} photo={dl.photo} aspect={heroAsp} r={mob?2:3}/>
+          <div style={{marginTop:mob?20:32}}>
+            <h1 style={{fontFamily:S.sf,fontSize:mob?22:32,fontWeight:300,lineHeight:1.5,letterSpacing:mob?0:1,margin:0,color:S.tx}}>{dl.title}</h1>
+            {metaParts.length>0&&<div style={{fontFamily:S.ui,fontSize:mob?11:12,fontWeight:300,letterSpacing:"0.06em",color:S.txF,marginTop:mob?6:8}}>{metaParts.join("  ·  ")}</div>}
+          </div>
+        </div>}
 
         {/* ── 기록 본문 영역 ── */}
         <div style={{maxWidth:640,margin:"0 auto",padding:mob?"0 24px":"0 32px"}}>
 
-          {/* 제목 · 만든이 */}
-          <div style={{paddingTop:mob?24:40}}>
-            <h1 style={{fontFamily:S.sf,fontSize:mob?22:32,fontWeight:300,lineHeight:1.5,letterSpacing:mob?0:1,margin:0,color:S.tx}}>{dl.title}</h1>
-            {metaSub&&<div style={{fontFamily:S.ui,fontSize:mob?12:13,fontWeight:300,color:S.txF,marginTop:mob?4:6}}>{metaSub}</div>}
-          </div>
-
-          {/* 본문 */}
-          {dl.note&&<div style={{marginTop:mob?20:32,fontFamily:S.bd,fontSize:mob?14:16,fontWeight:400,color:S.txM,lineHeight:2.0,letterSpacing:".01em"}}>{dl.note}</div>}
+          {/* 본문 — 넓은 호흡 */}
+          {dl.note&&<div style={{marginTop:mob?40:64,fontFamily:S.bd,fontSize:mob?14:16,fontWeight:400,color:S.txM,lineHeight:2.2,letterSpacing:".01em"}}>{dl.note}</div>}
 
           {/* ── 지그재그: 좌 → 우 → 좌 ── */}
 
-          {/* 1) 좌: 보관 · 링크 · 글쓴이 · 관리 */}
-          <div style={{marginTop:mob?28:40,paddingTop:mob?14:18,borderTop:"1px solid "+S.ln,display:"flex",alignItems:"center",gap:mob?14:20}}>
+          {/* 1) 좌: 보관 · 링크 · 글쓴이 */}
+          <div style={{marginTop:mob?36:56,paddingTop:mob?14:18,borderTop:"1px solid "+S.ln,display:"flex",alignItems:"center",gap:mob?14:20}}>
             <button onClick={()=>keep(dl.id)} style={{fontFamily:S.ui,fontSize:mob?13:12,fontWeight:400,letterSpacing:"0.08em",color:isSaved(dl.id)?S.ac:S.txF,background:"none",border:"none",cursor:"pointer",padding:mob?"6px 0":"4px 0",transition:"color .4s"}}>{isSaved(dl.id)?"보관됨":"보관"}</button>
             {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.ui,fontSize:mob?13:12,fontWeight:400,letterSpacing:"0.08em",color:S.txF,textDecoration:"none",padding:mob?"6px 0":"4px 0",transition:"color .4s"}}>{lLabel(dl)}</a>}
-            {creditLine&&<span style={{fontFamily:S.ui,fontSize:mob?12:11,fontWeight:300,letterSpacing:"0.08em",color:S.txGh,...(dl.isOfficial?{}:{cursor:"pointer"})}} onClick={()=>{if(!dl.isOfficial&&dl.editor&&ED[dl.editor])openRoom(dl.editor);}}>{creditLine}</span>}
-            {hasAdmin&&<>
-              <span style={{color:S.ln,userSelect:"none"}}>|</span>
-              <button onClick={()=>{setEditItem(dl);setShowWrite(true);}} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"4px 0",transition:"color .4s"}}>수정</button>
-              {auth.isAdmin&&<button onClick={()=>setCover(dl.id)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:dl.isCover?S.ac:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"4px 0",transition:"color .4s"}}>{dl.isCover?"커버":"커버 지정"}</button>}
-              <button onClick={deletePost} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"4px 0",transition:"color .4s"}}>삭제</button>
-            </>}
+            {creditLine&&<span style={{fontFamily:S.ui,fontSize:mob?11:11,fontWeight:300,letterSpacing:"0.08em",color:S.txGh,...(dl.isOfficial?{}:{cursor:"pointer"})}} onClick={()=>{if(!dl.isOfficial&&dl.editor&&ED[dl.editor])openRoom(dl.editor);}}>{creditLine}</span>}
+            {hasAdmin&&<><span style={{flex:1}}/><button onClick={()=>setShowMore(!showMore)} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"4px 0",transition:"color .4s"}}>{showMore?"닫기":"···"}</button></>}
           </div>
 
-          {/* 2) 우: 태그 */}
-          {dl.tags&&<div style={{marginTop:mob?20:28,textAlign:"right"}}>
-            <TagLinks tags={dl.tags} size={mob?12:11} color={S.txQ}/>
+          {/* 관리 더보기 */}
+          {hasAdmin&&showMore&&<div style={{display:"flex",gap:mob?16:20,paddingTop:8}}>
+            <button onClick={()=>{setEditItem(dl);setShowWrite(true);}} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"4px 0",transition:"color .4s"}}>수정</button>
+            {auth.isAdmin&&<button onClick={()=>setCover(dl.id)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:dl.isCover?S.ac:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"4px 0",transition:"color .4s"}}>{dl.isCover?"커버":"커버 지정"}</button>}
+            <button onClick={deletePost} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"4px 0",transition:"color .4s"}}>삭제</button>
+          </div>}
+
+          {/* 2) 우: 태그 — 작고 연하게 */}
+          {dl.tags&&<div style={{marginTop:mob?16:24,textAlign:"right"}}>
+            <TagLinks tags={dl.tags} size={mob?10:10} color={S.txGh}/>
           </div>}
         </div>
 
         {/* 3) 좌: 관련 기록 */}
         {relatedItems.length>0&&<div style={{maxWidth:640,margin:"0 auto",padding:mob?"0 24px":"0 32px"}}>
           <div style={{marginTop:mob?28:40}}>
-            <div style={{fontFamily:S.ui,fontSize:12,fontWeight:500,letterSpacing:"0.15em",color:S.txGh,marginBottom:mob?24:36}}>{relLabel}</div>
+            <div style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.15em",color:S.txGh,marginBottom:mob?20:28}}>{relLabel}</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:mob?16:40}}>
               {relatedItems.map(ri=><div key={ri.id} onClick={()=>openDetail(ri)} style={{cursor:"pointer"}}>
                 <Img grad={ri.grad} photo={ri.photo} aspect={relAsp(ri)} r={2}/>
-                <div style={{fontFamily:S.ui,fontSize:mob?13:14,fontWeight:300,lineHeight:1.5,color:S.tx,marginTop:mob?8:12}}>{ri.title}</div>
+                <div style={{fontFamily:S.ui,fontSize:mob?12:13,fontWeight:300,lineHeight:1.5,color:S.txQ,marginTop:mob?8:12}}>{ri.title}</div>
               </div>)}
             </div>
           </div>
