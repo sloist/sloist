@@ -110,6 +110,15 @@ export default function Sloist(){
     return()=>{stopLenis();};
   },[splashDone]);
 
+  // WriteEditor 뒤로가기 지원
+  useEffect(()=>{
+    if(!showWrite)return;
+    window.history.pushState({overlay:"write"},"");
+    const onPop=()=>{setShowWrite(false);setEditItem(null);};
+    window.addEventListener("popstate",onPop);
+    return()=>window.removeEventListener("popstate",onPop);
+  },[showWrite]);
+
   // Lenis 파괴/재생성: 오버레이가 열릴 때
   const overlayOpen=sov||view==="login"||showWrite||showAdmin||showEditorProfile||!!confirmDel;
   useEffect(()=>{
@@ -924,7 +933,7 @@ export default function Sloist(){
     </div>;})()}
 
     {/* 글쓰기 에디터 */}
-    {showWrite&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><WriteEditor editorId={auth.editorId} isAdmin={auth.isAdmin} userId={auth.user?.id} isStaff={auth.isStaff} editItem={editItem} onClose={()=>{setShowWrite(false);setEditItem(null);}} onSaved={()=>{setShowWrite(false);setEditItem(null);reloadData();}}/></div>}
+    {showWrite&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><WriteEditor editorId={auth.editorId} isAdmin={auth.isAdmin} userId={auth.user?.id} isStaff={auth.isStaff} editItem={editItem} onClose={()=>{window.history.back();}} onSaved={()=>{window.history.back();reloadData();}}/></div>}
 
     {/* 관리자 패널 */}
     {showAdmin&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><AdminPanel onClose={()=>setShowAdmin(false)}/></div>}
