@@ -339,11 +339,11 @@ export default function Sloist(){
     return <>{opts.map(o=>{const a=fv.includes(o);return <button key={o} onClick={()=>{if(multi){fs(a?fv.filter(x=>x!==o):[...fv,o]);}else{window.scrollTo({top:0,behavior:"smooth"});lt(()=>{fs(a?[]:[o]);});}}} style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:a?400:300,letterSpacing:2,color:a?S.tx:S.txGh,background:"none",border:"none",borderBottom:a?"1px solid "+S.ac:"1px solid transparent",padding:mob?"6px 0":"8px 0",cursor:"pointer",transition:"all .5s"}}>{o}</button>;})}</>;
   };
 
-  /* ── Nav — Cereal: 네비 없음, 검색+정보만 ── */
-  const Nav=({backAction})=>{
+  /* ── Nav ── */
+  const Nav=({showCats,backAction})=>{
     const r1h=mob?48:60;
-    return <div style={{position:"sticky",top:0,zIndex:50,background:S.bg,transform:headerVis?"translateY(0)":"translateY(-100%)",transition:"transform .6s cubic-bezier(.22,1,.36,1)"}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:r1h,padding:mob?"0 24px":"0 48px"}}>
+    return <div style={{position:"sticky",top:0,zIndex:50,background:S.bg}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:r1h,padding:mob?"0 24px":"0 48px",position:"relative",zIndex:2}}>
         {backAction?<button onClick={backAction} style={{fontFamily:S.ui,fontSize:12,fontWeight:400,letterSpacing:"0.1em",color:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>뒤로</button>:<div onClick={goHome} style={{fontFamily:S.sf,fontSize:mob?20:24,fontWeight:300,letterSpacing:mob?6:10,color:S.tx,cursor:"pointer",transition:"opacity .5s"}} onMouseEnter={e=>e.currentTarget.style.opacity=".6"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>sloist</div>}
         <div style={{display:"flex",alignItems:"center",gap:mob?12:20}}>
           {auth.canWrite&&!auth.editorId&&(auth.role==="editor")&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필</button>}
@@ -354,6 +354,14 @@ export default function Sloist(){
           <button onClick={()=>{if(auth.user){if(view!=="mypage")goTo("mypage");}else goTo("login");}} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><UIcon/></button>
         </div>
       </div>
+      {showCats&&<div style={{position:"absolute",top:r1h,left:0,right:0,zIndex:1,background:S.bg,transform:headerVis?"translateY(0)":"translateY(-100%)",transition:"transform .7s cubic-bezier(.22,1,.36,1)",pointerEvents:headerVis?"auto":"none"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?28:48,padding:mob?"6px 0":"8px 0"}}>
+          {CATS.map(k=><button key={k} onClick={()=>onCatClick(k)} style={{fontFamily:S.ui,fontSize:mob?11:12,fontWeight:activeCat===k?500:300,letterSpacing:"0.15em",textTransform:"lowercase",color:activeCat===k?catColor(k):S.txGh,background:"none",border:"none",padding:mob?"6px 0":"8px 0",cursor:"pointer",transition:"all .5s"}}>{k}</button>)}
+        </div>
+        {activeCat&&activeCat!=="space"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?14:28,flexWrap:"wrap",padding:mob?"2px 20px 8px":"2px 40px 10px"}}>
+          <FilterBtns/>
+        </div>}
+      </div>}
     </div>;
   };
   const Foot=()=><div style={{textAlign:"center",padding:"64px 0 40px",flexShrink:0}}><button onClick={()=>goTo("about")} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txF} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>slow with sloist</button></div>;
@@ -509,8 +517,8 @@ export default function Sloist(){
     </div>}
 
     {/* ═══ HOME ═══ */}
-    {view==="home"&&!detail&&<div style={{minHeight:"100vh",display:"flex",flexDirection:"column",background:activeCat==="space"?"#f8f7f4":activeCat==="objet"?"#f7f8f7":activeCat==="scene"?"#f6f5f3":S.bg}}>
-      <Nav/>
+    {view==="home"&&!detail&&<div style={{minHeight:"100vh",display:"flex",flexDirection:"column",background:S.bg}}>
+      <Nav showCats={true}/>
       <div style={{flex:"1 0 auto"}}>
         {activeCat&&activeCat!=="space"&&<div style={{...fd(cVis),textAlign:"center",paddingTop:mob?56:72,paddingBottom:mob?4:8}}><span style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:mob?6:8,color:S.txGh,textTransform:"lowercase"}}>{activeCat}</span></div>}
 
