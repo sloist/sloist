@@ -132,8 +132,23 @@ export default function Sloist(){
     return()=>{document.body.style.overflow="";};
   },[overlayOpen,splashDone]);
 
+  // 스크롤 방향 감지 — 데드존으로 떨림 방지
+  const scrollAcc=useRef(0);
   useEffect(()=>{
-    const h=()=>{const y=window.scrollY;sShowTop(y>500);if(y<=0)sHeaderVis(true);else if(y>lastScroll.current+2)sHeaderVis(false);else if(y<lastScroll.current-4)sHeaderVis(true);lastScroll.current=y;};
+    const h=()=>{
+      const y=window.scrollY;
+      sShowTop(y>500);
+      // 최상단에서는 항상 보이기
+      if(y<=10){sHeaderVis(true);scrollAcc.current=0;lastScroll.current=y;return;}
+      const delta=y-lastScroll.current;
+      lastScroll.current=y;
+      // 같은 방향 누적, 방향 전환 시 리셋
+      if(delta>0){scrollAcc.current=scrollAcc.current>0?scrollAcc.current+delta:delta;}
+      else if(delta<0){scrollAcc.current=scrollAcc.current<0?scrollAcc.current+delta:delta;}
+      // 누적량이 임계치를 넘어야 전환 (떨림 방지)
+      if(scrollAcc.current>12)sHeaderVis(false);
+      else if(scrollAcc.current<-8)sHeaderVis(true);
+    };
     window.addEventListener("scroll",h,{passive:true});return()=>window.removeEventListener("scroll",h);
   },[activeCat]);
 
@@ -342,8 +357,9 @@ export default function Sloist(){
   /* ── Nav ── */
   const Nav=({showCats,backAction})=>{
     const r1h=mob?48:60;
-    return <div style={{position:"sticky",top:0,zIndex:50,background:S.bg}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:r1h,padding:mob?"0 24px":"0 48px",position:"relative",zIndex:2}}>
+    return <div style={{position:"sticky",top:0,zIndex:50,background:S.bg,transform:headerVis?"translateY(0)":"translateY(-100%)",transition:"transform .8s cubic-bezier(.22,1,.36,1)"}}>
+      {/* 메인 바 */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:r1h,padding:mob?"0 24px":"0 48px"}}>
         {backAction?<button onClick={backAction} style={{fontFamily:S.ui,fontSize:12,fontWeight:400,letterSpacing:"0.1em",color:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>뒤로</button>:<div onClick={goHome} style={{fontFamily:S.sf,fontSize:mob?20:24,fontWeight:300,letterSpacing:mob?6:10,color:S.tx,cursor:"pointer",transition:"opacity .5s"}} onMouseEnter={e=>e.currentTarget.style.opacity=".6"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>sloist</div>}
         <div style={{display:"flex",alignItems:"center",gap:mob?12:20}}>
           {auth.canWrite&&!auth.editorId&&(auth.role==="editor")&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필</button>}
@@ -354,11 +370,12 @@ export default function Sloist(){
           <button onClick={()=>{if(auth.user){if(view!=="mypage")goTo("mypage");}else goTo("login");}} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><UIcon/></button>
         </div>
       </div>
-      {showCats&&<div style={{position:"absolute",top:r1h,left:0,right:0,zIndex:1,background:S.bg,transform:headerVis?"translateY(0)":"translateY(-100%)",transition:"transform .7s cubic-bezier(.22,1,.36,1)",pointerEvents:headerVis?"auto":"none"}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?28:48,padding:mob?"6px 0":"8px 0"}}>
-          {CATS.map(k=><button key={k} onClick={()=>onCatClick(k)} style={{fontFamily:S.ui,fontSize:mob?11:12,fontWeight:activeCat===k?500:300,letterSpacing:"0.15em",textTransform:"lowercase",color:activeCat===k?catColor(k):S.txGh,background:"none",border:"none",padding:mob?"6px 0":"8px 0",cursor:"pointer",transition:"all .5s"}}>{k}</button>)}
+      {/* 카테고리 탭 + 서브필터 */}
+      {showCats&&<div style={{borderTop:"1px solid "+S.lnL}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?28:48,padding:mob?"7px 0":"9px 0"}}>
+          {CATS.map(k=><button key={k} onClick={()=>onCatClick(k)} style={{fontFamily:S.ui,fontSize:mob?11:12,fontWeight:activeCat===k?500:300,letterSpacing:"0.15em",textTransform:"lowercase",color:activeCat===k?catColor(k):S.txGh,background:"none",border:"none",padding:mob?"5px 0":"6px 0",cursor:"pointer",transition:"color .5s, font-weight .5s"}}>{k}</button>)}
         </div>
-        {activeCat&&activeCat!=="space"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?14:28,flexWrap:"wrap",padding:mob?"2px 20px 8px":"2px 40px 10px"}}>
+        {activeCat&&activeCat!=="space"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?14:28,flexWrap:"wrap",padding:mob?"0 20px 8px":"0 40px 10px",opacity:1,transition:"opacity .4s"}}>
           <FilterBtns/>
         </div>}
       </div>}
