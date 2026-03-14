@@ -81,8 +81,47 @@ export default function Sloist(){
 
   // Supabase 데이터 로드되면 items 초기화
   useEffect(()=>{
-    if(ALL&&ALL.length>0&&!dataLoaded){sItems(ALL);setDataLoaded(true);}
+    if(ALL&&ALL.length>0&&!dataLoaded){
+      sItems(ALL);setDataLoaded(true);
+      // 딥링크: /space/id, /scene/id, /objet/id
+      const path=window.location.pathname;
+      const m=path.match(/^\/(space|scene|objet)\/(.+)$/);
+      if(m){const it=ALL.find(i=>i.id===m[2]);if(it)sDetail(it);}
+    }
   },[ALL,dataLoaded]);
+
+  // ── 초기 URL 라우팅 (마운트 시 1회) ──
+  useEffect(()=>{
+    const path=window.location.pathname;
+    const params=new URLSearchParams(window.location.search);
+    // PKCE 인증 확인 (/auth/confirm?token_hash=...&type=...)
+    if(path==="/auth/confirm"){
+      const tokenHash=params.get("token_hash");
+      const type=params.get("type");
+      const next=params.get("next")||"/";
+      if(tokenHash&&type){
+        supabase.auth.verifyOtp({token_hash:tokenHash,type}).then(({error})=>{
+          if(error){console.error("auth confirm error:",error.message);}
+          // recovery 타입이면 useAuth의 onAuthStateChange가 PASSWORD_RECOVERY 이벤트를 감지
+          window.history.replaceState(null,"",next);
+        });
+      }
+      return;
+    }
+    // 기타 딥링크 라우팅
+    if(path==="/login"){sView("login");}
+    else if(path==="/about"){sView("about");}
+    else if(path==="/search"){sView("search");}
+    else if(path==="/mypage"){sView("mypage");}
+    else if(path==="/archive"){sView("archive");}
+    else if(path==="/terms"){sLeg("terms");sView("legal");}
+    else if(path==="/privacy"){sLeg("privacy");sView("legal");}
+    else if(path==="/space"){sActiveCat("space");}
+    else if(path==="/scene"){sActiveCat("scene");}
+    else if(path==="/objet"){sActiveCat("objet");}
+    else if(path.startsWith("/room/")){const eid=path.replace("/room/","");sEdRoom(eid);sView("room");}
+  },[]);
+
   // 사용자 위치 — space 카테고리 진입 시에만
   useEffect(()=>{
     if(activeCat==="space"&&!userLoc&&navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>sUserLoc({lat:p.coords.latitude,lng:p.coords.longitude}),()=>{});
@@ -143,7 +182,7 @@ export default function Sloist(){
         else if(path==="/about"){sView("about");sDetail(null);}
         else if(path==="/terms"){sLeg("terms");sView("legal");sDetail(null);}
         else if(path==="/privacy"){sLeg("privacy");sView("legal");sDetail(null);}
-        else if(path==="/reset-password"){sView("home");sDetail(null);}
+        else if(path==="/reset-password"||path==="/auth/confirm"){sView("home");sDetail(null);}
         else if(path==="/mypage"){sView("mypage");sDetail(null);}
         else if(path==="/archive"){sView("archive");sDetail(null);}
         else if(path==="/space"){sView("home");sDetail(null);sActiveCat("space");}
