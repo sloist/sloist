@@ -351,7 +351,7 @@ export default function Sloist(){
     const fv=activeCat==="space"?spCat:activeCat==="scene"?scCat:obCat;
     const fs=activeCat==="space"?sSpCat:activeCat==="scene"?sScCat:sObCat;
     const multi=activeCat==="space";
-    return <>{opts.map(o=>{const a=fv.includes(o);return <button key={o} onClick={()=>{if(multi){fs(a?fv.filter(x=>x!==o):[...fv,o]);}else{window.scrollTo({top:0,behavior:"smooth"});lt(()=>{fs(a?[]:[o]);});}}} style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:a?400:300,letterSpacing:2,color:a?S.tx:S.txGh,background:"none",border:"none",borderBottom:a?"1px solid "+S.ac:"1px solid transparent",padding:mob?"6px 0":"8px 0",cursor:"pointer",transition:"all .5s"}}>{o}</button>;})}</>;
+    return <>{opts.map(o=>{const a=fv.includes(o);return <button key={o} onClick={()=>{if(multi){fs(a?fv.filter(x=>x!==o):[...fv,o]);}else{window.scrollTo({top:0,behavior:"smooth"});lt(()=>{fs(a?[]:[o]);});}}} style={{fontFamily:S.ui,fontSize:mob?9:10,fontWeight:a?400:300,letterSpacing:"0.1em",color:a?S.txM:S.txGh,background:"none",border:"none",padding:mob?"4px 8px":"5px 10px",cursor:"pointer",transition:"color .5s",flexShrink:0}}>{o}</button>;})}</>;
   };
 
   /* ── Nav ── */
@@ -370,14 +370,15 @@ export default function Sloist(){
           <button onClick={()=>{if(auth.user){if(view!=="mypage")goTo("mypage");}else goTo("login");}} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><UIcon/></button>
         </div>
       </div>
-      {/* 카테고리 탭 — 스크롤 시 로고 바 뒤로 슬라이드 */}
+      {/* 카테고리 + 필터 — 한 줄 */}
       {showCats&&<div style={{position:"absolute",top:r1h,left:0,right:0,background:S.bg,borderTop:"1px solid "+S.lnL,transform:headerVis?"translateY(0)":"translateY(-100%)",transition:"transform .8s cubic-bezier(.22,1,.36,1)",pointerEvents:headerVis?"auto":"none",zIndex:1}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?28:48,padding:mob?"5px 0":"6px 0"}}>
-          {CATS.map(k=><button key={k} onClick={()=>onCatClick(k)} style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:activeCat===k?500:300,letterSpacing:"0.15em",textTransform:"lowercase",color:activeCat===k?catColor(k):S.txGh,background:"none",border:"none",padding:mob?"4px 0":"5px 0",cursor:"pointer",transition:"color .5s, font-weight .5s"}}>{k}</button>)}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:0,padding:mob?"5px 16px":"6px 40px",flexWrap:"nowrap",overflow:"auto",WebkitOverflowScrolling:"touch",msOverflowStyle:"none",scrollbarWidth:"none"}}>
+          {CATS.map(k=><button key={k} onClick={()=>onCatClick(k)} style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:activeCat===k?500:300,letterSpacing:"0.15em",textTransform:"lowercase",color:activeCat===k?catColor(k):S.txGh,background:"none",border:"none",padding:mob?"4px 10px":"5px 14px",cursor:"pointer",transition:"color .5s, font-weight .5s",flexShrink:0}}>{k}</button>)}
+          {activeCat&&activeCat!=="space"&&<>
+            <span style={{color:S.ln,fontSize:10,padding:"0 4px",flexShrink:0,userSelect:"none"}}>|</span>
+            <FilterBtns/>
+          </>}
         </div>
-        {activeCat&&activeCat!=="space"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?14:28,flexWrap:"wrap",padding:mob?"0 20px 6px":"0 40px 7px"}}>
-          <FilterBtns/>
-        </div>}
       </div>}
     </div>;
   };
