@@ -209,7 +209,7 @@ export default function Sloist(){
     return()=>window.removeEventListener("popstate",onPop);
   },[items]);
 
-  const live=id=>items.find(i=>i.id===id)||{};
+  const live=id=>items.find(i=>i.id===id)||null;
   const sv=k=>items.filter(i=>i.root===k&&savedIds.includes(i.id));
   const edItems=eid=>items.filter(i=>i.editor===eid);
   const dl=detail?live(detail.id):null;
@@ -687,7 +687,7 @@ export default function Sloist(){
         </div>
         <div style={{marginTop:mob?16:20}}>
           <div style={{fontFamily:S.sf,fontSize:mob?15:17,fontWeight:300,letterSpacing:mob?3:4,marginBottom:8}}>{ed.name}</div>
-          <div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txGh,letterSpacing:1}}>{ed.tags.join(" · ")}</div>
+          <div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txGh,letterSpacing:1}}>{(ed.tags||[]).join(" · ")}</div>
         </div>
       </div>;})}</div></div><Foot/></div>}
 
@@ -699,7 +699,7 @@ export default function Sloist(){
           <div style={{textAlign:"center",padding:mob?"28px 0 36px":"48px 0 56px"}}>
             <div style={{width:mob?72:88,height:mob?72:88,borderRadius:"50%",overflow:"hidden",margin:"0 auto 24px",background:ed.grad}}>{ed.img&&<img src={ed.img} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>}</div>
             <div style={{fontFamily:S.sf,fontSize:mob?18:22,fontWeight:300,letterSpacing:mob?4:6,marginBottom:14}}>{"sloist "+ed.name}</div>
-            <div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txGh,letterSpacing:2,marginBottom:16}}>{ed.tags.join(" · ")}</div>
+            <div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txGh,letterSpacing:2,marginBottom:16}}>{(ed.tags||[]).join(" · ")}</div>
             <div style={{fontFamily:S.bd,fontSize:12,fontWeight:300,color:S.txQ,lineHeight:2.0,marginBottom:24}}>{ed.bio}</div>
             <button onClick={()=>toggleFol(edRoom)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:following.includes(edRoom)?S.ac:S.txGh,background:"none",border:"none",borderBottom:following.includes(edRoom)?"1px solid "+S.ac:"1px solid "+S.lnL,padding:"4px 0",cursor:"pointer",transition:"all .5s"}}>{following.includes(edRoom)?"팔로잉":"팔로우"}</button>
           </div>
@@ -764,7 +764,7 @@ export default function Sloist(){
               <div style={{width:mob?56:72,height:mob?56:72,flexShrink:0,borderRadius:2,overflow:"hidden",background:ed.grad||S.lnL}}>{ed.img&&<img src={ed.img} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>}</div>
               <div style={{flex:1}}>
                 <div style={{fontFamily:S.sf,fontSize:mob?15:17,fontWeight:300,letterSpacing:mob?3:4,marginBottom:4}}>{ed.name}</div>
-                <div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txQ,letterSpacing:1}}>{ed.tags.join(" · ")}</div>
+                <div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txQ,letterSpacing:1}}>{(ed.tags||[]).join(" · ")}</div>
               </div>
               <div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txGh,letterSpacing:1,flexShrink:0}}>{cnt}개의 기록</div>
             </div>;})}

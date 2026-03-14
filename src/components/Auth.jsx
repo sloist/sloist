@@ -18,32 +18,36 @@ export default function Auth({ onAuth, signIn, signUp }) {
     setMsg(null);
     setLoading(true);
 
-    if (mode === "signup") {
-      const pwErr = validatePw(pw, email);
-      if (pwErr) { setMsg(pwErr); setLoading(false); return; }
-      const { error } = await signUp(email, pw, name);
-      if (error) {
-        const m = error.message;
-        if (m.includes("already registered")) setMsg("이미 가입된 이메일입니다");
-        else if (m.includes("valid email")) setMsg("올바른 이메일을 입력하세요");
-        else setMsg("가입 실패: 다시 시도해주세요");
+    try {
+      if (mode === "signup") {
+        const pwErr = validatePw(pw, email);
+        if (pwErr) { setMsg(pwErr); setLoading(false); return; }
+        const { error } = await signUp(email, pw, name);
+        if (error) {
+          const m = error.message;
+          if (m.includes("already registered")) setMsg("이미 가입된 이메일입니다");
+          else if (m.includes("valid email")) setMsg("올바른 이메일을 입력하세요");
+          else setMsg("가입 실패: 다시 시도해주세요");
+        }
+        else setMsg("가입 완료. 이메일을 확인하세요.");
+      } else if (mode === "reset") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + "/reset-password",
+        });
+        if (error) setMsg("전송 실패: " + error.message);
+        else setMsg("해당 이메일로 가입된 계정이 있다면 재설정 링크가 전송됩니다.");
+      } else {
+        const { error } = await signIn(email, pw);
+        if (error) {
+          const m = error.message;
+          if (m.includes("Invalid login")) setMsg("이메일 또는 비밀번호를 확인하세요");
+          else if (m.includes("Email not confirmed")) setMsg("이메일 인증을 완료해주세요");
+          else setMsg("로그인 실패: 다시 시도해주세요");
+        }
+        else if (onAuth) onAuth();
       }
-      else setMsg("가입 완료. 이메일을 확인하세요.");
-    } else if (mode === "reset") {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + "/reset-password",
-      });
-      if (error) setMsg("전송 실패: " + error.message);
-      else setMsg("해당 이메일로 가입된 계정이 있다면 재설정 링크가 전송됩니다.");
-    } else {
-      const { error } = await signIn(email, pw);
-      if (error) {
-        const m = error.message;
-        if (m.includes("Invalid login")) setMsg("이메일 또는 비밀번호를 확인하세요");
-        else if (m.includes("Email not confirmed")) setMsg("이메일 인증을 완료해주세요");
-        else setMsg("로그인 실패: 다시 시도해주세요");
-      }
-      else if (onAuth) onAuth();
+    } catch {
+      setMsg("네트워크 오류: 다시 시도해주세요");
     }
     setLoading(false);
   }
@@ -95,7 +99,7 @@ export default function Auth({ onAuth, signIn, signUp }) {
                 placeholder="이메일"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter" && mode === "reset") handleSubmit(e); }}
+                onKeyDown={e => { if (e.key === "Enter") handleSubmit(e); }}
                 style={inputStyle}
               />
               {mode !== "reset" &&

@@ -60,7 +60,8 @@ export default function EditorProfile({ userId, existingEditor, onClose, onSaved
       const { error: e } = await supabase.from("editors").insert(row);
       error = e;
       if (!e) {
-        await supabase.from("profiles").update({ editor_id: editorId }).eq("id", userId);
+        const { error: linkErr } = await supabase.from("profiles").update({ editor_id: editorId }).eq("id", userId);
+        if (linkErr) { error = linkErr; }
       }
     }
 
