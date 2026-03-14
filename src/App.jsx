@@ -448,7 +448,7 @@ export default function Sloist(){
   </div>;}
   const h=homeFeed;
   return <div style={{fontFamily:S.bd,background:S.bg,color:S.tx,minHeight:"100vh",WebkitFontSmoothing:"antialiased",animation:"mainIn 1s cubic-bezier(.2,0,.3,1) forwards"}}>
-    <style>{`::selection{background:rgba(130,125,118,.15);color:inherit}button:focus-visible,a:focus-visible,input:focus-visible{outline:1px solid rgba(130,125,118,.3);outline-offset:2px}@keyframes mainIn{from{opacity:0}to{opacity:1}}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0}to{opacity:1}}`}</style>
+    <style>{`html,body{overscroll-behavior:none}::selection{background:rgba(130,125,118,.15);color:inherit}button:focus-visible,a:focus-visible,input:focus-visible{outline:1px solid rgba(130,125,118,.3);outline-offset:2px}@keyframes mainIn{from{opacity:0}to{opacity:1}}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0}to{opacity:1}}`}</style>
 
     {/* SEARCH */}
     {sov&&<div style={{position:"fixed",inset:0,background:"rgba(249,248,247,.97)",backdropFilter:"blur(32px)",zIndex:200,overflowY:"auto",animation:"fi .8s cubic-bezier(.2,0,.3,1)"}}>
@@ -613,7 +613,7 @@ export default function Sloist(){
           return <div style={{...fd(cVis),maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:mob?24:48,rowGap:mob?48:80,alignItems:"start"}}>{catItems.map((o,i)=><div key={o.id} onClick={()=>openDetail(o)} onMouseEnter={()=>sObjHov(o.id)} onMouseLeave={()=>sObjHov(null)} style={{cursor:"pointer",position:"relative"}}><div style={{overflow:"hidden",borderRadius:2}}><Img saved={isSaved(o.id)} grad={o.grad} photo={o.photo} aspect={getRatio(o,i)} r={2}/></div><div style={{padding:"14px 0 0"}}><div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:1.6}}>{o.title}</div>{o.maker&&<div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txQ,marginTop:4,letterSpacing:1}}>{o.maker}</div>}</div></div>)}</div>;
         })()}
       </div>
-      <div style={{position:"relative",zIndex:3,background:S.bg}}><Foot/></div>
+      <div style={{position:"relative",zIndex:3,background:S.bg,marginLeft:activeCat==="space"&&!mob?"42vw":0}}><Foot/></div>
     </div>}
     {view==="home"&&detail&&<DetailView/>}
 
