@@ -234,59 +234,81 @@ export default function Sloist(){
   /* ── Detail ── */
   const DetailView=({hideEditor})=>{
     if(!dl)return null;
+    // 관련 기록 매칭
+    const relatedItems=useMemo(()=>{
+      if(!dl||!items.length)return [];
+      const pool=items.filter(i=>i.id!==dl.id&&i.root===dl.root);
+      const dlTags=(dl.tags||"").split(" · ").filter(Boolean);
+      const scored=pool.map(i=>{
+        let s=0;
+        const iTags=(i.tags||"").split(" · ").filter(Boolean);
+        const shared=dlTags.filter(t=>iTags.includes(t)).length;
+        s+=shared*3;
+        if(dl.root==="space"&&dl.cat&&i.cat===dl.cat)s+=2;
+        if(dl.root==="scene"&&dl.type&&i.type===dl.type)s+=2;
+        if(dl.root==="objet"){if(dl.maker&&i.maker===dl.maker)s+=3;if(dl.otype&&i.otype===dl.otype)s+=2;}
+        return {item:i,score:s};
+      }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+      return scored.slice(0,2).map(x=>x.item);
+    },[dl,items]);
+    const relLabel=dl.root==="space"?"비슷한 공기의 장소":dl.root==="scene"?"같은 결의 기록":"비슷한 물성의 기록";
+    const relAsp=(it)=>{
+      if(it.aspect)return it.aspect;
+      if(it.root==="space")return "4/5";
+      if(it.root==="scene")return (it.type==="영상"?"16/9":"3/4");
+      return "4/5";
+    };
+    const bodyStyle={fontFamily:S.bd,fontSize:mob?14:15,fontWeight:400,color:S.txM,lineHeight:2.1,letterSpacing:.3};
     return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}>
       <Nav/>
       <div style={{flex:"1 0 auto"}}>
         <div style={{position:"relative",width:"100%",aspectRatio:mob?"16/10":"21/9",overflow:"hidden"}}>
           {dl.photo?<img src={dl.photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{width:"100%",height:"100%",background:dl.grad}}/>}
         </div>
-        <div style={{maxWidth:mob?undefined:720,margin:"0 auto",padding:mob?"36px 20px 80px":"64px 48px 120px"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:mob?36:56}}>
+        <div style={{maxWidth:mob?undefined:720,margin:"0 auto",padding:mob?"48px 20px 80px":"80px 48px 120px"}}>
+          {/* 카테고리 + back */}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:mob?32:56}}>
             <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,textTransform:"lowercase",color:S.ac}}>{dl.type||dl.cat||dl.otype||""}</div>
             <button onClick={closeDetail} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>back</button>
           </div>
+
+          {/* 제목 */}
           <h1 style={{fontFamily:S.sf,fontSize:mob?28:48,fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,marginBottom:20,textAlign:"center"}}>{dl.title}</h1>
 
-          {/* Space: 위치 + 태그 + 미니맵 */}
+          {/* Space 메타 */}
           {dl.root==="space"&&<>
             {dl.location&&<div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,letterSpacing:2,color:S.txF,marginBottom:16,textAlign:"center"}}>{dl.location}</div>}
-            {dl.tags&&<div style={{marginBottom:mob?40:64,textAlign:"center"}}><TagLinks tags={dl.tags} size={10} color={S.txGh}/></div>}
-            {!dl.location&&<div style={{height:mob?32:48}}/>}
-            <div style={{maxWidth:560,margin:"0 auto"}}>
-              {dl.note&&<div style={{fontFamily:S.bd,fontSize:mob?14:15,fontWeight:400,color:S.txM,lineHeight:2.0,marginBottom:mob?48:80}}>{dl.note}</div>}
-              {dl.lat&&dl.lng&&<div style={{marginBottom:mob?48:80,borderRadius:4,overflow:"hidden",border:"1px solid "+S.lnL}}><SpaceMap spaces={[dl]} hovId={null} onHover={()=>{}} onClick={()=>{}} style={{width:"100%",height:mob?200:240}}/></div>}
-            </div>
+            {dl.tags&&<div style={{marginBottom:mob?12:20,textAlign:"center"}}><TagLinks tags={dl.tags} size={10} color={S.txGh}/></div>}
           </>}
 
-          {/* Scene: 저자/감독 + 타입 */}
+          {/* Scene 메타 */}
           {dl.root==="scene"&&<>
             {dl.sub&&<p style={{fontFamily:S.bd,fontSize:14,fontWeight:300,color:S.txQ,marginBottom:8,textAlign:"center",lineHeight:1.8}}>{dl.sub}</p>}
-            {dl.type&&<div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:mob?48:80,textAlign:"center"}}>{dl.type}</div>}
-            {!dl.sub&&!dl.type&&<div style={{height:mob?32:48}}/>}
-            <div style={{maxWidth:560,margin:"0 auto"}}>
-              {dl.note&&<div style={{fontFamily:S.bd,fontSize:mob?14:15,fontWeight:400,color:S.txM,lineHeight:2.0,marginBottom:mob?48:80}}>{dl.note}</div>}
-            </div>
           </>}
 
-          {/* Objet: 제작자 강조 */}
+          {/* Objet 메타 */}
           {dl.root==="objet"&&<>
-            {dl.maker&&<div style={{fontFamily:S.sn,fontSize:12,fontWeight:300,letterSpacing:3,color:S.txQ,marginBottom:mob?48:80,textAlign:"center"}}>{dl.maker}</div>}
-            {!dl.maker&&<div style={{height:mob?32:48}}/>}
-            <div style={{maxWidth:560,margin:"0 auto"}}>
-              {dl.note&&<div style={{fontFamily:S.bd,fontSize:mob?14:15,fontWeight:400,color:S.txM,lineHeight:2.0,marginBottom:mob?48:80}}>{dl.note}</div>}
-            </div>
+            {dl.maker&&<div style={{fontFamily:S.sn,fontSize:12,fontWeight:300,letterSpacing:3,color:S.txQ,textAlign:"center"}}>{dl.maker}</div>}
           </>}
 
-          {/* 기타 (root 없는 경우 폴백) */}
-          {!["space","scene","objet"].includes(dl.root)&&<>
-            {dl.sub&&<p style={{fontFamily:S.bd,fontSize:14,fontWeight:300,color:S.txQ,marginBottom:20,textAlign:"center",lineHeight:1.8}}>{dl.sub}</p>}
-            <div style={{height:mob?48:80}}/>
-            <div style={{maxWidth:560,margin:"0 auto"}}>
-              {dl.note&&<div style={{fontFamily:S.bd,fontSize:mob?14:15,fontWeight:400,color:S.txM,lineHeight:2.0,marginBottom:mob?48:80}}>{dl.note}</div>}
-            </div>
-          </>}
-          {dl.tags&&<div style={{textAlign:"center",marginBottom:32}}><TagLinks tags={dl.tags} size={10} color={S.txGh}/></div>}
-          <div style={{borderTop:"1px solid "+S.lnL,paddingTop:32,display:"flex",alignItems:"center",justifyContent:"center",gap:mob?24:40,flexWrap:"wrap"}}>
+          {/* 구분선 — 제목 영역과 읽기 영역 분리 */}
+          <div style={{maxWidth:520,margin:mob?"40px auto":"72px auto"}}>
+            <div style={{borderTop:"1px solid "+S.lnL}}/>
+          </div>
+
+          {/* 본문 */}
+          <div style={{maxWidth:520,margin:"0 auto"}}>
+            {dl.note&&<div style={bodyStyle}>{dl.note}</div>}
+
+            {/* Space 미니맵 */}
+            {dl.root==="space"&&dl.lat&&dl.lng&&<div style={{marginTop:mob?48:80,borderRadius:4,overflow:"hidden"}}><SpaceMap spaces={[dl]} hovId={null} onHover={()=>{}} onClick={()=>{}} style={{width:"100%",height:mob?200:240}}/></div>}
+          </div>
+
+          {/* 태그 (space 외 — space는 위에서 이미 표시) */}
+          {dl.root!=="space"&&dl.tags&&<div style={{textAlign:"center",marginTop:mob?48:72}}><TagLinks tags={dl.tags} size={10} color={S.txGh}/></div>}
+
+          {/* 액션바 */}
+          <div style={{maxWidth:520,margin:mob?"48px auto 0":"72px auto 0",borderTop:"1px solid "+S.lnL,paddingTop:mob?28:36,display:"flex",alignItems:"center",justifyContent:"center",gap:mob?24:40,flexWrap:"wrap"}}>
             <button onClick={()=>keep(dl.id)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:dl.saved?S.ac:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}}>{dl.saved?"kept":"keep"}</button>
             <button onClick={()=>flash("link copied")} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}}>share</button>
             {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,textDecoration:"none",transition:"color .5s"}}>{lLabel(dl)}</a>}
@@ -295,6 +317,17 @@ export default function Sloist(){
             {(auth.isAdmin||(auth.editorId&&dl.editor===auth.editorId))&&<button onClick={()=>{setEditItem(dl);setShowWrite(true);}} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}}>수정</button>}
             {auth.isAdmin&&<button onClick={()=>setCover(dl.id)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:dl.isCover?S.ac:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}}>{dl.isCover?"홈 커버":"커버 지정"}</button>}
           </div>
+
+          {/* 관련 기록 */}
+          {relatedItems.length>0&&<div style={{maxWidth:520,margin:mob?"80px auto 0":"140px auto 0"}}>
+            <div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,textAlign:"center",marginBottom:mob?28:40}}>{relLabel}</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:mob?16:28}}>
+              {relatedItems.map(ri=><div key={ri.id} onClick={()=>openDetail(ri)} style={{cursor:"pointer"}}>
+                <Img grad={ri.grad} photo={ri.photo} aspect={relAsp(ri)} r={2}/>
+                <div style={{fontFamily:S.sf,fontSize:mob?12:13,fontWeight:300,lineHeight:1.5,marginTop:mob?10:14,color:S.txM}}>{ri.title}</div>
+              </div>)}
+            </div>
+          </div>}
         </div>
       </div>
       <Foot/>
