@@ -124,9 +124,12 @@ export default function Sloist(){
   useEffect(()=>{
     if(overlayOpen){
       stopLenis();
-    }else if(splashDone){
-      startLenis();
+      document.body.style.overflow="hidden";
+    }else{
+      document.body.style.overflow="";
+      if(splashDone)startLenis();
     }
+    return()=>{document.body.style.overflow="";};
   },[overlayOpen,splashDone]);
 
   useEffect(()=>{
