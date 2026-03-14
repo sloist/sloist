@@ -102,10 +102,18 @@ export default function Sloist(){
   },[splashDone]);
 
   // Lenis 정지: 오버레이가 열릴 때
+  const overlayOpen=sov||view==="login"||showWrite||showAdmin||showEditorProfile||!!confirmDel;
   useEffect(()=>{
-    const l=lenisRef.current;if(!l)return;
-    if(sov||view==="login"||showWrite||showAdmin||showEditorProfile||confirmDel)l.stop();else l.start();
-  },[sov,view,showWrite,showAdmin,showEditorProfile,confirmDel]);
+    const l=lenisRef.current;
+    if(overlayOpen){
+      if(l)l.stop();
+      document.body.style.overflow="hidden";
+    }else{
+      if(l)l.start();
+      document.body.style.overflow="";
+    }
+    return()=>{document.body.style.overflow="";};
+  },[overlayOpen]);
 
   useEffect(()=>{
     const h=()=>{const y=window.scrollY;sShowTop(y>500);if(y<60)sHeaderVis(true);else if(y>lastScroll.current+8)sHeaderVis(false);else if(y<lastScroll.current-8)sHeaderVis(true);lastScroll.current=y;};
