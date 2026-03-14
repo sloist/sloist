@@ -103,7 +103,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
     <div style={{ minHeight: "100vh", background: S.bg, display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: mob ? "16px" : "20px 36px", borderBottom: "1px solid " + S.lnL }}>
         <span style={{ fontFamily: S.sf, fontSize: mob ? 14 : 16, letterSpacing: 4, fontWeight: 300 }}>{isEdit ? "수정하기" : "새 기록"}</span>
-        <button onClick={onClose} style={{ fontFamily: S.sf, fontSize: 10, letterSpacing: 6, color: S.txGh, background: "none", border: "none", cursor: "pointer" }}>닫기</button>
+        <button onClick={() => { const hasContent = title.trim() || note.trim() || photo; if (hasContent && !confirm("작성 중인 내용이 있습니다. 닫으시겠습니까?")) return; onClose(); }} style={{ fontFamily: S.sf, fontSize: 10, letterSpacing: 6, color: S.txGh, background: "none", border: "none", cursor: "pointer" }}>닫기</button>
       </div>
       <div style={{ maxWidth: 600, margin: "0 auto", width: "100%", padding: mob ? "28px 16px" : "48px 24px" }}>
         {!isEdit && <div style={{ marginBottom: 36 }}><span style={labelStyle}>카테고리</span><div style={{ display: "flex", gap: 24, marginTop: 8 }}>{["space", "scene", "objet"].map(k => <button key={k} onClick={() => { setRoot(k); setCat(""); setType(""); setOtype(""); }} style={catBtn(root === k)}>{k}</button>)}</div></div>}

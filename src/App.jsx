@@ -21,7 +21,7 @@ import Lenis from "lenis";
 
 export default function Sloist(){
   const auth = useAuth();
-  const { ED: _ED, PF, ALL, SPACE, SCENE, OBJET, savedIds, setSavedIds, followingIds, setFollowingIds, loading, error } = useSupabaseData(auth.user?.id);
+  const { ED: _ED, PF, ALL, SPACE, SCENE, OBJET, savedIds, setSavedIds, followingIds, setFollowingIds, loading, error, reload: reloadData } = useSupabaseData(auth.user?.id);
   const ED = _ED || {};
   const [showWrite, setShowWrite] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
@@ -113,12 +113,14 @@ export default function Sloist(){
 
   // Supabase 데이터 로드되면 items 초기화
   useEffect(()=>{
-    if(ALL&&ALL.length>0&&!dataLoaded){
-      sItems(ALL);setDataLoaded(true);
-      // 딥링크: /space/id, /scene/id, /objet/id
-      const path=window.location.pathname;
-      const m=path.match(/^\/(space|scene|objet)\/(.+)$/);
-      if(m){const it=ALL.find(i=>i.id===m[2]);if(it)sDetail(it);}
+    if(ALL&&ALL.length>0){
+      sItems(ALL);
+      if(!dataLoaded){
+        setDataLoaded(true);
+        const path=window.location.pathname;
+        const m=path.match(/^\/(space|scene|objet)\/(.+)$/);
+        if(m){const it=ALL.find(i=>i.id===m[2]);if(it)sDetail(it);}
+      }
     }
   },[ALL,dataLoaded]);
 
@@ -901,12 +903,12 @@ export default function Sloist(){
     </div>;})()}
 
     {/* 글쓰기 에디터 */}
-    {showWrite&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><WriteEditor editorId={auth.editorId} isAdmin={auth.isAdmin} userId={auth.user?.id} isStaff={auth.isStaff} editItem={editItem} onClose={()=>{setShowWrite(false);setEditItem(null);}} onSaved={()=>{setShowWrite(false);setEditItem(null);window.location.reload();}}/></div>}
+    {showWrite&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><WriteEditor editorId={auth.editorId} isAdmin={auth.isAdmin} userId={auth.user?.id} isStaff={auth.isStaff} editItem={editItem} onClose={()=>{setShowWrite(false);setEditItem(null);}} onSaved={()=>{setShowWrite(false);setEditItem(null);reloadData();}}/></div>}
 
     {/* 관리자 패널 */}
     {showAdmin&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><AdminPanel onClose={()=>setShowAdmin(false)}/></div>}
 
     {/* 슬로이스트 프로필 만들기 */}
-    {showEditorProfile&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><EditorProfile userId={auth.user?.id} existingEditor={auth.editorId&&ED[auth.editorId]?{...ED[auth.editorId],id:auth.editorId}:null} onClose={()=>setShowEditorProfile(false)} onSaved={()=>{setShowEditorProfile(false);auth.reloadProfile();window.location.reload();}}/></div>}
+    {showEditorProfile&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><EditorProfile userId={auth.user?.id} existingEditor={auth.editorId&&ED[auth.editorId]?{...ED[auth.editorId],id:auth.editorId}:null} onClose={()=>setShowEditorProfile(false)} onSaved={()=>{setShowEditorProfile(false);auth.reloadProfile();reloadData();}}/></div>}
   </div>;
 }
