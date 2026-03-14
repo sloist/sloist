@@ -117,8 +117,8 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
       {/* ─── 모바일: 단일 컬럼 / 데스크톱: 좌우 분할 ─── */}
       <div style={{ maxWidth: mob ? 600 : 960, margin: "0 auto", width: "100%", padding: mob ? "28px 16px" : "48px 36px", display: mob ? "block" : "flex", gap: mob ? 0 : 48 }}>
 
-        {/* ──── 좌측: 핵심 정보 ──── */}
-        <div style={{ flex: mob ? undefined : "0 0 34%", minWidth: 0 }}>
+        {/* ──── 좌측: 콘텐츠 ──── */}
+        <div style={{ flex: mob ? undefined : 1, minWidth: 0 }}>
 
           {/* 카테고리 선택 (새 글만) */}
           {!isEdit && (
@@ -171,29 +171,29 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
           )}
 
           {/* 본문 */}
-          <div style={{ marginBottom: mob ? 28 : 0 }}>
+          <div style={{ marginBottom: 28 }}>
             <span style={labelStyle}>본문</span>
             <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="느리게 기록하세요" style={{ ...textareaStyle, minHeight: mob ? 120 : 200 }} />
           </div>
-        </div>
-
-        {/* ──── 우측 (데스크톱) / 하단 (모바일): 이미지 + 상세 설정 ──── */}
-        <div style={{ flex: mob ? undefined : 1, minWidth: 0 }}>
 
           {/* 이미지 */}
-          <div style={{ marginBottom: 32 }}>
+          <div style={{ marginBottom: 28 }}>
             <span style={labelStyle}>이미지</span>
             <ImageUpload value={photo} onChange={setPhoto} folder="contents" />
           </div>
 
           {/* 썸네일 비율 */}
-          <div style={{ marginBottom: 28 }}>
+          <div style={{ marginBottom: mob ? 28 : 0 }}>
             <span style={labelStyle}>썸네일 비율</span>
             <div style={{ display: "flex", gap: 16, marginTop: 8 }}>
               {ASPECT_OPTIONS.map(a => <button key={a} onClick={() => setAspect(aspect === a ? "" : a)} style={catBtn(aspect === a)}>{a}</button>)}
               <span style={{ fontFamily: S.sn, fontSize: 10, color: S.txGh, alignSelf: "center" }}>미선택 시 기본값</span>
             </div>
           </div>
+        </div>
+
+        {/* ──── 우측: 상세 설정 ──── */}
+        <div style={{ flex: mob ? undefined : 1, minWidth: 0 }}>
 
           {/* space: 위치 */}
           {root === "space" && (
