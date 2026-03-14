@@ -75,7 +75,7 @@ export default function Sloist(){
   useEffect(()=>{const h=()=>sWw(window.innerWidth);window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h);},[]);
   const mob=ww<768,tab=ww<1024;
   const isFirstVisit=useRef(!sessionStorage.getItem("sloist_v"));
-  useEffect(()=>{const t=setTimeout(()=>{sSplashDone(true);sessionStorage.setItem("sloist_v","1");},isFirstVisit.current?1400:800);return()=>clearTimeout(t);},[]);
+  useEffect(()=>{if(!isFirstVisit.current){const t=setTimeout(()=>{sSplashDone(true);},600);return()=>clearTimeout(t);}},[]);
 
   useEffect(()=>{
     const h=()=>{const y=window.scrollY;sShowTop(y>500);if(y<60)sHeaderVis(true);else if(y>lastScroll.current+8)sHeaderVis(false);else if(y<lastScroll.current-8)sHeaderVis(true);lastScroll.current=y;};
@@ -414,11 +414,12 @@ export default function Sloist(){
   };
 
   /* ═══ RENDER ═══ */
-  if(loading||!dataLoaded||!splashDone) return <div style={{fontFamily:S.sf,background:S.bg,minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+  if(loading||!dataLoaded||!splashDone){const ready=!loading&&dataLoaded;return <div onClick={()=>{if(isFirstVisit.current&&ready){sSplashDone(true);sessionStorage.setItem("sloist_v","1");}}} style={{fontFamily:S.sf,background:S.bg,minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:isFirstVisit.current&&ready?"pointer":"default"}}>
     <style>{`@keyframes sIn{0%{opacity:0;letter-spacing:${mob?14:20}px}100%{opacity:1;letter-spacing:${mob?8:14}px}}@keyframes sSub{0%{opacity:0}100%{opacity:1}}`}</style>
     <div style={{fontSize:mob?24:36,fontWeight:300,color:S.tx,animation:"sIn 1s cubic-bezier(.2,0,.3,1) forwards",opacity:0}}>sloist</div>
     {isFirstVisit.current&&<div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,marginTop:14,animation:"sSub .6s cubic-bezier(.2,0,.3,1) .5s forwards",opacity:0}}>멈춰야 보이는 것들</div>}
-  </div>;
+    {isFirstVisit.current&&ready&&<div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,marginTop:mob?48:64,animation:"sSub .5s cubic-bezier(.2,0,.3,1) 1.2s forwards",opacity:0}}>입장</div>}
+  </div>;}
   const h=homeFeed;
   return <div style={{fontFamily:S.bd,background:S.bg,color:S.tx,minHeight:"100vh",WebkitFontSmoothing:"antialiased"}}>
     <style>{`::selection{background:rgba(130,125,118,.15);color:inherit}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0}to{opacity:1}}`}</style>
