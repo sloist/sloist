@@ -53,18 +53,6 @@ export default function StickyCover({ curtain, reveal }) {
           }}
         >
           {curtain}
-          {/* 커튼 하단 그라데이션 — 경계를 자연스럽게 */}
-          <div
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: "30%",
-              background: "linear-gradient(to top, #f9f8f7, transparent)",
-              pointerEvents: "none",
-            }}
-          />
         </div>
       </div>
     </div>

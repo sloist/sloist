@@ -48,6 +48,7 @@ export function Img({ grad, photo, aspect = "4/3", r = 2 }) {
           objectFit: "cover", zIndex: 1,
           opacity: loaded ? 1 : 0,
           transition: "opacity .6s cubic-bezier(.2,0,.3,1)",
+          filter: "saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)",
         }}
       />}
     </div>

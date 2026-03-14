@@ -515,12 +515,18 @@ export default function Sloist(){
         {/* ── HOME EDITORIAL ── */}
         {!activeCat&&<div style={fd(cVis)}>
 
-          {/* ① 커튼 + 뒤에 숨은 패널 A */}
+          {/* ① 커튼: 풀블리드 장면 하나 */}
           <StickyCover
             curtain={
-              <div style={{height:"calc(100 * var(--dvh, 1vh))",background:S.bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",paddingLeft:mob?32:40,paddingRight:mob?32:40,paddingTop:0,paddingBottom:mob?80:120}}>
-                {h[0]&&<div onClick={()=>openDetail(h[0])} style={{cursor:"pointer",position:"relative",width:"100%",maxWidth:mob?280:480}}>
-                  <Img saved={isSaved(h[0].id)} grad={h[0].grad} photo={h[0].photo} aspect="4/5" r={4}/>
+              <div style={{height:"calc(100 * var(--dvh, 1vh))",background:S.bg,display:"flex",flexDirection:"column",justifyContent:"center",position:"relative"}}>
+                {h[0]&&<div onClick={()=>openDetail(h[0])} style={{cursor:"pointer",position:"absolute",inset:0,overflow:"hidden"}}>
+                  {h[0].photo&&<img src={h[0].photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"}}/>}
+                  {/* 하단 그라데이션 + 타이틀 */}
+                  <div style={{position:"absolute",bottom:0,left:0,right:0,height:"50%",background:"linear-gradient(to top, rgba(42,41,38,.52), transparent)",pointerEvents:"none"}}/>
+                  <div style={{position:"absolute",bottom:mob?48:72,left:mob?24:56,right:mob?24:56}}>
+                    <div style={{fontFamily:S.sf,fontSize:mob?20:32,fontWeight:300,lineHeight:1.5,letterSpacing:mob?0:1,color:"#f9f8f7"}}>{h[0].title}</div>
+                    <div style={{fontFamily:S.sn,fontSize:mob?9:10,fontWeight:300,letterSpacing:3,color:"rgba(249,248,247,.6)",marginTop:mob?8:12}}>{h[0].root}{h[0].location?" · "+h[0].location:h[0].tags?" · "+h[0].tags:""}</div>
+                  </div>
                 </div>}
               </div>
             }
@@ -760,7 +766,7 @@ export default function Sloist(){
       <div style={{textAlign:"center",marginBottom:mob?64:120}}><p style={{fontFamily:S.sf,fontSize:mob?14:16,lineHeight:2.6,color:S.txQ,letterSpacing:1}}>{"느린 삶을 사는 사람들,"}<br/>{"그리고 그들이 남긴 기록"}</p></div>
       <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:mob?"64px 0":"80px 56px"}}>{ED&&Object.entries(ED).map(([eid,ed],idx)=>{const ei=edItems(eid);const coverPhoto=(ei.find(i=>i.photo)||{}).photo;return <div key={eid} style={{opacity:0,animation:"stg .7s ease "+idx*.12+"s both",cursor:"pointer"}} onClick={()=>openRoom(eid)}>
         <div style={{width:"100%",aspectRatio:"4/5",background:ed.grad||S.lnL,borderRadius:2,position:"relative",overflow:"hidden"}}>
-          {coverPhoto&&<img src={coverPhoto} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>}
+          {coverPhoto&&<img src={coverPhoto} alt="" style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"}}/>}
         </div>
         <div style={{marginTop:mob?16:20}}>
           <div style={{fontFamily:S.sf,fontSize:mob?15:17,fontWeight:300,letterSpacing:mob?3:4,marginBottom:8}}>{ed.name}</div>
