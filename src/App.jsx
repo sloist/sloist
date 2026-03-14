@@ -356,7 +356,7 @@ export default function Sloist(){
 
   /* ── Nav ── */
   const Nav=({showCats,backAction})=>{
-    const r1h=mob?48:60;
+    const r1h=mob?44:52;
     return <div style={{position:"sticky",top:0,zIndex:50,background:S.bg,transform:headerVis?"translateY(0)":"translateY(-100%)",transition:"transform .8s cubic-bezier(.22,1,.36,1)"}}>
       {/* 메인 바 */}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:r1h,padding:mob?"0 24px":"0 48px"}}>
@@ -372,10 +372,10 @@ export default function Sloist(){
       </div>
       {/* 카테고리 탭 + 서브필터 */}
       {showCats&&<div style={{borderTop:"1px solid "+S.lnL}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?28:48,padding:mob?"7px 0":"9px 0"}}>
-          {CATS.map(k=><button key={k} onClick={()=>onCatClick(k)} style={{fontFamily:S.ui,fontSize:mob?11:12,fontWeight:activeCat===k?500:300,letterSpacing:"0.15em",textTransform:"lowercase",color:activeCat===k?catColor(k):S.txGh,background:"none",border:"none",padding:mob?"5px 0":"6px 0",cursor:"pointer",transition:"color .5s, font-weight .5s"}}>{k}</button>)}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?28:48,padding:mob?"5px 0":"6px 0"}}>
+          {CATS.map(k=><button key={k} onClick={()=>onCatClick(k)} style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:activeCat===k?500:300,letterSpacing:"0.15em",textTransform:"lowercase",color:activeCat===k?catColor(k):S.txGh,background:"none",border:"none",padding:mob?"4px 0":"5px 0",cursor:"pointer",transition:"color .5s, font-weight .5s"}}>{k}</button>)}
         </div>
-        {activeCat&&activeCat!=="space"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?14:28,flexWrap:"wrap",padding:mob?"0 20px 8px":"0 40px 10px",opacity:1,transition:"opacity .4s"}}>
+        {activeCat&&activeCat!=="space"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?14:28,flexWrap:"wrap",padding:mob?"0 20px 6px":"0 40px 7px",opacity:1,transition:"opacity .4s"}}>
           <FilterBtns/>
         </div>}
       </div>}
@@ -646,18 +646,18 @@ export default function Sloist(){
             return da-db;
           }):f0;
           if(f.length===0)return <div style={{textAlign:"center",padding:"120px 0",fontFamily:S.ui,fontSize:13,fontWeight:300,color:S.txGh}}>등록된 공간이 없습니다</div>;
-          const SpaceFilters=()=><div style={{position:"absolute",top:mob?10:12,left:"50%",transform:"translateX(-50%)",zIndex:5,display:"flex",gap:mob?4:6,flexWrap:"nowrap",justifyContent:"center"}}>
+          const SpaceFilters=()=><div style={{position:"absolute",top:mob?12:14,left:"50%",transform:"translateX(-50%)",zIndex:5,display:"flex",gap:mob?4:6,flexWrap:"nowrap",justifyContent:"center"}}>
             {SP_C.map(c=><button key={c} onClick={()=>sSpCat(p=>p.includes(c)?p.filter(x=>x!==c):[...p,c])} style={{fontFamily:S.ui,fontSize:mob?9:10,fontWeight:spCat.includes(c)?400:300,letterSpacing:mob?0:1,color:spCat.includes(c)?S.tx:S.txQ,background:spCat.includes(c)?"rgba(249,248,247,.95)":"rgba(249,248,247,.75)",border:"none",borderRadius:20,padding:mob?"5px 10px":"6px 14px",cursor:"pointer",transition:"all .3s",backdropFilter:"blur(4px)"}}>{c}</button>)}
           </div>;
           if(mob)return <div>
-            <div style={{position:"sticky",top:48,zIndex:12,width:"100%",height:"40vh",minHeight:200,maxHeight:360,overflow:"hidden",borderBottom:"1px solid "+S.ln}}>
+            <div style={{position:"sticky",top:72,zIndex:12,width:"100%",height:"40vh",minHeight:200,maxHeight:360,overflow:"hidden",borderBottom:"1px solid "+S.ln}}>
               <SpaceMap spaces={f} hovId={mobFocus} onHover={id=>sMobFocus(id)} onClick={s=>openDetail(s)} style={{width:"100%",height:"100%"}}/>
               <SpaceFilters/>
             </div>
             <div style={{background:S.bg,position:"relative",padding:"8px 20px 40px"}}>{f.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{display:"flex",gap:16,padding:"20px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",position:"relative",transition:"background .5s"}}><div style={{width:80,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="1/1" r={2} saved={isSaved(it.id)}/></div><div style={{paddingTop:2,flex:1}}><div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:5}}>{it.location}</div><div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,marginBottom:4}}>{it.title}</div><div style={{fontFamily:S.ui,fontSize:11,fontWeight:300,color:S.txF,lineHeight:1.6,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.note}</div></div></div>)}</div>
           </div>;
           return <div style={{display:"flex",flexDirection:"row",minHeight:"100vh"}}>
-            <div style={{width:"42vw",flexShrink:0,position:"fixed",left:0,top:60,height:"calc(100 * var(--dvh, 1vh) - 60px)",borderRight:"1px solid "+S.lnL,zIndex:2}}>
+            <div style={{width:"42vw",flexShrink:0,position:"fixed",left:0,top:84,height:"calc(100 * var(--dvh, 1vh) - 84px)",borderRight:"1px solid "+S.lnL,zIndex:2}}>
               <SpaceMap spaces={f} hovId={spHov} onHover={id=>sSpHov(id)} onClick={s=>openDetail(s)} style={{width:"100%",height:"100%"}}/>
               <SpaceFilters/>
             </div>
