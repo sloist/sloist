@@ -116,10 +116,10 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
       </div>
 
       {/* ─── 모바일: 단일 컬럼 / 데스크톱: 좌우 분할 ─── */}
-      <div style={{ maxWidth: mob ? 600 : 1000, margin: "0 auto", width: "100%", padding: mob ? "28px 16px" : "48px 36px", display: mob ? "block" : "flex", gap: mob ? 0 : 60 }}>
+      <div style={{ maxWidth: mob ? 600 : 960, margin: "0 auto", width: "100%", padding: mob ? "28px 16px" : "48px 36px", display: mob ? "block" : "flex", gap: mob ? 0 : 48 }}>
 
         {/* ──── 좌측: 핵심 정보 ──── */}
-        <div style={{ flex: mob ? undefined : 1, minWidth: 0 }}>
+        <div style={{ flex: mob ? undefined : "0 0 42%", minWidth: 0 }}>
 
           {/* 카테고리 선택 (새 글만) */}
           {!isEdit && (
@@ -179,7 +179,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
         </div>
 
         {/* ──── 우측 (데스크톱) / 하단 (모바일): 이미지 + 상세 설정 ──── */}
-        <div style={{ flex: mob ? undefined : 1, minWidth: 0, marginTop: mob ? 0 : 0 }}>
+        <div style={{ flex: mob ? undefined : 1, minWidth: 0 }}>
 
           {/* 이미지 */}
           <div style={{ marginBottom: 32 }}>
@@ -243,7 +243,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
       </div>
 
       {/* ─── 발행 버튼 (하단 고정) ─── */}
-      <div style={{ maxWidth: mob ? 600 : 1000, margin: "0 auto", width: "100%", padding: mob ? "0 16px 60px" : "0 36px 60px" }}>
+      <div style={{ maxWidth: mob ? 600 : 960, margin: "0 auto", width: "100%", padding: mob ? "0 16px 60px" : "0 36px 60px" }}>
         {msg && <div style={{ fontSize: 12, letterSpacing: 2, marginBottom: 20, textAlign: "center", color: msg.includes("완료") ? S.ac : "#c47" }}>{msg}</div>}
         <button onClick={handleSave} disabled={saving} style={{ width: "100%", fontFamily: S.sf, fontSize: 12, letterSpacing: 4, color: "#fff", background: S.tx, border: "none", padding: "14px 0", cursor: "pointer", opacity: saving ? 0.5 : 1 }}>
           {saving ? "저장 중..." : isEdit ? "수정하기" : "발행하기"}
