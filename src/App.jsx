@@ -103,8 +103,8 @@ export default function Sloist(){
   // Lenis 정지: 오버레이가 열릴 때
   useEffect(()=>{
     const l=lenisRef.current;if(!l)return;
-    if(sov||view==="login")l.stop();else l.start();
-  },[sov,view]);
+    if(sov||view==="login"||showWrite||showAdmin||showEditorProfile||confirmDel)l.stop();else l.start();
+  },[sov,view,showWrite,showAdmin,showEditorProfile,confirmDel]);
 
   useEffect(()=>{
     const h=()=>{const y=window.scrollY;sShowTop(y>500);if(y<60)sHeaderVis(true);else if(y>lastScroll.current+8)sHeaderVis(false);else if(y<lastScroll.current-8)sHeaderVis(true);lastScroll.current=y;};
@@ -162,28 +162,29 @@ export default function Sloist(){
   const flash=useCallback(m=>{sToast(m);setTimeout(()=>sToast(null),1400);},[]);
   const isSaved=useCallback(id=>savedIds.includes(id),[savedIds]);
   const keep=useCallback(async(id)=>{if(!auth.user){goTo("login");return;}const was=savedIds.includes(id);
-    // optimistic update
     setSavedIds(p=>was?p.filter(x=>x!==id):[...p,id]);
     flash(was?"보관 해제":"보관됨");
-    // server sync
-    if(was){await supabase.from("saves").delete().eq("user_id",auth.user.id).eq("content_id",id);}
-    else{await supabase.from("saves").insert({user_id:auth.user.id,content_id:id});}
+    const{error}=was
+      ?await supabase.from("saves").delete().eq("user_id",auth.user.id).eq("content_id",id)
+      :await supabase.from("saves").insert({user_id:auth.user.id,content_id:id});
+    if(error){setSavedIds(p=>was?[...p,id]:p.filter(x=>x!==id));flash("저장 실패");}
   },[savedIds,flash,auth.user,setSavedIds]);
   const toggleFol=async(eid)=>{if(!auth.user){goTo("login");return;}const was=following.includes(eid);
     setFollowingIds(p=>was?p.filter(x=>x!==eid):[...p,eid]);
     flash(was?"팔로우 해제":"팔로우됨");
-    if(was){await supabase.from("follows").delete().eq("user_id",auth.user.id).eq("editor_id",eid);}
-    else{await supabase.from("follows").insert({user_id:auth.user.id,editor_id:eid});}
+    const{error}=was
+      ?await supabase.from("follows").delete().eq("user_id",auth.user.id).eq("editor_id",eid)
+      :await supabase.from("follows").insert({user_id:auth.user.id,editor_id:eid});
+    if(error){setFollowingIds(p=>was?[...p,eid]:p.filter(x=>x!==eid));flash("저장 실패");}
   };
   const setCover=useCallback(async(id)=>{
-    // optimistic update
+    const prev=items.map(i=>({id:i.id,isCover:i.isCover}));
     sItems(p=>p.map(i=>({...i,isCover:i.id===id})));
     flash("커버로 지정됨");
-    // clear old covers, set new
     const{error:e1}=await supabase.from("contents").update({is_cover:false}).eq("is_cover",true);
     const{error:e2}=await supabase.from("contents").update({is_cover:true}).eq("id",id);
-    if(e1||e2){flash("저장 실패");sItems(p=>p.map(i=>({...i,isCover:false})));}
-  },[flash]);
+    if(e1||e2){flash("저장 실패");sItems(p=>p.map(i=>{const o=prev.find(x=>x.id===i.id);return{...i,isCover:o?o.isCover:false};}));}
+  },[flash,items]);
 
   const lt=fn=>{sCVis(false);setTimeout(()=>{fn();sCVis(true);},280);};
   const mt=fn=>{sCVis(false);setTimeout(()=>{fn();window.scrollTo({top:0});setTimeout(()=>sCVis(true),120);},500);};
@@ -722,7 +723,7 @@ export default function Sloist(){
     {/* ARCHIVE */}
     {view==="archive"&&<div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/><div style={{maxWidth:900,margin:"0 auto",width:"100%",padding:mob?"48px 20px":"96px 48px",flex:"1 0 auto"}}>
       <div style={{textAlign:"center",marginBottom:mob?64:120}}><p style={{fontFamily:S.sf,fontSize:mob?14:16,lineHeight:2.6,color:S.txQ,letterSpacing:1}}>{"느린 삶을 사는 사람들,"}<br/>{"그리고 그들이 남긴 기록"}</p></div>
-      <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:mob?"64px 0":"80px 56px"}}>{Object.entries(ED).map(([eid,ed],idx)=>{const ei=edItems(eid);const coverPhoto=(ei.find(i=>i.photo)||{}).photo;return <div key={eid} style={{opacity:0,animation:"stg .7s ease "+idx*.12+"s both",cursor:"pointer"}} onClick={()=>openRoom(eid)}>
+      <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:mob?"64px 0":"80px 56px"}}>{ED&&Object.entries(ED).map(([eid,ed],idx)=>{const ei=edItems(eid);const coverPhoto=(ei.find(i=>i.photo)||{}).photo;return <div key={eid} style={{opacity:0,animation:"stg .7s ease "+idx*.12+"s both",cursor:"pointer"}} onClick={()=>openRoom(eid)}>
         <div style={{width:"100%",aspectRatio:"4/5",background:ed.grad||S.lnL,borderRadius:2,position:"relative",overflow:"hidden"}}>
           {coverPhoto&&<img src={coverPhoto} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>}
         </div>
