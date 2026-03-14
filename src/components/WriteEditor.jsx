@@ -95,13 +95,12 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
   }
 
   const inputStyle = { width: "100%", background: "transparent", border: "none", borderBottom: "1px solid " + S.ln, padding: "12px 0", fontFamily: S.bd, fontSize: 14, color: S.tx, outline: "none" };
-  const textareaStyle = { ...inputStyle, resize: "vertical", minHeight: 120, lineHeight: 2 };
+  const textareaStyle = { ...inputStyle, resize: "none", minHeight: 120, lineHeight: 2 };
   const labelStyle = { fontSize: 10, letterSpacing: 4, color: S.txGh, marginBottom: 6, display: "block" };
   const catBtn = (active) => ({ fontFamily: S.sf, fontSize: 12, letterSpacing: 3, color: active ? S.tx : S.txGh, fontWeight: active ? 400 : 300, background: "none", border: "none", borderBottom: active ? "1px solid " + S.ac : "1px solid transparent", padding: "8px 0", cursor: "pointer" });
 
   // 카테고리별 부가 필드 라벨
   const rootLabel = root === "space" ? "장소" : root === "scene" ? "장면" : "물건";
-  const rootIcon = root === "space" ? "◯" : root === "scene" ? "△" : "□";
 
 
   return (
@@ -119,7 +118,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
       <div style={{ maxWidth: mob ? 600 : 960, margin: "0 auto", width: "100%", padding: mob ? "28px 16px" : "48px 36px", display: mob ? "block" : "flex", gap: mob ? 0 : 48 }}>
 
         {/* ──── 좌측: 핵심 정보 ──── */}
-        <div style={{ flex: mob ? undefined : "0 0 42%", minWidth: 0 }}>
+        <div style={{ flex: mob ? undefined : "0 0 34%", minWidth: 0 }}>
 
           {/* 카테고리 선택 (새 글만) */}
           {!isEdit && (
