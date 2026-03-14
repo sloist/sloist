@@ -2,7 +2,7 @@
 import { useState } from "react";
 import S from "../styles/tokens";
 import { supabase } from "../lib/supabase";
-import { SP_C, SC_C, OB_C } from "../data/constants";
+import { SP_C, SC_C, OB_C, TAG_GROUPS } from "../data/constants";
 import ImageUpload from "./ImageUpload";
 
 export default function WriteEditor({ editorId, isAdmin, onClose, onSaved, editItem }) {
@@ -121,10 +121,18 @@ export default function WriteEditor({ editorId, isAdmin, onClose, onSaved, editI
             </div>
             {(lat && lng) && <div style={{ fontFamily: S.sn, fontSize: 10, color: S.txF, marginTop: 8, letterSpacing: 1 }}>📍 {Number(lat).toFixed(4)}, {Number(lng).toFixed(4)}</div>}
           </div>
-          <div style={{ marginBottom: 28 }}><span style={labelStyle}>태그</span><input value={tags} onChange={e => setTags(e.target.value)} placeholder="카페 · 핸드드립" style={inputStyle} /></div>
         </>}
-        {root === "scene" && (type === "장면" || type === "루틴") && <div style={{ marginBottom: 28 }}><span style={labelStyle}>태그</span><input value={tags} onChange={e => setTags(e.target.value)} placeholder="빛 · 창가 · 새벽" style={inputStyle} /></div>}
         {root === "objet" && <div style={{ marginBottom: 28 }}><span style={labelStyle}>제작자</span><input value={maker} onChange={e => setMaker(e.target.value)} placeholder="공방 이름" style={inputStyle} /></div>}
+        <div style={{ marginBottom: 28 }}>
+          <span style={labelStyle}>태그 (최대 3개)</span>
+          {Object.entries(TAG_GROUPS).map(([group, items]) => <div key={group} style={{ marginTop: 12 }}>
+            <div style={{ fontFamily: S.sn, fontSize: 9, color: S.txGh, letterSpacing: 2, marginBottom: 6 }}>{group}</div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {items.map(t => { const sel = tags.split(" · ").filter(Boolean); const active = sel.includes(t); return <button key={t} onClick={() => { if (active) setTags(sel.filter(x => x !== t).join(" · ")); else if (sel.length < 3) setTags([...sel, t].join(" · ")); }} style={{ fontFamily: S.sn, fontSize: 11, fontWeight: active ? 400 : 300, color: active ? S.tx : S.txGh, background: active ? "rgba(184,164,140,.12)" : "none", border: "1px solid " + (active ? S.ac : S.lnL), borderRadius: 20, padding: "5px 12px", cursor: sel.length >= 3 && !active ? "default" : "pointer", opacity: sel.length >= 3 && !active ? 0.4 : 1, transition: "all .3s" }}>{t}</button>; })}
+            </div>
+          </div>)}
+          {tags && <div style={{ fontFamily: S.sn, fontSize: 11, color: S.txQ, marginTop: 12, letterSpacing: 1 }}>{tags}</div>}
+        </div>
         <div style={{ marginBottom: 36 }}><span style={labelStyle}>링크 (선택)</span><input value={link} onChange={e => setLink(e.target.value)} placeholder="https://..." style={inputStyle} /></div>
         {msg && <div style={{ fontSize: 12, letterSpacing: 2, marginBottom: 20, textAlign: "center", color: msg.includes("완료") ? S.ac : "#c47" }}>{msg}</div>}
         <button onClick={handleSave} disabled={saving} style={{ width: "100%", fontFamily: S.sf, fontSize: 12, letterSpacing: 4, color: "#fff", background: S.tx, border: "none", padding: "14px 0", cursor: "pointer", opacity: saving ? 0.5 : 1, marginBottom: 60 }}>
