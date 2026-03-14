@@ -49,6 +49,10 @@ export default function Sloist(){
   const [delConfirm,sDelConfirm]=useState("");
   const [postsCat,sPostsCat]=useState("");
   const [postsAuthor,sPostsAuthor]=useState("");
+  const [rpw,setRpw]=useState("");
+  const [rpw2,setRpw2]=useState("");
+  const [rmsg,setRmsg]=useState(null);
+  const [rsaving,setRsaving]=useState(false);
   const [activeCat,sActiveCat]=useState(null);
   const [spCat,sSpCat]=useState([]);
   const [scCat,sScCat]=useState([]);
@@ -139,6 +143,7 @@ export default function Sloist(){
         else if(path==="/about"){sView("about");sDetail(null);}
         else if(path==="/terms"){sLeg("terms");sView("legal");sDetail(null);}
         else if(path==="/privacy"){sLeg("privacy");sView("legal");sDetail(null);}
+        else if(path==="/reset-password"){sView("home");sDetail(null);}
         else if(path==="/mypage"){sView("mypage");sDetail(null);}
         else if(path==="/archive"){sView("archive");sDetail(null);}
         else if(path==="/space"){sView("home");sDetail(null);sActiveCat("space");}
@@ -769,7 +774,21 @@ export default function Sloist(){
     {toast&&<div style={{position:"fixed",bottom:40,left:"50%",transform:"translateX(-50%)",color:S.txM,fontSize:11,fontWeight:300,letterSpacing:3,zIndex:300,fontFamily:S.sn}}>{toast}</div>}
 
     {/* 로그인/회원가입 — 독립 페이지 */}
-    {view==="login"&&<Auth onAuth={()=>goHome()} signIn={auth.signIn} signUp={auth.signUp}/>}
+    {view==="login"&&!auth.isRecovery&&<Auth onAuth={()=>goHome()} signIn={auth.signIn} signUp={auth.signUp}/>}
+
+    {/* 비밀번호 재설정 화면 */}
+    {auth.isRecovery&&(()=>{const doReset=async()=>{const pwErr=validatePw(rpw,auth.user?.email);if(pwErr){setRmsg(pwErr);return;}if(rpw!==rpw2){setRmsg("비밀번호가 일치하지 않습니다");return;}setRsaving(true);const{error}=await auth.updatePassword(rpw);if(error)setRmsg("변경 실패: "+error.message);else{flash("비밀번호가 변경되었습니다");goHome();}setRsaving(false);};return <div style={{position:"fixed",inset:0,zIndex:600,background:S.bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"0 24px"}}>
+      <div style={{width:"100%",maxWidth:300,textAlign:"center"}}>
+        <div style={{fontFamily:S.sf,fontSize:mob?28:36,fontWeight:300,letterSpacing:mob?10:16,color:S.tx,marginBottom:12}}>sloist</div>
+        <div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,letterSpacing:3,color:S.txF,marginBottom:mob?40:56}}>새 비밀번호 설정</div>
+        <div style={{display:"flex",flexDirection:"column",gap:16,textAlign:"left"}}>
+          <input type="password" placeholder="새 비밀번호" value={rpw} onChange={e=>setRpw(e.target.value)} style={{width:"100%",background:"transparent",border:"none",borderBottom:"1px solid "+S.ln,padding:"14px 0",fontFamily:S.sn,fontSize:mob?15:14,fontWeight:300,color:S.tx,outline:"none",letterSpacing:1}}/>
+          <input type="password" placeholder="새 비밀번호 확인" value={rpw2} onChange={e=>setRpw2(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")doReset();}} style={{width:"100%",background:"transparent",border:"none",borderBottom:"1px solid "+S.ln,padding:"14px 0",fontFamily:S.sn,fontSize:mob?15:14,fontWeight:300,color:S.tx,outline:"none",letterSpacing:1}}/>
+          <div style={{minHeight:18}}>{rmsg&&<div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,color:"#c47",lineHeight:1.7,textAlign:"center"}}>{rmsg}</div>}</div>
+          <button onClick={doReset} disabled={rsaving} style={{fontFamily:S.sn,fontSize:12,fontWeight:400,letterSpacing:4,color:"#fff",background:"#4A4844",border:"none",borderRadius:3,padding:"14px 0",cursor:"pointer",opacity:rsaving?.5:1,transition:"opacity .5s"}}>{rsaving?"...":"변경하기"}</button>
+        </div>
+      </div>
+    </div>;})()}
 
     {/* 글쓰기 에디터 */}
     {showWrite&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><WriteEditor editorId={auth.editorId} isAdmin={auth.isAdmin} userId={auth.user?.id} isStaff={auth.isStaff} editItem={editItem} onClose={()=>{setShowWrite(false);setEditItem(null);}} onSaved={()=>{setShowWrite(false);setEditItem(null);window.location.reload();}}/></div>}
