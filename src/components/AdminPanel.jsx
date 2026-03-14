@@ -90,10 +90,10 @@ export default function AdminPanel({ onClose }) {
               <div style={{ fontSize: 11, color: S.txQ }}>{u.email}</div>
             </div>
             <select value={u.role} onChange={e => changeRole(u.id, e.target.value)} style={{ fontFamily: S.sf, fontSize: 11, color: S.tx, background: S.bg, border: "1px solid " + S.ln, padding: "6px 12px", cursor: "pointer" }}>
-              <option value="user">user</option>
-              <option value="staff">staff</option>
-              <option value="editor">editor</option>
-              <option value="master">master</option>
+              <option value="user">사용자</option>
+              <option value="editor">에디터</option>
+              <option value="staff">스태프</option>
+              <option value="master">마스터</option>
             </select>
             {(u.role === "editor" || u.role === "master" || u.role === "staff") && <select value={u.editor_id || ""} onChange={async e => { const val = e.target.value || null; const { error } = await supabase.from("profiles").update({ editor_id: val }).eq("id", u.id); if (error) flash("연결 실패: " + error.message); else { flash(val ? "슬로이스트 연결 완료" : "슬로이스트 연결 해제"); load(); } }} style={{ fontFamily: S.sf, fontSize: 11, color: S.tx, background: S.bg, border: "1px solid " + S.ln, padding: "6px 12px", cursor: "pointer" }}>
               <option value="">슬로이스트 없음</option>

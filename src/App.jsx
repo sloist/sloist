@@ -85,8 +85,8 @@ export default function Sloist(){
   },[activeCat,userLoc]);
 
   const flash=useCallback(m=>{sToast(m);setTimeout(()=>sToast(null),1400);},[]);
-  const keep=useCallback(id=>{const was=items.find(i=>i.id===id)?.saved;sItems(p=>p.map(i=>i.id===id?{...i,saved:!i.saved}:i));flash(was?"removed":"saved");},[items,flash]);
-  const toggleFol=eid=>{const was=following.includes(eid);sFol(p=>was?p.filter(x=>x!==eid):[...p,eid]);flash(was?"unfollowed":"followed");};
+  const keep=useCallback(id=>{const was=items.find(i=>i.id===id)?.saved;sItems(p=>p.map(i=>i.id===id?{...i,saved:!i.saved}:i));flash(was?"보관 해제":"보관됨");},[items,flash]);
+  const toggleFol=eid=>{const was=following.includes(eid);sFol(p=>was?p.filter(x=>x!==eid):[...p,eid]);flash(was?"팔로우 해제":"팔로우됨");};
   const isSaved=()=>false;
   const setCover=useCallback(async(id)=>{
     // optimistic update
@@ -222,8 +222,8 @@ export default function Sloist(){
         <div style={{display:"flex",alignItems:"center",gap:mob?14:24}}>
           {auth.role==="editor"&&!auth.editorId&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필 만들기</button>}
           {auth.editorId&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필</button>}
-          {(auth.isMaster||auth.isStaff||(auth.role==="editor"&&auth.editorId))&&<button onClick={()=>{setEditItem(null);setShowWrite(true);}} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>write</button>}
-          {auth.isAdmin&&<button onClick={()=>setShowAdmin(true)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:4}}>admin</button>}
+          {(auth.isMaster||auth.isStaff||(auth.role==="editor"&&auth.editorId))&&<button onClick={()=>{setEditItem(null);setShowWrite(true);}} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>글쓰기</button>}
+          {auth.isAdmin&&<button onClick={()=>setShowAdmin(true)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:4}}>관리</button>}
           <button onClick={()=>sSov(true)} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><SIcon/></button>
           <button onClick={()=>{if(auth.user){if(view!=="mypage")goTo("mypage");}else goTo("login");}} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><UIcon/></button>
         </div>
@@ -306,7 +306,7 @@ export default function Sloist(){
 
           {/* 읽기 밖 — 액션 */}
           <div style={{marginTop:mob?48:72,display:"flex",alignItems:"center",justifyContent:"center",gap:mob?28:44}}>
-            <button onClick={()=>keep(dl.id)} style={{fontFamily:S.sn,fontSize:9,fontWeight:400,letterSpacing:4,color:dl.saved?S.ac:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}}>{dl.saved?"kept":"keep"}</button>
+            <button onClick={()=>keep(dl.id)} style={{fontFamily:S.sn,fontSize:9,fontWeight:400,letterSpacing:4,color:dl.saved?S.ac:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}}>{dl.saved?"보관됨":"보관"}</button>
             <button onClick={()=>flash("link copied")} style={{fontFamily:S.sn,fontSize:9,fontWeight:400,letterSpacing:4,color:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}}>share</button>
             {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.sn,fontSize:9,fontWeight:400,letterSpacing:4,color:S.txQ,textDecoration:"none",transition:"color .4s"}}>{lLabel(dl)}</a>}
           </div>
@@ -626,7 +626,7 @@ export default function Sloist(){
             <div style={{fontFamily:S.sf,fontSize:mob?18:22,fontWeight:300,letterSpacing:mob?4:6,marginBottom:14}}>{"sloist "+ed.name}</div>
             <div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txGh,letterSpacing:2,marginBottom:16}}>{ed.tags.join(" · ")}</div>
             <div style={{fontFamily:S.bd,fontSize:12,fontWeight:300,color:S.txQ,lineHeight:2.0,marginBottom:24}}>{ed.bio}</div>
-            <button onClick={()=>toggleFol(edRoom)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:following.includes(edRoom)?S.ac:S.txGh,background:"none",border:"none",borderBottom:following.includes(edRoom)?"1px solid "+S.ac:"1px solid "+S.lnL,padding:"4px 0",cursor:"pointer",transition:"all .5s"}}>{following.includes(edRoom)?"following":"follow"}</button>
+            <button onClick={()=>toggleFol(edRoom)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:following.includes(edRoom)?S.ac:S.txGh,background:"none",border:"none",borderBottom:following.includes(edRoom)?"1px solid "+S.ac:"1px solid "+S.lnL,padding:"4px 0",cursor:"pointer",transition:"all .5s"}}>{following.includes(edRoom)?"팔로잉":"팔로우"}</button>
           </div>
         </div>
         <div style={{maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px",borderTop:"1px solid "+S.lnL,paddingTop:mob?32:48}}>
@@ -640,7 +640,7 @@ export default function Sloist(){
       <div style={{flex:"1 0 auto"}}>
         {/* 탭 — keep / following + 에디터 보조 링크 */}
         <div style={{display:"flex",justifyContent:"center",alignItems:"baseline",gap:mob?28:44,padding:mob?"28px 0 36px":"44px 0 52px"}}>
-          {["keep","following"].map(k=><button key={k} onClick={()=>lt(()=>sMyTab(k==="keep"?"saved":k))} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:mob?3:4,color:S.tx,opacity:(k==="keep"?(myTab==="saved"||myTab==="posts"):myTab===k)?1:.35,background:"none",border:"none",padding:"6px 0",cursor:"pointer",transition:"opacity .5s"}}>{k}</button>)}
+          {[["saved","보관"],["following","팔로잉"]].map(([k,label])=><button key={k} onClick={()=>lt(()=>sMyTab(k))} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:mob?3:4,color:S.tx,opacity:(k==="saved"?(myTab==="saved"||myTab==="posts"):myTab===k)?1:.35,background:"none",border:"none",padding:"6px 0",cursor:"pointer",transition:"opacity .5s"}}>{label}</button>)}
           {auth.isEditor&&<button onClick={()=>lt(()=>sMyTab("posts"))} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.tx,opacity:myTab==="posts"?1:.35,background:"none",border:"none",cursor:"pointer",transition:"opacity .4s"}}>내 기록</button>}
         </div>
         <div style={fd(cVis)}>
