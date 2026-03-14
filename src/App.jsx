@@ -243,7 +243,6 @@ export default function Sloist(){
   /* ── Detail — 기록 한 편을 읽는 방 ── */
   const DetailView=({hideEditor})=>{
     if(!dl)return null;
-    // 관련 기록 매칭
     const relatedItems=useMemo(()=>{
       if(!dl||!items.length)return [];
       const pool=items.filter(i=>i.id!==dl.id&&i.root===dl.root);
@@ -267,7 +266,6 @@ export default function Sloist(){
       if(it.root==="scene")return (it.type==="영상"?"16/9":"3/4");
       return "4/5";
     };
-    // 카테고리별 이미지 비율 — 홈/룸과 같은 결
     const heroAsp=dl.aspect||(dl.root==="space"?"4/5":dl.root==="scene"?(dl.type==="영상"?"16/9":"3/4"):"1/1");
     const bodyStyle={fontFamily:S.bd,fontSize:mob?14:15,fontWeight:400,color:S.txM,lineHeight:2.1,letterSpacing:.3};
     const hasAdmin=auth.isAdmin||(auth.editorId&&dl.editor===auth.editorId);
@@ -277,6 +275,8 @@ export default function Sloist(){
       const meta=dl.root==="space"?dl.location:dl.root==="scene"?dl.sub:dl.root==="objet"?dl.maker:"";
       return meta?cat+" · "+meta:cat;
     })();
+    const actStyle={fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s"};
+    const deletePost=async()=>{if(!confirm("정말 삭제하시겠습니까?"))return;const{error}=await supabase.from("contents").delete().eq("id",dl.id);if(error){flash("삭제 실패");}else{flash("삭제 완료");sItems(p=>p.filter(x=>x.id!==dl.id));closeDetail();}};
     return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}>
       <Nav backAction={closeDetail}/>
       <div style={{flex:"1 0 auto"}}>
@@ -284,19 +284,13 @@ export default function Sloist(){
 
           {/* ── 입장 ── */}
           <div style={{paddingTop:mob?36:72}}>
-            {/* 이미지 — 본문 폭 안에, 카테고리별 비율 */}
             <div style={{width:mob?"100%":"88%",margin:"0 auto"}}>
               <Img grad={dl.grad} photo={dl.photo} aspect={heroAsp} r={3}/>
             </div>
-
-            {/* 제목 블록 — 메타 + 제목 + 에디터 */}
             <div style={{textAlign:"center",padding:mob?"28px 0 0":"44px 0 0"}}>
               {metaLine&&<div style={{fontFamily:S.sn,fontSize:mob?9:10,fontWeight:300,letterSpacing:3,color:S.txF,marginBottom:mob?10:14}}>{metaLine}</div>}
               <h1 style={{fontFamily:S.sf,fontSize:mob?22:36,fontWeight:300,lineHeight:1.5,letterSpacing:mob?0:1,margin:0}}>{dl.title}</h1>
-              {editorLine&&<div style={{marginTop:mob?14:20}}><span onClick={()=>{if(dl.editor&&ED[dl.editor])openRoom(dl.editor);else if(dl.isOfficial)goTo("about");}} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,cursor:"pointer",transition:"color .4s"}}>{editorLine}</span></div>}
             </div>
-
-            {/* 구분선 — 여기서부터 읽기 시작 */}
             <div style={{marginTop:mob?28:44,borderTop:"1px solid "+S.lnL}}/>
           </div>
 
@@ -304,40 +298,33 @@ export default function Sloist(){
           <ScrollReveal>
           <div style={{paddingTop:mob?32:48}}>
             {dl.note&&<div style={bodyStyle}>{dl.note}</div>}
-
-            {/* 태그 — 본문의 잔향 */}
-            {dl.tags&&<div style={{marginTop:dl.note?mob?24:36:0,textAlign:dl.note?"left":"center"}}><TagLinks tags={dl.tags} size={10} color={S.txGh}/></div>}
-
-            {/* 미니맵 (space) */}
             {dl.root==="space"&&dl.lat&&dl.lng&&<div style={{marginTop:mob?40:64,borderRadius:4,overflow:"hidden"}}><SpaceMap spaces={[dl]} hovId={null} onHover={()=>{}} onClick={()=>{}} style={{width:"100%",height:mob?200:240}}/></div>}
+
+            {/* ── 본문 이후 한 덩어리: 태그 · 글쓴이 · 액션 ── */}
+            <div style={{marginTop:mob?48:80,borderTop:"1px solid "+S.lnL,paddingTop:mob?24:36,textAlign:"center"}}>
+              {/* 태그 */}
+              {dl.tags&&<div style={{marginBottom:mob?16:20}}><TagLinks tags={dl.tags} size={10} color={S.txGh}/></div>}
+              {/* 글쓴이 */}
+              {editorLine&&<div style={{marginBottom:mob?20:28}}><span onClick={()=>{if(dl.editor&&ED[dl.editor])openRoom(dl.editor);else if(dl.isOfficial)goTo("about");}} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,cursor:"pointer",transition:"color .4s"}}>{editorLine}</span></div>}
+              {/* 액션 — 한 줄 */}
+              <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:mob?20:32}}>
+                <button onClick={()=>keep(dl.id)} style={{...actStyle,color:dl.saved?S.ac:S.txQ}}>{dl.saved?"보관됨":"보관"}</button>
+                <button onClick={()=>{navigator.clipboard?.writeText(window.location.href);flash("링크 복사됨");}} style={actStyle}>공유</button>
+                {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{...actStyle,textDecoration:"none"}}>{lLabel(dl)}</a>}
+              </div>
+              {/* 관리자 액션 — 같은 구역, 한 톤 더 약하게 */}
+              {hasAdmin&&<div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:mob?16:28,marginTop:mob?14:20}}>
+                <button onClick={()=>{setEditItem(dl);setShowWrite(true);}} style={{...actStyle,fontSize:8,color:S.txGh}}>수정</button>
+                {auth.isAdmin&&<button onClick={()=>setCover(dl.id)} style={{...actStyle,fontSize:8,color:dl.isCover?S.ac:S.txGh}}>{dl.isCover?"홈 커버":"커버 지정"}</button>}
+                {hasAdmin&&<button onClick={deletePost} style={{...actStyle,fontSize:8,color:S.txGh}}>삭제</button>}
+              </div>}
+            </div>
           </div>
           </ScrollReveal>
 
-          {/* ── 여운 ── */}
-          <div style={{marginTop:mob?64:120}}>
-            <div style={{borderTop:"1px solid "+S.lnL}}/>
+        </div>
 
-            {/* 보관 — 주역 */}
-            <div style={{textAlign:"center",padding:mob?"36px 0":"52px 0"}}>
-              <button onClick={()=>keep(dl.id)} style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:5,color:dl.saved?S.ac:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}}>{dl.saved?"보관됨":"보관"}</button>
-            </div>
-
-            {/* share · link — 속삭임 */}
-            <div style={{display:"flex",justifyContent:"center",gap:mob?24:36}}>
-              <button onClick={()=>{navigator.clipboard?.writeText(window.location.href);flash("링크 복사됨");}} style={{fontFamily:S.sn,fontSize:8,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}}>공유</button>
-              {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.sn,fontSize:8,fontWeight:300,letterSpacing:3,color:S.txGh,textDecoration:"none",transition:"color .4s"}}>{lLabel(dl)}</a>}
-            </div>
-
-            {/* 관리자 */}
-            {hasAdmin&&<div style={{display:"flex",justifyContent:"center",gap:24,marginTop:mob?16:24}}>
-              <button onClick={()=>{setEditItem(dl);setShowWrite(true);}} style={{fontFamily:S.sn,fontSize:8,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer"}}>수정</button>
-              {auth.isAdmin&&<button onClick={()=>setCover(dl.id)} style={{fontFamily:S.sn,fontSize:8,fontWeight:300,letterSpacing:3,color:dl.isCover?S.ac:S.txGh,background:"none",border:"none",cursor:"pointer"}}>{dl.isCover?"홈 커버":"커버 지정"}</button>}
-            </div>}
-          </div>
-
-        </div>{/* maxWidth 컨테이너 닫기 */}
-
-        {/* 관련 기록 — 여운의 연장 */}
+        {/* 관련 기록 */}
         {relatedItems.length>0&&<div style={{maxWidth:520,margin:"0 auto",padding:mob?"0 20px":"0 24px"}}>
           <ScrollReveal>
           <div style={{marginTop:mob?56:100,borderTop:"1px solid "+S.lnL,paddingTop:mob?32:48}}>
