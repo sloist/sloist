@@ -13,7 +13,7 @@ export function aLabel(it, ED) {
 export function lLabel(it) {
   if (!it.link) return null;
   const t = it.type || it.otype || "";
-  return t === "음악" ? "listen" : t === "영상" ? "watch" : t === "서적" ? "read" : "visit";
+  return t === "음악" ? "듣기" : t === "영상" ? "보기" : t === "서적" ? "읽기" : "방문";
 }
 
 // 이미지 컴포넌트
