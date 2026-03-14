@@ -19,9 +19,9 @@ import ScrollReveal from "./components/ScrollReveal";
 import StickyCover from "./components/StickyCover";
 
 export default function Sloist(){
-  const { ED: _ED, PF, ALL, SPACE, SCENE, OBJET, loading, error } = useSupabaseData();
-  const ED = _ED || {};
   const auth = useAuth();
+  const { ED: _ED, PF, ALL, SPACE, SCENE, OBJET, savedIds, setSavedIds, followingIds, setFollowingIds, loading, error } = useSupabaseData(auth.user?.id);
+  const ED = _ED || {};
   const [showAuth, setShowAuth] = useState(false); // 레거시 — 이제 view==="login" 사용
   const [showWrite, setShowWrite] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
@@ -59,7 +59,7 @@ export default function Sloist(){
   const [obCat,sObCat]=useState([]);
   const [spHov,sSpHov]=useState(null);
   const [objHov,sObjHov]=useState(null);
-  const [following,sFol]=useState(["hayan","yunseul"]);
+  const following=followingIds;
   const [legalOpen,sLeg]=useState(null);
   const [cVis,sCVis]=useState(true);
   const [mobFocus,sMobFocus]=useState(null);
@@ -128,9 +128,21 @@ export default function Sloist(){
   },[activeCat,userLoc]);
 
   const flash=useCallback(m=>{sToast(m);setTimeout(()=>sToast(null),1400);},[]);
-  const keep=useCallback(id=>{if(!auth.user){goTo("login");return;}const was=items.find(i=>i.id===id)?.saved;sItems(p=>p.map(i=>i.id===id?{...i,saved:!i.saved}:i));flash(was?"보관 해제":"보관됨");},[items,flash,auth.user]);
-  const toggleFol=eid=>{const was=following.includes(eid);sFol(p=>was?p.filter(x=>x!==eid):[...p,eid]);flash(was?"팔로우 해제":"팔로우됨");};
-  const isSaved=()=>false;
+  const isSaved=useCallback(id=>savedIds.includes(id),[savedIds]);
+  const keep=useCallback(async(id)=>{if(!auth.user){goTo("login");return;}const was=savedIds.includes(id);
+    // optimistic update
+    setSavedIds(p=>was?p.filter(x=>x!==id):[...p,id]);
+    flash(was?"보관 해제":"보관됨");
+    // server sync
+    if(was){await supabase.from("saves").delete().eq("user_id",auth.user.id).eq("content_id",id);}
+    else{await supabase.from("saves").insert({user_id:auth.user.id,content_id:id});}
+  },[savedIds,flash,auth.user,setSavedIds]);
+  const toggleFol=async(eid)=>{if(!auth.user){goTo("login");return;}const was=following.includes(eid);
+    setFollowingIds(p=>was?p.filter(x=>x!==eid):[...p,eid]);
+    flash(was?"팔로우 해제":"팔로우됨");
+    if(was){await supabase.from("follows").delete().eq("user_id",auth.user.id).eq("editor_id",eid);}
+    else{await supabase.from("follows").insert({user_id:auth.user.id,editor_id:eid});}
+  };
   const setCover=useCallback(async(id)=>{
     // optimistic update
     sItems(p=>p.map(i=>({...i,isCover:i.id===id})));
@@ -198,7 +210,7 @@ export default function Sloist(){
   },[items]);
 
   const live=id=>items.find(i=>i.id===id)||{};
-  const sv=k=>items.filter(i=>i.root===k&&i.saved);
+  const sv=k=>items.filter(i=>i.root===k&&savedIds.includes(i.id));
   const edItems=eid=>items.filter(i=>i.editor===eid);
   const dl=detail?live(detail.id):null;
   const fd=(show)=>({opacity:show?1:0,transition:"opacity .8s cubic-bezier(.2,0,.3,1)"});
@@ -355,7 +367,7 @@ export default function Sloist(){
               </div>}
               {/* 액션 — 한 줄, 가장 또렷하게 */}
               <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:mob?24:36}}>
-                <button onClick={()=>keep(dl.id)} style={{fontFamily:S.sn,fontSize:11,fontWeight:400,letterSpacing:3,color:dl.saved?S.ac:S.txQ,background:"none",border:"none",cursor:"pointer",padding:mob?"8px 4px":"6px 4px",transition:"color .4s"}}>{dl.saved?"보관됨":"보관"}</button>
+                <button onClick={()=>keep(dl.id)} style={{fontFamily:S.sn,fontSize:11,fontWeight:400,letterSpacing:3,color:isSaved(dl.id)?S.ac:S.txQ,background:"none",border:"none",cursor:"pointer",padding:mob?"8px 4px":"6px 4px",transition:"color .4s"}}>{isSaved(dl.id)?"보관됨":"보관"}</button>
                 <button onClick={()=>{navigator.clipboard?.writeText(window.location.href);flash("링크 복사됨");}} style={{fontFamily:S.sn,fontSize:11,fontWeight:400,letterSpacing:3,color:S.txQ,background:"none",border:"none",cursor:"pointer",padding:mob?"8px 4px":"6px 4px",transition:"color .4s"}}>공유</button>
                 {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.sn,fontSize:11,fontWeight:400,letterSpacing:3,color:S.txQ,textDecoration:"none",cursor:"pointer",padding:mob?"8px 4px":"6px 4px",transition:"color .4s"}}>{lLabel(dl)}</a>}
               </div>
@@ -693,7 +705,7 @@ export default function Sloist(){
           </div>
         </div>
         <div style={{maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px",borderTop:"1px solid "+S.lnL,paddingTop:mob?32:48}}>
-          <div style={{display:"grid",gridTemplateColumns:mob?"repeat(2,1fr)":"repeat(3,1fr)",columnGap:mob?20:40,rowGap:mob?44:72,gridAutoFlow:"dense"}}>{ei.map(it=>{const isWide=it.root==="scene"&&it.type==="영상";const cols=mob?2:3;const asp=it.aspect||(it.root==="scene"?(isWide?"16/9":"3/4"):(it.root==="objet"?"4/5":"4/3"));return <div key={it.id} style={{gridColumn:isWide?"span "+cols:"span 1",cursor:"pointer",position:"relative"}} onClick={()=>{scrollSave.current=window.scrollY;lt(()=>sDetail(it));}}><Img saved={isSaved(it.id)} grad={it.grad} photo={it.photo} aspect={asp} r={2}/><div style={{marginTop:14}}><div style={{fontFamily:S.sn,fontSize:8,fontWeight:300,letterSpacing:3,color:S.txGh,marginBottom:4}}>{it.root}</div><div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:1.5}}>{it.title}</div></div></div>;})}</div>
+          <div style={{display:"grid",gridTemplateColumns:mob?"repeat(2,1fr)":"repeat(3,1fr)",columnGap:mob?20:40,rowGap:mob?44:72,gridAutoFlow:"dense"}}>{ei.map(it=>{const isWide=it.root==="scene"&&it.type==="영상";const cols=mob?2:3;const asp=it.aspect||(it.root==="scene"?(isWide?"16/9":"3/4"):(it.root==="objet"?"4/5":"4/3"));return <div key={it.id} style={{gridColumn:isWide?"span "+cols:"span 1",cursor:"pointer",position:"relative"}} onClick={()=>{scrollSave.current=window.scrollY;pushUrl("/"+it.root+"/"+it.id);lt(()=>sDetail(it));}}><Img saved={isSaved(it.id)} grad={it.grad} photo={it.photo} aspect={asp} r={2}/><div style={{marginTop:14}}><div style={{fontFamily:S.sn,fontSize:8,fontWeight:300,letterSpacing:3,color:S.txGh,marginBottom:4}}>{it.root}</div><div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:1.5}}>{it.title}</div></div></div>;})}</div>
         </div>
       </div><Foot/></div>;})()}
     {view==="room"&&detail&&<DetailView hideEditor={true}/>}

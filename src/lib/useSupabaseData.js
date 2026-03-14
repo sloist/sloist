@@ -5,10 +5,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "./supabase";
 
-export function useSupabaseData() {
+export function useSupabaseData(userId) {
   const [editors, setEditors] = useState(null);    // ED 객체
   const [profiles, setProfiles] = useState(null);  // PF 객체 (작성자)
   const [contents, setContents] = useState(null);   // 전체 콘텐츠 배열
+  const [savedIds, setSavedIds] = useState([]);      // 보관된 content id 배열
+  const [followingIds, setFollowingIds] = useState([]); // 팔로우 editor id 배열
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -71,7 +73,7 @@ export function useSupabaseData() {
           authorId: row.author_id || undefined,
           isOfficial: row.is_official || false,
           isCover: row.is_cover || false,
-          saved: false,
+          created_at: row.created_at || undefined,
         }));
 
         setEditors(ED);
@@ -87,10 +89,24 @@ export function useSupabaseData() {
     load();
   }, []);
 
+  // 로그인 사용자의 saves/follows 로딩
+  useEffect(() => {
+    if (!userId) { setSavedIds([]); setFollowingIds([]); return; }
+    async function loadUserData() {
+      const [{ data: sv }, { data: fl }] = await Promise.all([
+        supabase.from("saves").select("content_id").eq("user_id", userId),
+        supabase.from("follows").select("editor_id").eq("user_id", userId),
+      ]);
+      setSavedIds((sv || []).map(r => r.content_id));
+      setFollowingIds((fl || []).map(r => r.editor_id));
+    }
+    loadUserData();
+  }, [userId]);
+
   // 카테고리별 분리
   const SPACE = contents?.filter((i) => i.root === "space") || [];
   const SCENE = contents?.filter((i) => i.root === "scene") || [];
   const OBJET = contents?.filter((i) => i.root === "objet") || [];
 
-  return { ED: editors, PF: profiles, ALL: contents, SPACE, SCENE, OBJET, loading, error };
+  return { ED: editors, PF: profiles, ALL: contents, SPACE, SCENE, OBJET, savedIds, setSavedIds, followingIds, setFollowingIds, loading, error };
 }
