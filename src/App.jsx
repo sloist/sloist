@@ -573,12 +573,17 @@ export default function Sloist(){
     </div>}
 
     {/* ARCHIVE */}
-    {view==="archive"&&<div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/><div style={{padding:mob?"48px 16px":"96px 36px",flex:"1 0 auto"}}><div style={{display:"flex",justifyContent:"flex-end",marginBottom:mob?20:32}}><button onClick={goBack} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,background:"none",border:"none",cursor:"pointer"}}>back</button></div><div style={{textAlign:"center",marginBottom:mob?56:100}}><p style={{fontFamily:S.sf,fontSize:mob?14:16,lineHeight:2.6,color:S.txQ,letterSpacing:1}}>{"\uB290\uB9B0 \uC0B6\uC744 \uC0AC\uB294 \uC0AC\uB78C\uB4E4,"}<br/>{"\uADF8\uB9AC\uACE0 \uADF8\uB4E4\uC774 \uB0A8\uAE34 \uAE30\uB85D"}</p></div>
-      <div style={{display:"grid",gridTemplateColumns:mob?"1fr":tab?"repeat(2,1fr)":"repeat(3,1fr)",gap:mob?"56px 0":tab?"64px 40px":"80px 56px"}}>{Object.entries(ED).map(([eid,ed],idx)=><div key={eid} style={{opacity:0,animation:"stg .7s ease "+idx*.1+"s both"}} onClick={()=>openRoom(eid)}>
-        <div style={{cursor:"pointer",textAlign:"center"}}><div style={{width:"100%",aspectRatio:"3/4",background:ed.grad,borderRadius:2,marginBottom:24,overflow:"hidden"}}>{ed.img&&<img src={ed.img} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>}</div>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,marginBottom:12}}><span style={{fontFamily:S.sf,fontSize:mob?16:18,letterSpacing:3,fontWeight:300}}>{ed.name}</span><span style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txGh,letterSpacing:1}}>{ed.tags.join(" · ")}</span></div>
-        <div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,color:S.txQ,lineHeight:1.8}}>{ed.bio}</div></div>
-      </div>)}</div></div><Foot/></div>}
+    {view==="archive"&&<div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/><div style={{maxWidth:900,margin:"0 auto",width:"100%",padding:mob?"48px 20px":"96px 48px",flex:"1 0 auto"}}>
+      <div style={{textAlign:"center",marginBottom:mob?64:120}}><p style={{fontFamily:S.sf,fontSize:mob?14:16,lineHeight:2.6,color:S.txQ,letterSpacing:1}}>{"느린 삶을 사는 사람들,"}<br/>{"그리고 그들이 남긴 기록"}</p></div>
+      <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:mob?"64px 0":"80px 56px"}}>{Object.entries(ED).map(([eid,ed],idx)=>{const ei=edItems(eid);const coverPhoto=(ei.find(i=>i.photo)||{}).photo;return <div key={eid} style={{opacity:0,animation:"stg .7s ease "+idx*.12+"s both",cursor:"pointer"}} onClick={()=>openRoom(eid)}>
+        <div style={{width:"100%",aspectRatio:"4/5",background:ed.grad||S.lnL,borderRadius:2,position:"relative",overflow:"hidden"}}>
+          {coverPhoto&&<img src={coverPhoto} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>}
+        </div>
+        <div style={{marginTop:mob?16:20}}>
+          <div style={{fontFamily:S.sf,fontSize:mob?15:17,fontWeight:300,letterSpacing:mob?3:4,marginBottom:8}}>{ed.name}</div>
+          <div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txGh,letterSpacing:1}}>{ed.tags.join(" · ")}</div>
+        </div>
+      </div>;})}</div></div><Foot/></div>}
 
     {/* ROOM */}
     {view==="room"&&edRoom&&ED[edRoom]&&!detail&&(()=>{const ed=ED[edRoom],ei=edItems(edRoom);return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/>
