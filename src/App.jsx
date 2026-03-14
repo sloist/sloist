@@ -434,18 +434,18 @@ export default function Sloist(){
       <div style={{flex:"1 0 auto"}}>
 
         {/* ── 히어로 이미지 ── */}
-        <div style={{maxWidth:mob?undefined:720,margin:"0 auto",padding:mob?"0":"0 48px",paddingTop:mob?0:40}}>
-          <Img grad={dl.grad} photo={dl.photo} aspect={heroAsp} r={mob?0:3}/>
+        <div style={{maxWidth:mob?undefined:680,margin:"0 auto",padding:mob?"0 16px":"0 48px",paddingTop:mob?8:36}}>
+          <Img grad={dl.grad} photo={dl.photo} aspect={heroAsp} r={mob?2:3}/>
         </div>
 
         {/* ── 기록 본문 영역 ── */}
         <div style={{maxWidth:640,margin:"0 auto",padding:mob?"0 24px":"0 32px"}}>
 
           {/* 카테고리 라벨 + 제목 */}
-          <div style={{paddingTop:mob?32:56}}>
-            <div style={{fontFamily:S.ui,fontSize:12,fontWeight:500,letterSpacing:"0.15em",color:cc,marginBottom:mob?12:16}}>{dl.root}</div>
-            <h1 style={{fontFamily:S.ui,fontSize:mob?24:36,fontWeight:300,lineHeight:1.5,letterSpacing:mob?"-0.01em":"0",margin:0,color:S.tx}}>{dl.title}</h1>
-            {metaSub&&<div style={{fontFamily:S.ui,fontSize:mob?13:14,fontWeight:300,color:S.txF,marginTop:mob?8:12}}>{metaSub}</div>}
+          <div style={{paddingTop:mob?28:48}}>
+            <div style={{fontFamily:S.ui,fontSize:11,fontWeight:500,letterSpacing:"0.15em",color:cc,marginBottom:mob?10:14}}>{dl.root}</div>
+            <h1 style={{fontFamily:S.sf,fontSize:mob?22:32,fontWeight:300,lineHeight:1.5,letterSpacing:mob?0:1,margin:0,color:S.tx}}>{dl.title}</h1>
+            {metaSub&&<div style={{fontFamily:S.ui,fontSize:mob?12:13,fontWeight:300,color:S.txF,marginTop:mob?8:10}}>{metaSub}</div>}
           </div>
 
           {/* 크레딧 — Kinfolk 패턴 */}
@@ -454,15 +454,15 @@ export default function Sloist(){
           </div>}
 
           {/* 본문 텍스트 — & Premium: 짧게, 감각의 연장 */}
-          {dl.note&&<div style={{paddingTop:mob?32:48,fontFamily:S.bd,fontSize:mob?15:17,fontWeight:400,color:S.txM,lineHeight:mob?2.0:1.9,letterSpacing:".01em"}}>{dl.note}</div>}
+          {dl.note&&<div style={{paddingTop:mob?28:40,fontFamily:S.bd,fontSize:mob?14:16,fontWeight:400,color:S.txM,lineHeight:2.0,letterSpacing:".01em"}}>{dl.note}</div>}
 
-          {/* 태그 */}
-          {dl.tags&&<div style={{marginTop:mob?48:72,paddingTop:mob?20:24,borderTop:"1px solid "+S.ln}}>
-            <TagLinks tags={dl.tags} size={12} color={S.txGh}/>
-          </div>}
-
-          {/* 액션 */}
-          <div style={{display:"flex",alignItems:"center",gap:mob?20:32,marginTop:mob?32:40,paddingTop:mob?20:24,borderTop:"1px solid "+S.ln}}>
+          {/* 태그 + 액션 */}
+          <div style={{marginTop:mob?40:64,paddingTop:mob?20:24,borderTop:"1px solid "+S.ln}}>
+            {dl.tags&&<div style={{marginBottom:mob?16:20}}>
+              <TagLinks tags={dl.tags} size={12} color={S.txGh}/>
+            </div>}
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:mob?20:32}}>
             <button onClick={()=>keep(dl.id)} style={{fontFamily:S.ui,fontSize:13,fontWeight:400,letterSpacing:"0.08em",color:isSaved(dl.id)?S.ac:S.txQ,background:"none",border:"none",cursor:"pointer",padding:"6px 0",transition:"color .4s"}}>{isSaved(dl.id)?"보관됨":"보관"}</button>
             <button onClick={()=>{navigator.clipboard?.writeText(window.location.href);flash("링크 복사됨");}} style={{fontFamily:S.ui,fontSize:13,fontWeight:400,letterSpacing:"0.08em",color:S.txQ,background:"none",border:"none",cursor:"pointer",padding:"6px 0",transition:"color .4s"}}>공유</button>
             {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.ui,fontSize:13,fontWeight:400,letterSpacing:"0.08em",color:S.txQ,textDecoration:"none",padding:"6px 0",transition:"color .4s"}}>{lLabel(dl)}</a>}
