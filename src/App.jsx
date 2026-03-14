@@ -437,25 +437,18 @@ export default function Sloist(){
       <Nav/>
       <div style={{flex:"1 0 auto"}}>
 
-        {/* ── 히어로: space는 풀블리드 + 오버레이 제목 ── */}
-        {isSpace?<div style={{position:"relative",width:"100%",maxWidth:mob?undefined:900,margin:"0 auto"}}>
-          <div style={{width:"100%",aspectRatio:heroAsp,position:"relative",overflow:"hidden"}}>
+        {/* ── 히어로: 이미지 + 중앙하단 오버레이 제목 ── */}
+        <div style={{position:"relative",width:"100%",maxWidth:mob?undefined:(isSpace?900:720),margin:"0 auto",padding:isSpace?0:(mob?"0 16px":"0 48px"),paddingTop:isSpace?0:(mob?8:36)}}>
+          <div style={{width:"100%",aspectRatio:heroAsp,position:"relative",overflow:"hidden",borderRadius:isSpace?0:(mob?2:3)}}>
             {dl.photo&&<img src={dl.photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"}}/>}
             {!dl.photo&&<div style={{width:"100%",height:"100%",background:dl.grad||S.bgAlt}}/>}
-            <div style={{position:"absolute",bottom:0,left:0,right:0,height:"55%",background:"linear-gradient(to top, rgba(36,35,32,.5), transparent)",pointerEvents:"none"}}/>
-            <div style={{position:"absolute",bottom:mob?24:40,left:mob?24:48,right:mob?24:48}}>
-              <h1 style={{fontFamily:S.sf,fontSize:mob?24:36,fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,margin:0,color:"#fff"}}>{dl.title}</h1>
-              {metaParts.length>0&&<div style={{fontFamily:S.ui,fontSize:mob?11:12,fontWeight:300,letterSpacing:"0.06em",color:"rgba(255,255,255,.65)",marginTop:mob?6:10}}>{metaParts.join("  ·  ")}</div>}
+            <div style={{position:"absolute",bottom:0,left:0,right:0,height:isSpace?"55%":"45%",background:"linear-gradient(to top, rgba(36,35,32,"+(isSpace?".5":".4")+"), transparent)",pointerEvents:"none"}}/>
+            <div style={{position:"absolute",bottom:mob?24:40,left:0,right:0,textAlign:"center",padding:mob?"0 24px":"0 48px"}}>
+              <h1 style={{fontFamily:S.sf,fontSize:mob?22:(isSpace?36:32),fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,margin:0,color:"#fff"}}>{dl.title}</h1>
+              {metaParts.length>0&&<div style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,letterSpacing:"0.08em",color:"rgba(255,255,255,.55)",marginTop:mob?6:10}}>{metaParts.join("  ·  ")}</div>}
             </div>
           </div>
         </div>
-        :<div style={{maxWidth:mob?undefined:680,margin:"0 auto",padding:mob?"0 16px":"0 48px",paddingTop:mob?8:36}}>
-          <Img grad={dl.grad} photo={dl.photo} aspect={heroAsp} r={mob?2:3}/>
-          <div style={{marginTop:mob?20:32}}>
-            <h1 style={{fontFamily:S.sf,fontSize:mob?22:32,fontWeight:300,lineHeight:1.5,letterSpacing:mob?0:1,margin:0,color:S.tx}}>{dl.title}</h1>
-            {metaParts.length>0&&<div style={{fontFamily:S.ui,fontSize:mob?11:12,fontWeight:300,letterSpacing:"0.06em",color:S.txF,marginTop:mob?6:8}}>{metaParts.join("  ·  ")}</div>}
-          </div>
-        </div>}
 
         {/* ── 기록 본문 영역 ── */}
         <div style={{maxWidth:640,margin:"0 auto",padding:mob?"0 24px":"0 32px"}}>
