@@ -284,6 +284,7 @@ export default function Sloist(){
               {dl.note&&<div style={{fontFamily:S.bd,fontSize:mob?14:15,fontWeight:400,color:S.txM,lineHeight:2.0,marginBottom:mob?48:80}}>{dl.note}</div>}
             </div>
           </>}
+          {dl.tags&&<div style={{textAlign:"center",marginBottom:32}}><div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:2,color:S.txGh}}>{dl.tags}</div></div>}
           <div style={{borderTop:"1px solid "+S.lnL,paddingTop:32,display:"flex",alignItems:"center",justifyContent:"center",gap:mob?24:40,flexWrap:"wrap"}}>
             <button onClick={()=>keep(dl.id)} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:dl.saved?S.ac:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}}>{dl.saved?"kept":"keep"}</button>
             <button onClick={()=>flash("link copied")} style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}}>share</button>
@@ -464,7 +465,7 @@ export default function Sloist(){
         {/* ── OBJET ── */}
         {activeCat==="objet"&&(()=>{
           const seq=["4/5","4/5","1/1","3/4","4/5","1/1"];const getRatio=(o,i)=>o.aspect||seq[i%seq.length];
-          return <div style={{...fd(cVis),maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:mob?24:48,rowGap:mob?48:80,alignItems:"start"}}>{catItems.map((o,i)=><div key={o.id} onClick={()=>openDetail(o)} onMouseEnter={()=>sObjHov(o.id)} onMouseLeave={()=>sObjHov(null)} style={{cursor:"pointer",position:"relative"}}><div style={{overflow:"hidden",borderRadius:2}}><SavedDot isSaved={isSaved(o.id)}/><Img grad={o.grad} photo={o.photo} aspect={getRatio(o,i)} r={2}/></div><div style={{padding:"14px 0 0"}}><div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:1.6}}>{o.title}</div>{o.maker&&<div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txQ,marginTop:4,letterSpacing:1}}>{o.maker}</div>}{o.tags&&<div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,color:S.txGh,marginTop:4,letterSpacing:1}}>{o.tags}</div>}</div></div>)}</div>;
+          return <div style={{...fd(cVis),maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:mob?24:48,rowGap:mob?48:80,alignItems:"start"}}>{catItems.map((o,i)=><div key={o.id} onClick={()=>openDetail(o)} onMouseEnter={()=>sObjHov(o.id)} onMouseLeave={()=>sObjHov(null)} style={{cursor:"pointer",position:"relative"}}><div style={{overflow:"hidden",borderRadius:2}}><SavedDot isSaved={isSaved(o.id)}/><Img grad={o.grad} photo={o.photo} aspect={getRatio(o,i)} r={2}/></div><div style={{padding:"14px 0 0"}}><div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:1.6}}>{o.title}</div>{o.maker&&<div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,color:S.txQ,marginTop:4,letterSpacing:1}}>{o.maker}</div>}</div></div>)}</div>;
         })()}
       </div>
       <Foot/>
