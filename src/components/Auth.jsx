@@ -1,7 +1,7 @@
 // ── 로그인 / 회원가입 ──
 import { useState } from "react";
 import S from "../styles/tokens";
-import { supabase } from "../lib/supabase";
+import { supabase, validatePw } from "../lib/supabase";
 
 export default function Auth({ onAuth, signIn, signUp }) {
   const [mode, setMode] = useState("login"); // login | signup | reset
@@ -19,12 +19,13 @@ export default function Auth({ onAuth, signIn, signUp }) {
     setLoading(true);
 
     if (mode === "signup") {
+      const pwErr = validatePw(pw, email);
+      if (pwErr) { setMsg(pwErr); setLoading(false); return; }
       const { error } = await signUp(email, pw, name);
       if (error) {
         const m = error.message;
         if (m.includes("already registered")) setMsg("이미 가입된 이메일입니다");
         else if (m.includes("valid email")) setMsg("올바른 이메일을 입력하세요");
-        else if (m.includes("at least")) setMsg("비밀번호는 6자 이상이어야 합니다");
         else setMsg("가입 실패: 다시 시도해주세요");
       }
       else setMsg("가입 완료. 이메일을 확인하세요.");

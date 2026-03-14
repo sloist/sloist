@@ -38,7 +38,3 @@ export const UIcon = () => (
     <circle cx="12" cy="8" r="4" /><path d="M4 21 v-1 a 8 8 0 0 1 16 0 v1" />
   </svg>
 );
-
-// 저장 표시 점
-export const SavedDot = ({ isSaved }) =>
-  isSaved ? <div style={{ position: "absolute", bottom: 10, right: 10, width: 6, height: 6, borderRadius: "50%", background: S.txGh, zIndex: 3 }} /> : null;

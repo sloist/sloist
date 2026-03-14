@@ -7,6 +7,7 @@ import { supabase } from "./supabase";
 
 export function useSupabaseData() {
   const [editors, setEditors] = useState(null);    // ED 객체
+  const [profiles, setProfiles] = useState(null);  // PF 객체 (작성자)
   const [contents, setContents] = useState(null);   // 전체 콘텐츠 배열
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,6 +27,13 @@ export function useSupabaseData() {
           .select("*")
           .order("created_at", { ascending: true });
         if (ctErr) throw ctErr;
+
+        // 작성자 프로필 (master용)
+        const { data: pfRows } = await supabase
+          .from("profiles")
+          .select("id, name, role");
+        const PF = {};
+        (pfRows || []).forEach(r => { PF[r.id] = r; });
 
         // 에디터를 { hayan: { name, bio, ... }, ... } 형태로 변환
         const ED = {};
@@ -60,12 +68,14 @@ export function useSupabaseData() {
           lat: row.lat || undefined,
           lng: row.lng || undefined,
           editor: row.editor || undefined,
+          authorId: row.author_id || undefined,
           isOfficial: row.is_official || false,
           isCover: row.is_cover || false,
           saved: false,
         }));
 
         setEditors(ED);
+        setProfiles(PF);
         setContents(items);
       } catch (e) {
         console.error("Supabase load error:", e);
@@ -82,5 +92,5 @@ export function useSupabaseData() {
   const SCENE = contents?.filter((i) => i.root === "scene") || [];
   const OBJET = contents?.filter((i) => i.root === "objet") || [];
 
-  return { ED: editors, ALL: contents, SPACE, SCENE, OBJET, loading, error };
+  return { ED: editors, PF: profiles, ALL: contents, SPACE, SCENE, OBJET, loading, error };
 }

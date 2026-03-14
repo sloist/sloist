@@ -91,10 +91,11 @@ export default function AdminPanel({ onClose }) {
             </div>
             <select value={u.role} onChange={e => changeRole(u.id, e.target.value)} style={{ fontFamily: S.sf, fontSize: 11, color: S.tx, background: S.bg, border: "1px solid " + S.ln, padding: "6px 12px", cursor: "pointer" }}>
               <option value="user">user</option>
+              <option value="staff">staff</option>
               <option value="editor">editor</option>
-              <option value="admin">admin</option>
+              <option value="master">master</option>
             </select>
-            {(u.role === "editor" || u.role === "admin") && <select value={u.editor_id || ""} onChange={async e => { const val = e.target.value || null; const { error } = await supabase.from("profiles").update({ editor_id: val }).eq("id", u.id); if (error) flash("연결 실패: " + error.message); else { flash(val ? "슬로이스트 연결 완료" : "슬로이스트 연결 해제"); load(); } }} style={{ fontFamily: S.sf, fontSize: 11, color: S.tx, background: S.bg, border: "1px solid " + S.ln, padding: "6px 12px", cursor: "pointer" }}>
+            {(u.role === "editor" || u.role === "master" || u.role === "staff") && <select value={u.editor_id || ""} onChange={async e => { const val = e.target.value || null; const { error } = await supabase.from("profiles").update({ editor_id: val }).eq("id", u.id); if (error) flash("연결 실패: " + error.message); else { flash(val ? "슬로이스트 연결 완료" : "슬로이스트 연결 해제"); load(); } }} style={{ fontFamily: S.sf, fontSize: 11, color: S.tx, background: S.bg, border: "1px solid " + S.ln, padding: "6px 12px", cursor: "pointer" }}>
               <option value="">슬로이스트 없음</option>
               {editors.map(ed => <option key={ed.id} value={ed.id}>{ed.name} ({ed.id})</option>)}
             </select>}

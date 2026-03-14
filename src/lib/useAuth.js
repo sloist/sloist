@@ -60,16 +60,28 @@ export function useAuth() {
     setProfile(null);
   }
 
+  // 프로필 업데이트
+  async function updateProfile(fields) {
+    if (!user) return { error: { message: "not logged in" } };
+    const { error } = await supabase.from("profiles").update(fields).eq("id", user.id);
+    if (!error) await loadProfile(user.id);
+    return { error };
+  }
+
   // 역할
   const role = profile?.role || "user";
-  const isAdmin = role === "admin";
-  const isEditor = role === "editor" || role === "admin";
+  const isMaster = role === "master";
+  const isStaff = role === "staff";
+  const isAdmin = isMaster; // 하위호환
+  const canWrite = isMaster || isStaff || role === "editor";
+  const isEditor = canWrite; // 하위호환: 글쓰기 가능 여부
   const editorId = profile?.editor_id || null;
+  const prefs = profile?.preferences || {};
 
   return {
     user, profile, authLoading,
-    role, isAdmin, isEditor, editorId,
-    signUp, signIn, signOut,
+    role, isMaster, isStaff, isAdmin, isEditor, canWrite, editorId, prefs,
+    signUp, signIn, signOut, updateProfile,
     reloadProfile: () => user && loadProfile(user.id),
   };
 }

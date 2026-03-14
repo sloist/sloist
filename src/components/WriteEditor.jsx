@@ -5,7 +5,7 @@ import { supabase } from "../lib/supabase";
 import { SP_C, SC_C, OB_C, TAG_GROUPS } from "../data/constants";
 import ImageUpload from "./ImageUpload";
 
-export default function WriteEditor({ editorId, isAdmin, onClose, onSaved, editItem }) {
+export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClose, onSaved, editItem }) {
   const mob = typeof window !== "undefined" && window.innerWidth < 768;
   const isEdit = !!editItem;
 
@@ -74,7 +74,8 @@ export default function WriteEditor({ editorId, isAdmin, onClose, onSaved, editI
       lat: lat ? parseFloat(lat) : null,
       lng: lng ? parseFloat(lng) : null,
       editor: editorId || null,
-      is_official: !editorId,
+      author_id: userId || null,
+      is_official: isStaff ? true : !editorId,
       updated_at: new Date().toISOString(),
     };
 
