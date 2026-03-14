@@ -86,6 +86,9 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
           "circle-color": "rgba(184,164,140,0.5)",
           "circle-stroke-width": 1.5,
           "circle-stroke-color": "rgba(249,248,247,0.8)",
+          "circle-radius-transition": { duration: 400, delay: 0 },
+          "circle-color-transition": { duration: 400, delay: 0 },
+          "circle-stroke-width-transition": { duration: 400, delay: 0 },
         },
       });
 
@@ -95,10 +98,13 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
         type: "circle",
         source: "spaces",
         paint: {
-          "circle-radius": 9,
+          "circle-radius": 8,
           "circle-color": "#B8A48C",
-          "circle-stroke-width": 2.5,
+          "circle-stroke-width": 2,
           "circle-stroke-color": "rgba(249,248,247,1)",
+          "circle-opacity": 0.9,
+          "circle-radius-transition": { duration: 500, delay: 0 },
+          "circle-opacity-transition": { duration: 500, delay: 0 },
         },
         filter: ["==", ["get", "id"], ""],
       });

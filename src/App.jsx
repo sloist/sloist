@@ -411,7 +411,11 @@ export default function Sloist(){
   };
 
   /* ═══ RENDER ═══ */
-  if(loading||!dataLoaded) return <div style={{fontFamily:S.sf,background:S.bg,color:S.txGh,minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,letterSpacing:6,fontWeight:300}}>sloist</div>;
+  if(loading||!dataLoaded) return <div style={{fontFamily:S.sf,background:S.bg,minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+    <style>{`@keyframes sloistIn{0%{opacity:0;letter-spacing:${mob?16:24}px}60%{opacity:1}100%{opacity:1;letter-spacing:${mob?10:16}px}}@keyframes sloistSub{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}`}</style>
+    <div style={{fontSize:mob?28:40,fontWeight:300,color:S.tx,animation:"sloistIn 2s cubic-bezier(.2,0,.3,1) forwards",opacity:0}}>sloist</div>
+    <div style={{fontFamily:S.sn,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,marginTop:16,animation:"sloistSub 1.2s cubic-bezier(.2,0,.3,1) .8s forwards",opacity:0}}>멈춰야 보이는 것들</div>
+  </div>;
   const h=homeFeed;
   return <div style={{fontFamily:S.bd,background:S.bg,color:S.tx,minHeight:"100vh",WebkitFontSmoothing:"antialiased"}}>
     <style>{`::selection{background:rgba(130,125,118,.15);color:inherit}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0}to{opacity:1}}`}</style>
@@ -547,7 +551,7 @@ export default function Sloist(){
             <div style={{background:S.bg,position:"relative",padding:"8px 20px 40px"}}>{f.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{display:"flex",gap:16,padding:"20px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",position:"relative",transition:"background .5s"}}><div style={{width:80,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="1/1" r={2} saved={isSaved(it.id)}/></div><div style={{paddingTop:2,flex:1}}><div style={{fontFamily:S.sn,fontSize:9,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:5}}>{it.location}</div><div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,marginBottom:4}}>{it.title}</div><div style={{fontFamily:S.sn,fontSize:11,fontWeight:300,color:S.txF,lineHeight:1.6,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.note}</div></div></div>)}</div>
           </div>;
           return <div style={{display:"flex",flexDirection:"row",minHeight:"100vh"}}>
-            <div style={{width:"42vw",flexShrink:0,position:"sticky",top:0,height:"calc(100 * var(--dvh, 1vh))",overflow:"hidden",borderRight:"1px solid "+S.lnL}}>
+            <div style={{width:"42vw",flexShrink:0,position:"sticky",top:60,height:"calc(100 * var(--dvh, 1vh) - 60px)",borderRight:"1px solid "+S.lnL}}>
               <SpaceMap spaces={f} hovId={spHov} onHover={id=>sSpHov(id)} onClick={s=>openDetail(s)} style={{width:"100%",height:"100%"}}/>
               <SpaceFilters/>
             </div>
