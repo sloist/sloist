@@ -19,12 +19,8 @@ export function lLabel(it) {
 // 이미지 컴포넌트
 export function Img({ grad, photo, aspect = "4/3", r = 2 }) {
   return (
-    <div
-      style={{ width: "100%", aspectRatio: aspect, background: grad, borderRadius: r, position: "relative", overflow: "hidden" }}
-      onMouseEnter={e => { const img = e.currentTarget.querySelector("img"); if (img) img.style.transform = "scale(1.03)"; }}
-      onMouseLeave={e => { const img = e.currentTarget.querySelector("img"); if (img) img.style.transform = "scale(1)"; }}
-    >
-      {photo && <img src={photo} alt="" loading="lazy" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1, transition: "transform 1.2s cubic-bezier(.2,0,.3,1)" }} />}
+    <div style={{ width: "100%", aspectRatio: aspect, background: grad, borderRadius: r, position: "relative", overflow: "hidden" }}>
+      {photo && <img src={photo} alt="" loading="lazy" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />}
     </div>
   );
 }
