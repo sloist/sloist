@@ -59,6 +59,8 @@ export default function Sloist(){
   const [confirmDel,sConfirmDel]=useState(null); // {id, title} for in-app delete dialog
   const [postsCat,sPostsCat]=useState("");
   const [savedCat,sSavedCat]=useState("");
+  const [editTagline,sEditTagline]=useState(false);
+  const [taglineVal,sTaglineVal]=useState("");
   const [postsAuthor,sPostsAuthor]=useState("");
   const [rpw,setRpw]=useState("");
   const [rpw2,setRpw2]=useState("");
@@ -963,10 +965,17 @@ export default function Sloist(){
               {/* 한 줄 문장 */}
               <div>
                 <div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:MS.txGh,marginBottom:8}}>한 줄 문장</div>
-                <div style={{display:"flex",gap:12,alignItems:"center"}}>
-                  <input value={tagline||""} onChange={e=>{if(e.target.value.length<=60)setPref("tagline",e.target.value);}} placeholder="나만의 문장을 남겨보세요" style={{fontFamily:S.bd,fontSize:12,fontWeight:300,background:"transparent",border:"none",borderBottom:"1px solid "+MS.lnL,padding:"6px 0",color:MS.tx,outline:"none",flex:1,letterSpacing:"0.02em"}}/>
-                  <span style={{fontFamily:S.ui,fontSize:8,color:MS.txGh,flexShrink:0}}>{(tagline||"").length}/60</span>
-                </div>
+                {editTagline
+                  ?<div style={{display:"flex",gap:12,alignItems:"center"}}>
+                    <input value={taglineVal} onChange={e=>{if(e.target.value.length<=30)sTaglineVal(e.target.value);}} placeholder="나만의 문장을 남겨보세요" autoFocus style={{fontFamily:S.bd,fontSize:12,fontWeight:300,background:"transparent",border:"none",borderBottom:"1px solid "+MS.ln,padding:"6px 0",color:MS.tx,outline:"none",flex:1,letterSpacing:"0.02em"}} onKeyDown={e=>{if(e.key==="Enter"){setPref("tagline",taglineVal.trim());sEditTagline(false);}if(e.key==="Escape")sEditTagline(false);}}/>
+                    <span style={{fontFamily:S.ui,fontSize:8,color:MS.txGh,flexShrink:0}}>{taglineVal.length}/30</span>
+                    <button onClick={()=>{setPref("tagline",taglineVal.trim());sEditTagline(false);}} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:MS.txQ,background:"none",border:"none",cursor:"pointer"}}>저장</button>
+                    <button onClick={()=>sEditTagline(false)} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:MS.txGh,background:"none",border:"none",cursor:"pointer"}}>취소</button>
+                  </div>
+                  :<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div style={{fontFamily:S.bd,fontSize:12,fontWeight:300,color:tagline?MS.txQ:MS.txGh,letterSpacing:"0.02em"}}>{tagline||"문장이 없습니다"}</div>
+                    <button onClick={()=>{sTaglineVal(tagline||"");sEditTagline(true);}} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:MS.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .3s"}} onMouseEnter={e=>e.currentTarget.style.color=MS.txQ} onMouseLeave={e=>e.currentTarget.style.color=MS.txGh}>수정</button>
+                  </div>}
               </div>
             </div>
 
