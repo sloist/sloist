@@ -556,14 +556,10 @@ export default function Sloist(){
               <div style={{height:"calc(100 * var(--dvh, 1vh))",background:S.bg,position:"relative"}}>
                 {h[0]&&<div onClick={()=>openDetail(h[0])} style={{cursor:"pointer",position:"absolute",inset:0,overflow:"hidden"}}>
                   {h[0].photo&&<img src={h[0].photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"}}/>}
-                  <div style={{position:"absolute",bottom:0,left:0,right:0,height:"65%",background:"linear-gradient(to top, rgba(30,29,26,.6), transparent)",pointerEvents:"none"}}/>
-                  <div style={{position:"absolute",bottom:mob?56:72,left:mob?24:56,right:mob?24:56}}>
-                    <div style={{fontFamily:S.sf,fontSize:mob?26:42,fontWeight:300,lineHeight:1.35,letterSpacing:mob?1:2,color:"#fff",textShadow:"0 2px 12px rgba(0,0,0,.2)"}}>{h[0].title}</div>
-                    {(h[0].location||h[0].sub||h[0].maker)&&<div style={{fontFamily:S.ui,fontSize:mob?11:12,fontWeight:300,letterSpacing:"0.12em",color:"rgba(255,255,255,.55)",marginTop:mob?8:12}}>{h[0].location||h[0].sub||h[0].maker}</div>}
-                  </div>
-                  {/* 스크롤 힌트 */}
-                  <div style={{position:"absolute",bottom:mob?16:24,left:"50%",transform:"translateX(-50%)",opacity:.4}}>
-                    <div style={{width:1,height:mob?20:28,background:"rgba(255,255,255,.5)"}}/>
+                  <div style={{position:"absolute",bottom:0,left:0,right:0,height:"55%",background:"linear-gradient(to top, rgba(30,29,26,.45), transparent)",pointerEvents:"none"}}/>
+                  <div style={{position:"absolute",bottom:mob?28:44,left:mob?24:56,right:mob?24:56}}>
+                    <div style={{fontFamily:S.sf,fontSize:mob?24:38,fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,color:"#fff",textShadow:"0 1px 8px rgba(0,0,0,.15)"}}>{h[0].title}</div>
+                    {(h[0].location||h[0].sub||h[0].maker)&&<div style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,letterSpacing:"0.1em",color:"rgba(255,255,255,.55)",marginTop:mob?6:10}}>{h[0].location||h[0].sub||h[0].maker}</div>}
                   </div>
                 </div>}
               </div>
@@ -641,39 +637,17 @@ export default function Sloist(){
                     </div>
                     <button onClick={()=>onCatClick(key)} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.12em",color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>더 보기</button>
                   </div>
-                  {/* 비대칭 레이아웃: 1큰 + 나머지 작은 */}
-                  {mob
-                    ?<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
-                      <div onClick={()=>openDetail(main)} style={{cursor:"pointer",gridRow:"span 2"}}>
-                        <Img grad={main.grad} photo={main.photo} aspect={asp} r={2}/>
-                        <div style={{marginTop:8}}>
-                          <div style={{fontFamily:S.sf,fontSize:12,fontWeight:300,lineHeight:1.5,color:S.tx}}>{main.title}</div>
-                          {(main.location||main.sub||main.maker)&&<div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,color:S.txF,marginTop:2,letterSpacing:"0.06em"}}>{main.location||main.sub||main.maker}</div>}
-                        </div>
+                  {/* 가로 스크롤 — 갤러리 느낌 */}
+                  <div style={{display:"flex",gap:mob?14:24,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",paddingBottom:4,msOverflowStyle:"none"}}>
+                    <style>{`.cat-scroll::-webkit-scrollbar{display:none}`}</style>
+                    {preview.map((it,i)=><div key={it.id} className="cat-scroll" onClick={()=>openDetail(it)} style={{cursor:"pointer",flexShrink:0,width:mob?(i===0?"60%":"40%"):(i===0?280:200)}}>
+                      <Img grad={it.grad} photo={it.photo} aspect={i===0?asp:"1/1"} r={2}/>
+                      <div style={{marginTop:mob?8:12}}>
+                        <div style={{fontFamily:S.sf,fontSize:mob?12:13,fontWeight:300,lineHeight:1.5,color:S.tx,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.title}</div>
+                        {i===0&&(it.location||it.sub||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txF,marginTop:3,letterSpacing:"0.06em"}}>{it.location||it.sub||it.maker}</div>}
                       </div>
-                      {side.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer"}}>
-                        <Img grad={it.grad} photo={it.photo} aspect="1/1" r={2}/>
-                        <div style={{marginTop:6}}>
-                          <div style={{fontFamily:S.sf,fontSize:10,fontWeight:300,lineHeight:1.4,color:S.tx,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.title}</div>
-                        </div>
-                      </div>)}
-                    </div>
-                    :<div style={{display:"grid",gridTemplateColumns:"1.4fr 1fr 1fr",gap:28,alignItems:"start"}}>
-                      <div onClick={()=>openDetail(main)} style={{cursor:"pointer"}}>
-                        <Img grad={main.grad} photo={main.photo} aspect={asp} r={2}/>
-                        <div style={{marginTop:14}}>
-                          <div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,lineHeight:1.5,color:S.tx}}>{main.title}</div>
-                          {(main.location||main.sub||main.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txF,marginTop:4,letterSpacing:"0.08em"}}>{main.location||main.sub||main.maker}</div>}
-                        </div>
-                      </div>
-                      {side.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer"}}>
-                        <Img grad={it.grad} photo={it.photo} aspect="1/1" r={2}/>
-                        <div style={{marginTop:10}}>
-                          <div style={{fontFamily:S.sf,fontSize:13,fontWeight:300,lineHeight:1.5,color:S.tx,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.title}</div>
-                        </div>
-                      </div>)}
-                    </div>
-                  }
+                    </div>)}
+                  </div>
                 </div>
               </ScrollReveal>;
             })}
