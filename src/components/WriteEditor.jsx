@@ -53,7 +53,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
   const ASPECT_OPTIONS = root === "space" ? ["4/5","3/4","1/1"] : root === "scene" ? ["3/4","16/9"] : root === "from_sloist" ? ["3/4","16/9","1/1"] : ["1/1","4/5","3/4"];
 
   async function handleSave() {
-    if (!title.trim()) { setMsg("제목을 입력하세요"); return; }
+    if (!title.trim()) { setMsg("제목을 입력해주세요"); return; }
     setSaving(true); setMsg(null);
 
     const prefix = root === "space" ? "s" : root === "scene" ? "m" : root === "from_sloist" ? "f" : "o";
@@ -259,7 +259,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
 
       {/* ─── 발행 버튼 ─── */}
       <div style={{ maxWidth: 640, margin: "0 auto", width: "100%", padding: mob ? "0 16px 48px" : "0 36px 48px" }}>
-        {msg && <div style={{ fontSize: 12, letterSpacing: 2, marginBottom: 16, textAlign: "center", color: msg.includes("완료") ? S.ac : "#B07060" }}>{msg}</div>}
+        {msg && <div style={{ fontSize: 12, letterSpacing: 2, marginBottom: 16, textAlign: "center", color: msg.includes("완료") || msg.includes("저장했습니다") ? S.ac : "#B07060" }}>{msg}</div>}
         <button onClick={handleSave} disabled={saving} style={{ width: "100%", fontFamily: S.sf, fontSize: 12, letterSpacing: 4, color: "#fff", background: S.tx, border: "none", padding: "14px 0", cursor: "pointer", opacity: saving ? 0.6 : 1, pointerEvents: saving ? "none" : "auto" }}>
           {saving ? "저장 중..." : isEdit ? "수정하기" : "저장하기"}
         </button>

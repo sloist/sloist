@@ -27,8 +27,8 @@ export default function EditorProfile({ userId, existingEditor, onClose, onSaved
   const [msg, setMsg] = useState(null);
 
   async function handleSave() {
-    if (!name.trim()) { setMsg("이름을 입력하세요"); return; }
-    if (!bio.trim()) { setMsg("소개를 입력하세요"); return; }
+    if (!name.trim()) { setMsg("이름을 입력해주세요"); return; }
+    if (!bio.trim()) { setMsg("소개를 입력해주세요"); return; }
     setSaving(true);
     setMsg(null);
 
@@ -117,7 +117,7 @@ export default function EditorProfile({ userId, existingEditor, onClose, onSaved
             </div>
           ))}
         </div>
-        {msg && <div style={{ fontSize: 12, letterSpacing: 2, marginBottom: 20, textAlign: "center", color: msg.includes("실패") ? "#B07060" : S.ac, lineHeight: 1.8 }}>{msg}</div>}
+        {msg && <div style={{ fontSize: 12, letterSpacing: 2, marginBottom: 20, textAlign: "center", color: msg.includes("완료") || msg.includes("저장되었습니다") ? S.ac : "#B07060", lineHeight: 1.8 }}>{msg}</div>}
         <button onClick={handleSave} disabled={saving} style={{ width: "100%", fontFamily: S.sf, fontSize: 12, letterSpacing: 4, color: "#fff", background: S.tx, border: "none", padding: "14px 0", cursor: "pointer", opacity: saving ? 0.5 : 1, marginBottom: 60 }}>
           {saving ? "저장 중..." : isEdit ? "수정하기" : "저장하기"}
         </button>
