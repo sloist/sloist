@@ -57,11 +57,20 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
       doubleClickZoom: true,
       attributionControl: false,
       logoPosition: "bottom-right",
+      locale: { "NavigationControl.ZoomIn": "확대", "NavigationControl.ZoomOut": "축소" },
     });
 
     map.on("load", () => {
       const canvas = containerRef.current?.querySelector(".mapboxgl-canvas");
       if (canvas) canvas.style.filter = "saturate(0.3) sepia(0.12) brightness(1.03)";
+
+      // 한글 레이블로 전환
+      const layers = map.getStyle().layers || [];
+      for (const layer of layers) {
+        if (layer.layout && layer.layout["text-field"]) {
+          map.setLayoutProperty(layer.id, "text-field", ["coalesce", ["get", "name_ko"], ["get", "name"]]);
+        }
+      }
 
       // GeoJSON 소스
       map.addSource("spaces", {
@@ -71,7 +80,7 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
           features: valid.map(s => ({
             type: "Feature",
             geometry: { type: "Point", coordinates: [s.lng, s.lat] },
-            properties: { id: s.id, title: s.title, location: s.location || "" },
+            properties: { id: s.id, title: s.title, location: s.location || "", photo: s.photo || "" },
           })),
         },
       });
@@ -82,9 +91,9 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
         type: "circle",
         source: "spaces",
         paint: {
-          "circle-radius": 5,
-          "circle-color": "rgba(184,164,140,0.5)",
-          "circle-stroke-width": 1.5,
+          "circle-radius": 6,
+          "circle-color": "rgba(184,164,140,0.6)",
+          "circle-stroke-width": 1.8,
           "circle-stroke-color": "rgba(249,248,247,0.8)",
           "circle-radius-transition": { duration: 400, delay: 0 },
           "circle-color-transition": { duration: 400, delay: 0 },
@@ -127,24 +136,60 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
         callbacksRef.current.onHover?.(id);
 
         if (popupRef.current) popupRef.current.remove();
+        const photoHtml = f.properties.photo
+          ? `<img src="${escHtml(f.properties.photo)}" style="width:120px;height:80px;object-fit:cover;border-radius:2px;display:block;margin-bottom:6px;filter:saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"/>`
+          : "";
         popupRef.current = new mapboxgl.Popup({
           closeButton: false, closeOnClick: false, offset: 14, className: "sloist-popup",
         })
           .setLngLat(f.geometry.coordinates)
           .setHTML(
-            `<div style="font-family:${S.sf};font-size:13px;font-weight:300;letter-spacing:2px;color:${S.tx};margin-bottom:2px">${escHtml(f.properties.title)}</div>` +
-            `<div style="font-family:${S.sf};font-size:10px;letter-spacing:1px;color:${S.txQ}">${escHtml(f.properties.location)}</div>`
+            photoHtml +
+            `<div style="font-family:${S.sf};font-size:12px;font-weight:300;letter-spacing:1px;color:${S.tx};max-width:120px;line-height:1.4">${escHtml(f.properties.title)}</div>`
           )
           .addTo(map);
       });
 
-      // 클릭
+      // 클릭/터치 — 모바일: 첫 탭=미리보기, 두 번째 탭=상세 진입
+      let lastTappedId = null;
       map.on("click", "spaces-pins", (e) => {
         if (!e.features || e.features.length === 0) return;
-        const id = e.features[0].properties.id;
+        const f = e.features[0];
+        const id = f.properties.id;
+        const isMobile = "ontouchstart" in window;
+        if (isMobile && lastTappedId !== id) {
+          // 첫 터치: 미리보기 팝업 표시
+          lastTappedId = id;
+          callbacksRef.current.onHover?.(id);
+          if (popupRef.current) popupRef.current.remove();
+          const photoHtml = f.properties.photo
+            ? `<img src="${escHtml(f.properties.photo)}" style="width:120px;height:80px;object-fit:cover;border-radius:2px;display:block;margin-bottom:6px;filter:saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"/>`
+            : "";
+          popupRef.current = new mapboxgl.Popup({
+            closeButton: false, closeOnClick: false, offset: 14, className: "sloist-popup",
+          })
+            .setLngLat(f.geometry.coordinates)
+            .setHTML(
+              photoHtml +
+              `<div style="font-family:${S.sf};font-size:12px;font-weight:300;letter-spacing:1px;color:${S.tx};max-width:120px;line-height:1.4">${escHtml(f.properties.title)}</div>`
+            )
+            .addTo(map);
+          return;
+        }
+        // 두 번째 탭 또는 데스크톱 클릭 → 상세 진입
+        lastTappedId = null;
         const sp = spacesRef.current;
         const s = sp?.find(x => x.id === id);
         if (s) callbacksRef.current.onClick?.(s);
+      });
+      // 지도 빈 영역 클릭 시 미리보기 리셋
+      map.on("click", (e) => {
+        const features = map.queryRenderedFeatures(e.point, { layers: ["spaces-pins"] });
+        if (!features.length) {
+          lastTappedId = null;
+          if (popupRef.current) { popupRef.current.remove(); popupRef.current = null; }
+          callbacksRef.current.onHover?.(null);
+        }
       });
 
     });
@@ -152,7 +197,7 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
     // 스타일 주입
     const styleEl = document.createElement("style");
     styleEl.textContent = `
-      .sloist-popup .mapboxgl-popup-content { background:rgba(249,248,247,.95); border:1px solid rgba(130,125,118,.1); border-radius:3px; padding:8px 12px; box-shadow:0 2px 12px rgba(0,0,0,.06); }
+      .sloist-popup .mapboxgl-popup-content { background:rgba(249,248,247,.95); border:1px solid rgba(130,125,118,.1); border-radius:3px; padding:8px; box-shadow:0 2px 12px rgba(0,0,0,.06); max-width:140px; }
       .sloist-popup .mapboxgl-popup-tip { border-top-color:rgba(249,248,247,.95); }
       .mapboxgl-canvas { outline:none; }
       .mapboxgl-ctrl-logo, .mapboxgl-ctrl-attrib { display:none !important; }

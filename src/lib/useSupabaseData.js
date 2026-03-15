@@ -42,6 +42,7 @@ export function useSupabaseData(userId) {
           tags: row.tags || [],
           img: row.img,
           grad: row.grad,
+          links: row.links || [],
         };
       });
 
@@ -59,6 +60,7 @@ export function useSupabaseData(userId) {
         type: row.type || undefined,
         otype: row.otype || undefined,
         maker: row.maker || undefined,
+        photos: row.photos || [],
         aspect: row.aspect || undefined,
         link: row.link || undefined,
         lat: row.lat || undefined,
@@ -101,6 +103,7 @@ export function useSupabaseData(userId) {
   const SPACE = contents?.filter((i) => i.root === "space") || [];
   const SCENE = contents?.filter((i) => i.root === "scene") || [];
   const OBJET = contents?.filter((i) => i.root === "objet") || [];
+  const FROMSLOIST = contents?.filter((i) => i.root === "from_sloist") || [];
 
-  return { ED: editors, PF: profiles, ALL: contents, SPACE, SCENE, OBJET, savedIds, setSavedIds, followingIds, setFollowingIds, loading, error, reload: load };
+  return { ED: editors, PF: profiles, ALL: contents, SPACE, SCENE, OBJET, FROMSLOIST, savedIds, setSavedIds, followingIds, setFollowingIds, loading, error, reload: load };
 }

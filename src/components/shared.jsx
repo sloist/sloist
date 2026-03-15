@@ -21,6 +21,7 @@ export function catColor(root) {
   if (root === "space") return S.cSpace;
   if (root === "scene") return S.cScene;
   if (root === "objet") return S.cObjet;
+  if (root === "from_sloist") return S.cFrom;
   return S.txF;
 }
 

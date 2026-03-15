@@ -18,6 +18,7 @@ const S = {
   cSpace: "#7A8B6E",
   cObjet: "#9B8574",
   cScene: "#7E8B9B",
+  cFrom: "#8B7E74",
 
   // ── 서체 ──
   // display / 영문 포인트

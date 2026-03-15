@@ -4,7 +4,9 @@
 export const SP_C = ["카페", "식당", "숙소", "휴식", "영감"];
 export const SC_C = ["음악", "영상", "서적", "장면", "루틴"];
 export const OB_C = ["가구", "조명", "그릇", "의류", "소품"];
-export const CATS = ["space", "objet", "scene"];
+export const FS_C = ["매거진", "에세이", "인터뷰", "큐레이션", "가이드"];
+export const CATS = ["space", "objet", "scene", "from_sloist"];
+export const NAV_CATS = ["space", "objet", "scene"];
 
 // 슬로이스트 태그 체계 — 결을 잡는 단어들
 export const TAG_GROUPS = {
