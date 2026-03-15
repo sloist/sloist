@@ -36,6 +36,7 @@ export default function Sloist(){
   const [detail,sDetail]=useState(null);
   const [edRoom,sEdRoom]=useState(null);
   const [toast,sToast]=useState(null);
+  const [toastVis,sToastVis]=useState(false);
   const [sov,sSov]=useState(false);
   const [sq,sSq]=useState("");
   const [showTags,sShowTags]=useState(false);
@@ -210,12 +211,14 @@ export default function Sloist(){
     if(activeCat==="space"&&!userLoc&&navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>sUserLoc({lat:p.coords.latitude,lng:p.coords.longitude}),()=>{});
   },[activeCat,userLoc]);
 
-  const flash=useCallback(m=>{sToast(m);setTimeout(()=>sToast(null),1400);},[]);
+  const toastTimer=useRef(null);
+  const flash=useCallback(m=>{if(toastTimer.current)clearTimeout(toastTimer.current);sToast(m);sToastVis(true);toastTimer.current=setTimeout(()=>{sToastVis(false);setTimeout(()=>sToast(null),600);},1800);},[]);
   const isSaved=useCallback(id=>savedIds.includes(id),[savedIds]);
   const keep=useCallback(async(id)=>{if(!auth.user){pendingAction.current={type:"keep",id};goTo("login");return;}const was=savedIds.includes(id);
     setSavedIds(p=>was?p.filter(x=>x!==id):[...p,id]);
-    const keepMsgs=["잘 두었습니다","잠시 맡아둘게요","기억해둘게요","여기 두겠습니다"];
-    flash(was?"보관 해제":keepMsgs[Math.floor(Math.random()*keepMsgs.length)]);
+    const keepIn=["잘 두었습니다","잠시 맡아둘게요","기억해둘게요","여기 두겠습니다"];
+    const keepOut=["다시 놓아둡니다","가볍게 내려놓았습니다","조용히 돌려놓았습니다"];
+    flash(was?keepOut[Math.floor(Math.random()*keepOut.length)]:keepIn[Math.floor(Math.random()*keepIn.length)]);
     const{error}=was
       ?await supabase.from("saves").delete().eq("user_id",auth.user.id).eq("content_id",id)
       :await supabase.from("saves").insert({user_id:auth.user.id,content_id:id});
@@ -516,12 +519,7 @@ export default function Sloist(){
       </div>
       <div style={{maxWidth:600,margin:"0 auto",padding:mob?"8vh 24px 40px":"14vh 32px 80px"}}>
         {/* 큰 검색 입력 */}
-        <div style={{position:"relative"}}>
-          <input ref={sqRef} placeholder="기록 검색" value={sq} onChange={e=>sSq(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&sq.trim())doSearch(sq.trim());}} style={{width:"100%",background:"transparent",border:"none",borderBottom:"1px solid "+S.ln,padding:"16px 0",fontFamily:S.ui,fontSize:mob?24:32,fontWeight:300,color:S.tx,letterSpacing:"-0.01em",outline:"none"}}/>
-          {!sq.trim()&&<div style={{position:"absolute",bottom:-1,left:0,right:0,height:3,overflow:"hidden",pointerEvents:"none"}}>
-            <div style={{position:"absolute",bottom:0,width:3,height:3,borderRadius:"50%",background:S.txGh,animation:"dotDrift 45s linear infinite",opacity:0}}/>
-          </div>}
-        </div>
+        <input ref={sqRef} placeholder="기록 검색" value={sq} onChange={e=>sSq(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&sq.trim())doSearch(sq.trim());}} style={{width:"100%",background:"transparent",border:"none",borderBottom:"1px solid "+S.ln,padding:"16px 0",fontFamily:S.ui,fontSize:mob?24:32,fontWeight:300,color:S.tx,letterSpacing:"-0.01em",outline:"none"}}/>
 
         {/* 추천 태그 */}
         {!sq.trim()&&<div style={{marginTop:mob?36:56}}>
@@ -943,7 +941,7 @@ export default function Sloist(){
     {view==="mypage"&&detail&&<DetailView/>}
 
     {showTop&&<button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:mob?28:40,right:mob?20:40,fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txGh,background:S.bg,border:"none",cursor:"pointer",padding:"8px 0",transition:"opacity .5s",opacity:.6,zIndex:100}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity=".6"}>top</button>}
-    {toast&&<div style={{position:"fixed",bottom:40,left:"50%",transform:"translateX(-50%)",color:S.txM,fontSize:11,fontWeight:300,letterSpacing:3,zIndex:300,fontFamily:S.ui}}>{toast}</div>}
+    {toast&&<div style={{position:"fixed",bottom:mob?32:40,left:"50%",transform:"translateX(-50%)",color:S.txQ,fontSize:12,fontWeight:300,letterSpacing:2,zIndex:300,fontFamily:S.ui,opacity:toastVis?1:0,transition:"opacity .6s ease"}}>{toast}</div>}
 
     {/* 삭제 확인 다이얼로그 */}
     {confirmDel&&<div style={{position:"fixed",inset:0,zIndex:400,background:"rgba(249,248,247,.92)",backdropFilter:"blur(24px)",display:"flex",alignItems:"center",justifyContent:"center",animation:"fi .4s cubic-bezier(.2,0,.3,1)"}}>
