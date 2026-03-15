@@ -6,17 +6,31 @@ import S from "../styles/tokens";
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
-function distKm(lat1, lng1, lat2, lng2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
 function escHtml(str) {
   if (!str) return "";
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function buildGeoJSON(spaces) {
+  const valid = (spaces || []).filter(s => s.lat && s.lng);
+  return {
+    type: "FeatureCollection",
+    features: valid.map(s => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [s.lng, s.lat] },
+      properties: { id: s.id, title: s.title, location: s.location || "", photo: s.photo || "" },
+    })),
+  };
+}
+
+function popupHtml(f) {
+  const photoHtml = f.properties.photo
+    ? `<img src="${escHtml(f.properties.photo)}" style="width:120px;height:80px;object-fit:cover;border-radius:2px;display:block;margin-bottom:6px;filter:saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"/>`
+    : "";
+  return `<div class="sloist-popup-inner" data-space-id="${escHtml(f.properties.id)}" style="cursor:pointer">`
+    + photoHtml
+    + `<div style="font-family:${S.sf};font-size:12px;font-weight:300;letter-spacing:1px;color:${S.tx};max-width:120px;line-height:1.4">${escHtml(f.properties.title)}</div>`
+    + `</div>`;
 }
 
 export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
@@ -26,16 +40,30 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
   const styleRef = useRef(null);
   const callbacksRef = useRef({ onHover, onClick });
   const spacesRef = useRef(spaces);
+  const lastTappedRef = useRef(null);
+  const readyRef = useRef(false);
 
   callbacksRef.current = { onHover, onClick };
   spacesRef.current = spaces;
 
-  // 맵 초기화 — spaces가 준비되면
+  // 팝업 클릭 → 상세 진입 (이벤트 위임)
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-    const sp = spacesRef.current;
-    if (!sp || sp.length === 0) return;
+    const handler = (e) => {
+      const inner = e.target.closest(".sloist-popup-inner");
+      if (!inner) return;
+      const id = inner.dataset.spaceId;
+      if (!id) return;
+      const sp = spacesRef.current;
+      const s = sp?.find(x => x.id === id);
+      if (s) callbacksRef.current.onClick?.(s);
+    };
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, []);
 
+  // 맵 초기화 함수 (한 번만 호출)
+  const initMap = useRef((sp) => {
+    if (!containerRef.current || mapRef.current) return;
     const valid = sp.filter(s => s.lat && s.lng);
     if (valid.length === 0) return;
 
@@ -45,6 +73,10 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
       [Math.min(...lngs) - 0.3, Math.min(...lats) - 0.3],
       [Math.max(...lngs) + 0.3, Math.max(...lats) + 0.3],
     ];
+
+    const isMobile = "ontouchstart" in window;
+    const pinRadius = isMobile ? 10 : 6;
+    const hoverRadius = isMobile ? 13 : 8;
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
@@ -73,25 +105,27 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
       }
 
       // GeoJSON 소스
-      map.addSource("spaces", {
-        type: "geojson",
-        data: {
-          type: "FeatureCollection",
-          features: valid.map(s => ({
-            type: "Feature",
-            geometry: { type: "Point", coordinates: [s.lng, s.lat] },
-            properties: { id: s.id, title: s.title, location: s.location || "", photo: s.photo || "" },
-          })),
+      map.addSource("spaces", { type: "geojson", data: buildGeoJSON(sp) });
+
+      // 투명 히트 영역 (모바일 터치 개선)
+      map.addLayer({
+        id: "spaces-hit",
+        type: "circle",
+        source: "spaces",
+        paint: {
+          "circle-radius": isMobile ? 22 : 14,
+          "circle-color": "transparent",
+          "circle-stroke-width": 0,
         },
       });
 
-      // 핀 — 네이티브 circle 레이어 (GPU 렌더링)
+      // 핀
       map.addLayer({
         id: "spaces-pins",
         type: "circle",
         source: "spaces",
         paint: {
-          "circle-radius": 6,
+          "circle-radius": pinRadius,
           "circle-color": "rgba(184,164,140,0.6)",
           "circle-stroke-width": 1.8,
           "circle-stroke-color": "rgba(249,248,247,0.8)",
@@ -101,13 +135,13 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
         },
       });
 
-      // 호버 핀 — 별도 레이어
+      // 호버 핀
       map.addLayer({
         id: "spaces-pins-hover",
         type: "circle",
         source: "spaces",
         paint: {
-          "circle-radius": 8,
+          "circle-radius": hoverRadius,
           "circle-color": "#B8A48C",
           "circle-stroke-width": 2,
           "circle-stroke-color": "rgba(249,248,247,1)",
@@ -118,80 +152,71 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
         filter: ["==", ["get", "id"], ""],
       });
 
+      readyRef.current = true;
+
       // 커서
-      map.on("mouseenter", "spaces-pins", () => {
+      map.on("mouseenter", "spaces-hit", () => {
         map.getCanvas().style.cursor = "pointer";
       });
-      map.on("mouseleave", "spaces-pins", () => {
+      map.on("mouseleave", "spaces-hit", () => {
         map.getCanvas().style.cursor = "";
         callbacksRef.current.onHover?.(null);
         if (popupRef.current) { popupRef.current.remove(); popupRef.current = null; }
       });
 
       // 호버
-      map.on("mousemove", "spaces-pins", (e) => {
-        if (!e.features || e.features.length === 0) return;
-        const f = e.features[0];
-        const id = f.properties.id;
-        callbacksRef.current.onHover?.(id);
+      map.on("mousemove", "spaces-hit", (e) => {
+        const features = map.queryRenderedFeatures(e.point, { layers: ["spaces-pins"] });
+        if (!features || features.length === 0) return;
+        const f = features[0];
+        callbacksRef.current.onHover?.(f.properties.id);
 
         if (popupRef.current) popupRef.current.remove();
-        const photoHtml = f.properties.photo
-          ? `<img src="${escHtml(f.properties.photo)}" style="width:120px;height:80px;object-fit:cover;border-radius:2px;display:block;margin-bottom:6px;filter:saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"/>`
-          : "";
         popupRef.current = new mapboxgl.Popup({
           closeButton: false, closeOnClick: false, offset: 14, className: "sloist-popup",
         })
           .setLngLat(f.geometry.coordinates)
-          .setHTML(
-            photoHtml +
-            `<div style="font-family:${S.sf};font-size:12px;font-weight:300;letter-spacing:1px;color:${S.tx};max-width:120px;line-height:1.4">${escHtml(f.properties.title)}</div>`
-          )
+          .setHTML(popupHtml(f))
           .addTo(map);
       });
 
-      // 클릭/터치 — 모바일: 첫 탭=미리보기, 두 번째 탭=상세 진입
-      let lastTappedId = null;
-      map.on("click", "spaces-pins", (e) => {
-        if (!e.features || e.features.length === 0) return;
-        const f = e.features[0];
+      // 클릭/터치
+      map.on("click", "spaces-hit", (e) => {
+        const features = map.queryRenderedFeatures(e.point, { layers: ["spaces-pins"] });
+        if (!features || features.length === 0) return;
+        e.preventDefault?.();
+        const f = features[0];
         const id = f.properties.id;
-        const isMobile = "ontouchstart" in window;
-        if (isMobile && lastTappedId !== id) {
-          // 첫 터치: 미리보기 팝업 표시
-          lastTappedId = id;
+
+        if (isMobile && lastTappedRef.current !== id) {
+          // 첫 터치: 미리보기 팝업
+          lastTappedRef.current = id;
           callbacksRef.current.onHover?.(id);
           if (popupRef.current) popupRef.current.remove();
-          const photoHtml = f.properties.photo
-            ? `<img src="${escHtml(f.properties.photo)}" style="width:120px;height:80px;object-fit:cover;border-radius:2px;display:block;margin-bottom:6px;filter:saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"/>`
-            : "";
           popupRef.current = new mapboxgl.Popup({
             closeButton: false, closeOnClick: false, offset: 14, className: "sloist-popup",
           })
             .setLngLat(f.geometry.coordinates)
-            .setHTML(
-              photoHtml +
-              `<div style="font-family:${S.sf};font-size:12px;font-weight:300;letter-spacing:1px;color:${S.tx};max-width:120px;line-height:1.4">${escHtml(f.properties.title)}</div>`
-            )
+            .setHTML(popupHtml(f))
             .addTo(map);
           return;
         }
         // 두 번째 탭 또는 데스크톱 클릭 → 상세 진입
-        lastTappedId = null;
-        const sp = spacesRef.current;
-        const s = sp?.find(x => x.id === id);
+        lastTappedRef.current = null;
+        const sp2 = spacesRef.current;
+        const s = sp2?.find(x => x.id === id);
         if (s) callbacksRef.current.onClick?.(s);
       });
-      // 지도 빈 영역 클릭 시 미리보기 리셋
+
+      // 빈 영역 클릭 → 리셋
       map.on("click", (e) => {
-        const features = map.queryRenderedFeatures(e.point, { layers: ["spaces-pins"] });
+        const features = map.queryRenderedFeatures(e.point, { layers: ["spaces-hit"] });
         if (!features.length) {
-          lastTappedId = null;
+          lastTappedRef.current = null;
           if (popupRef.current) { popupRef.current.remove(); popupRef.current = null; }
           callbacksRef.current.onHover?.(null);
         }
       });
-
     });
 
     // 스타일 주입
@@ -205,21 +230,34 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
     document.head.appendChild(styleEl);
     styleRef.current = styleEl;
     mapRef.current = map;
+  });
 
+  // 언마운트 시 정리
+  useEffect(() => {
     return () => {
-      map.remove();
-      mapRef.current = null;
-      if (styleRef.current) {
-        styleRef.current.remove();
-        styleRef.current = null;
-      }
+      if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; }
+      readyRef.current = false;
+      if (styleRef.current) { styleRef.current.remove(); styleRef.current = null; }
     };
+  }, []);
+
+  // spaces 로딩 시 맵 초기화 또는 소스 업데이트
+  useEffect(() => {
+    if (!spaces || spaces.length === 0) return;
+    if (!mapRef.current) {
+      // 맵이 아직 없으면 초기화
+      initMap.current(spaces);
+    } else if (readyRef.current) {
+      // 맵이 이미 있으면 소스만 업데이트
+      const src = mapRef.current.getSource("spaces");
+      if (src) src.setData(buildGeoJSON(spaces));
+    }
   }, [spaces]);
 
   // 호버 핀 필터 + 부드러운 패닝
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map || !readyRef.current) return;
     if (!map.getLayer("spaces-pins-hover")) return;
     map.setFilter("spaces-pins-hover", hovId ? ["==", ["get", "id"], hovId] : ["==", ["get", "id"], ""]);
     if (hovId) {
