@@ -223,6 +223,7 @@ export default function Sloist(){
     else if(path==="/objet"){sActiveCat("objet");}
     else if(path==="/from_sloist"){sActiveCat("from_sloist");}
     else if(path.startsWith("/room/")){const eid=path.replace("/room/","");sEdRoom(eid);sView("room");}
+    else if(path!=="/"){sView("404");}
   },[]);
 
   // 사용자 위치 — space 카테고리 진입 시에만
@@ -306,7 +307,8 @@ export default function Sloist(){
         else if(path==="/scene"){sView("home");sDetail(null);sActiveCat("scene");}
         else if(path==="/objet"){sView("home");sDetail(null);sActiveCat("objet");}
         else if(path==="/from_sloist"){sView("home");sDetail(null);sActiveCat("from_sloist");}
-        else {sView("home");sDetail(null);}
+        else if(path==="/"){sView("home");sDetail(null);}
+        else {sView("404");sDetail(null);}
         window.scrollTo({top:0});
         setTimeout(()=>{sCVis(true);isPopping.current=false;},80);
       },300);
@@ -540,7 +542,12 @@ export default function Sloist(){
           </div>
         </div>;})()}
 
-        <div style={{height:mob?16:24}}/>
+        {/* 스크롤 끝 한 마디 */}
+        <ScrollReveal distance={0} duration={1.2}>
+          <div style={{textAlign:"center",marginTop:80,marginBottom:40}}>
+            <div style={{fontFamily:S.bd,fontSize:12,fontWeight:300,color:"#D3D1C7",letterSpacing:"0.04em"}}>{["여기까지 왔군요","느린 걸음도 걸음입니다","천천히 본 사람만 남습니다"][(dl.id||"").charCodeAt(0)%3]}</div>
+          </div>
+        </ScrollReveal>
       </div>
       <Foot/>
     </div>;
@@ -636,6 +643,7 @@ export default function Sloist(){
           <ScrollReveal>
             <div style={{padding:mob?"48px 32px":"88px 56px",textAlign:"center",maxWidth:640,margin:"0 auto"}}>
               <div style={{fontFamily:S.bd,fontSize:mob?15:18,fontWeight:300,lineHeight:2.2,color:S.txM,letterSpacing:mob?0:1}}>{DAILY_QUOTES[new Date().getDay()%DAILY_QUOTES.length]}</div>
+              <div style={{fontFamily:S.bd,fontSize:12,fontWeight:300,color:"#D3D1C7",letterSpacing:"0.04em",marginTop:mob?24:36}}>{(()=>{const hr=new Date().getHours();if(hr>=5&&hr<7)return"안개가 걷히기 전입니다";if(hr>=7&&hr<11)return"천천히 눈을 떠도 됩니다";if(hr>=11&&hr<17)return"햇살이 비스듬한 시간입니다";if(hr>=17&&hr<20)return"하루가 느려지는 중입니다";return"고요한 시간입니다";})()}</div>
             </div>
           </ScrollReveal>
 
@@ -881,6 +889,13 @@ export default function Sloist(){
         </div>
       </div>
       <Foot/>
+    </div>}
+
+    {/* 404 */}
+    {view==="404"&&<div style={{minHeight:"100vh",background:S.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
+      <div style={{width:4,height:4,borderRadius:"50%",background:"#6B6560",marginBottom:40}}/>
+      <div style={{fontFamily:S.bd,fontSize:17,fontWeight:400,color:S.txF,letterSpacing:"0.04em",lineHeight:1.8,textAlign:"center"}}>여기엔 아직 아무것도 없습니다</div>
+      <div style={{marginTop:32}} onClick={goHome}><span style={{fontFamily:S.bd,fontSize:14,fontWeight:300,color:"#6B6560",cursor:"pointer",letterSpacing:"0.04em",transition:"opacity .4s"}} onMouseEnter={e=>e.currentTarget.style.opacity=".6"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>다른 길로</span></div>
     </div>}
 
     {/* ARCHIVE */}
