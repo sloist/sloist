@@ -30,7 +30,7 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
   callbacksRef.current = { onHover, onClick };
   spacesRef.current = spaces;
 
-  // 맵 초기화 — 한 번만
+  // 맵 초기화 — spaces가 준비되면
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
     const sp = spacesRef.current;
@@ -214,7 +214,7 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
         styleRef.current = null;
       }
     };
-  }, []);
+  }, [spaces]);
 
   // 호버 핀 필터 + 부드러운 패닝
   useEffect(() => {

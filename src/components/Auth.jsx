@@ -103,7 +103,7 @@ export default function Auth({ onAuth, signIn, signUp }) {
 
               {/* 메시지 */}
               <div style={{ minHeight: 18 }}>
-                {msg && <div style={{ fontFamily: S.ui, fontSize: 11, fontWeight: 300, color: msg.includes("완료") || msg.includes("전송했습니다") ? S.ac : "#c47", lineHeight: 1.7, textAlign: "center" }}>{msg}</div>}
+                {msg && <div style={{ fontFamily: S.ui, fontSize: 11, fontWeight: 300, color: msg.includes("완료") || msg.includes("전송") ? S.ac : "#c47", lineHeight: 1.7, textAlign: "center" }}>{msg}</div>}
               </div>
 
               <button

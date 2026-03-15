@@ -92,10 +92,9 @@ export default function Sloist(){
   const mob=ww<768,tab=ww<1024;
   const isFirstVisit=useRef(!sessionStorage.getItem("sloist_v"));
   useEffect(()=>{
-    const fadeStart=isFirstVisit.current?3200:1200;
-    const t1=setTimeout(()=>{sSplashFading(true);},fadeStart);
-    const t2=setTimeout(()=>{sSplashDone(true);if(isFirstVisit.current)sessionStorage.setItem("sloist_v","1");},fadeStart+1200);
-    return()=>{clearTimeout(t1);clearTimeout(t2);};
+    // 개발 편의: 스플래시 즉시 스킵
+    sSplashDone(true);
+    if(isFirstVisit.current)sessionStorage.setItem("sloist_v","1");
   },[]);
 
   // ── Lenis smooth scroll ──
@@ -277,7 +276,7 @@ export default function Sloist(){
   const openRoom=eid=>{prevState.current={view,activeCat,edRoom,detail,scroll:window.scrollY};pushUrl("/room/"+eid);mt(()=>{sEdRoom(eid);sDetail(null);sView("room");});};
   const goBack=()=>{const p=prevState.current;if(p){pushUrl(p.view==="home"?"/":"/"+p.view);sCVis(false);setTimeout(()=>{sView(p.view);sActiveCat(p.activeCat||null);sEdRoom(p.edRoom||null);sDetail(p.detail||null);prevState.current=null;setTimeout(()=>{window.scrollTo({top:p.scroll});setTimeout(()=>sCVis(true),80);},50);},350);}else goHome();};
   const closeSov=(cb)=>{sSovFading(true);setTimeout(()=>{sSov(false);sSovFading(false);if(cb)cb();},300);};
-  const doSearch=q=>{sSearchQ(q);closeSov(()=>goTo("search"));};
+  const doSearch=q=>{sSearchQ(q);pushUrl("/search");sDetail(null);sEdRoom(null);sView("search");window.scrollTo({top:0});sSovFading(true);setTimeout(()=>{sSov(false);sSovFading(false);},1200);};
 
   // popstate 핸들러 (브라우저 뒤로/앞으로가기)
   useEffect(()=>{
@@ -322,7 +321,6 @@ export default function Sloist(){
   const dl=detail?live(detail.id):null;
   const fd=(show)=>({opacity:show?1:0,transition:"opacity .8s cubic-bezier(.2,0,.3,1)"});
   const TagLinks=({tags,size=10,color=S.txGh})=>tags?<span>{tags.split(" · ").map((t,i)=><span key={t}>{i>0&&<span style={{margin:"0 3px"}}>{"  "}</span>}<span onClick={e=>{e.stopPropagation();doSearch(t);}} style={{fontFamily:S.ui,fontSize:size,fontWeight:300,letterSpacing:1,color,cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=color}>{t}</span></span>)}</span>:null;
-  const px=mob?"0 16px":"0 36px";
   useEffect(()=>{if(sov){sSq("");sShowTags(false);setTimeout(()=>sqRef.current?.focus(),120);}},[sov]);
 
   const homeFeed=useMemo(()=>{
@@ -500,7 +498,7 @@ export default function Sloist(){
 
           {/* 1) 좌: 보관 · 링크 · 글쓴이 */}
           <div style={{marginTop:mob?36:56,paddingTop:mob?14:18,borderTop:"1px solid "+S.ln,display:"flex",alignItems:"center",gap:mob?14:20}}>
-            <button onClick={()=>keep(dl.id)} style={{fontFamily:S.ui,fontSize:mob?12:12,fontWeight:300,letterSpacing:"0.08em",color:isSaved(dl.id)?S.ac:S.txF,background:"none",border:"none",cursor:"pointer",padding:mob?"6px 0":"4px 0",transition:"color 3s ease"}}>{isSaved(dl.id)?"보관됨":"보관"}</button>
+            <button onClick={()=>keep(dl.id)} style={{fontFamily:S.ui,fontSize:mob?12:12,fontWeight:300,letterSpacing:"0.08em",color:isSaved(dl.id)?S.ac:S.txF,background:"none",border:"none",cursor:"pointer",padding:mob?"6px 0":"4px 0",transition:"color .3s ease"}}>{isSaved(dl.id)?"보관됨":"보관"}</button>
             {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.ui,fontSize:mob?12:12,fontWeight:300,letterSpacing:"0.08em",color:S.txF,textDecoration:"none",padding:mob?"6px 0":"4px 0",transition:"color .4s"}}>{lLabel(dl)}</a>}
             {creditLine&&<span style={{fontFamily:S.ui,fontSize:mob?12:12,fontWeight:300,letterSpacing:"0.08em",color:S.txGh,...(dl.isOfficial?{}:{cursor:"pointer"})}} onClick={()=>{if(!dl.isOfficial&&dl.editor&&ED[dl.editor])openRoom(dl.editor);}}>{creditLine}</span>}
             {hasAdmin&&<><span style={{flex:1}}/><button onClick={()=>{setEditItem(dl);setShowWrite(true);}} style={{fontFamily:S.ui,fontSize:mob?12:12,fontWeight:300,letterSpacing:"0.08em",color:S.txF,background:"none",border:"none",cursor:"pointer",padding:mob?"6px 0":"4px 0",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txF}>수정</button><button onClick={()=>setShowMore(!showMore)} style={{fontFamily:S.ui,fontSize:mob?12:12,fontWeight:300,letterSpacing:"0.08em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:mob?"6px 0":"4px 0",transition:"color .4s"}}>{showMore?"닫기":"더보기"}</button></>}
@@ -559,7 +557,7 @@ export default function Sloist(){
     <style>{`html,body{overscroll-behavior:none}::selection{background:rgba(130,125,118,.15);color:inherit}button:focus-visible,a:focus-visible,input:focus-visible{outline:1px solid rgba(130,125,118,.3);outline-offset:2px}@keyframes mainIn{from{opacity:0}to{opacity:1}}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0}to{opacity:1}}`}</style>
 
     {/* SEARCH — Cereal 검색 오버레이 */}
-    {sov&&<div style={{position:"fixed",inset:0,background:"rgba(250,250,248,.97)",backdropFilter:"blur(40px)",zIndex:200,overflowY:"auto",opacity:sovFading?0:1,transition:"opacity .3s cubic-bezier(.2,0,.3,1)",animation:sovFading?undefined:"fi .6s cubic-bezier(.2,0,.3,1)"}}>
+    {sov&&<div style={{position:"fixed",inset:0,background:"rgba(250,250,248,.97)",backdropFilter:"blur(40px)",zIndex:200,overflowY:"auto",opacity:sovFading?0:1,transition:"opacity 1.2s cubic-bezier(.2,0,.3,1)",animation:sovFading?undefined:"fi .6s cubic-bezier(.2,0,.3,1)"}}>
       <div style={{display:"flex",justifyContent:"flex-end",padding:mob?"14px 20px":"18px 48px"}}>
         <button onClick={()=>closeSov()} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.12em",color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>닫기</button>
       </div>
@@ -681,7 +679,7 @@ export default function Sloist(){
               {key:"space",label:"space",desc:"장소의 기록",items:SPACE,asp:"4/5"},
               {key:"scene",label:"scene",desc:"장면의 기록",items:SCENE,asp:"3/4"},
               {key:"objet",label:"objet",desc:"물건의 기록",items:OBJET,asp:"1/1"},
-            ].map(({key,label,desc,items:catArr,asp,isFrom})=>{
+            ].map(({key,label,desc,items:catArr,asp})=>{
               const usedIds=h.map(x=>x?.id).filter(Boolean);
               const pool=catArr.filter(x=>!usedIds.includes(x.id));
               // 날짜 기반 시드로 셔플 — 매일 다른 조합, 같은 날은 동일
@@ -689,7 +687,6 @@ export default function Sloist(){
               const shuffled=[...pool].sort((a,b)=>{const ha=(a.id.charCodeAt(0)*seed)%997;const hb=(b.id.charCodeAt(0)*seed)%997;return ha-hb;});
               const preview=shuffled.slice(0,mob?3:4);
               if(preview.length===0)return null;
-              const main=preview[0];const side=preview.slice(1);
               return <ScrollReveal key={key}>
                 <div style={{padding:mob?"0 24px 56px":"0 56px 80px",maxWidth:1100,margin:"0 auto"}}>
                   {/* 카테고리 헤더 */}
