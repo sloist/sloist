@@ -838,7 +838,7 @@ export default function Sloist(){
             </div>
           </div>
         </div>
-        <div style={{textAlign:"center",marginBottom:mob?48:72}}><span onClick={()=>goTo("archive")} style={{fontFamily:S.sf,fontSize:mob?12:14,fontWeight:300,letterSpacing:mob?3:5,color:S.txQ,cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}><span style={{padding:mob?"10px 0":"4px 0",display:"inline-block",minHeight:mob?44:undefined}}>모든 기록 보기</span></span></div>
+        <div style={{textAlign:"center",marginBottom:mob?48:72}}><span onClick={()=>goTo("archive")} style={{fontFamily:S.sf,fontSize:mob?12:14,fontWeight:300,letterSpacing:mob?3:5,color:S.txQ,cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}><span style={{padding:mob?"10px 0":"4px 0",display:"inline-block",minHeight:mob?44:undefined}}>슬로이스트 보기</span></span></div>
         <div style={{borderTop:"1px solid "+S.ln,paddingTop:mob?28:40}}>
           <div style={{display:"flex",justifyContent:"center",gap:24,marginBottom:mob?16:20}}>
             {[["terms","이용약관"],["privacy","개인정보처리방침"]].map(([l,label])=><button key={l} onClick={()=>{sLeg(l);prevState.current={view,activeCat,edRoom,detail,scroll:window.scrollY};pushUrl("/"+l);mt(()=>{sDetail(null);sEdRoom(null);sView("legal");});}} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .3s",padding:mob?"10px 4px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txF} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>{label}</button>)}
@@ -1163,7 +1163,7 @@ export default function Sloist(){
     {showWrite&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><WriteEditor editorId={auth.editorId} isAdmin={auth.isAdmin} userId={auth.user?.id} isStaff={auth.isStaff} editItem={editItem} onClose={()=>{window.history.back();}} onSaved={()=>{window.history.back();reloadData();}}/></div>}
 
     {/* 관리자 패널 */}
-    {showAdmin&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><AdminPanel onClose={()=>setShowAdmin(false)}/></div>}
+    {showAdmin&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><AdminPanel onClose={()=>setShowAdmin(false)} onOpenRoom={(eid)=>{setShowAdmin(false);openRoom(eid);}}/></div>}
 
     {/* 슬로이스트 프로필 만들기 */}
     {showEditorProfile&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><EditorProfile userId={auth.user?.id} existingEditor={auth.editorId&&ED[auth.editorId]?{...ED[auth.editorId],id:auth.editorId}:null} onClose={()=>setShowEditorProfile(false)} onSaved={()=>{setShowEditorProfile(false);auth.reloadProfile();reloadData();if(auth.editorId){pushUrl("/room/"+auth.editorId);sEdRoom(auth.editorId);sDetail(null);sView("room");}}}/></div>}

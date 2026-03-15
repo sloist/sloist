@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import S from "../styles/tokens";
 import { supabase } from "../lib/supabase";
 
-export default function AdminPanel({ onClose }) {
+export default function AdminPanel({ onClose, onOpenRoom }) {
   const mob = typeof window !== "undefined" && window.innerWidth < 768;
   const [users, setUsers] = useState([]);
   const [editors, setEditors] = useState([]);
@@ -100,7 +100,7 @@ export default function AdminPanel({ onClose }) {
               {editors.map(ed => <option key={ed.id} value={ed.id}>{ed.name} ({ed.id})</option>)}
             </select>}
           </div>)}</div>}
-          {tab === "editors" && <div>{approved.length === 0 ? <div style={{ textAlign: "center", padding: "60px 0", color: S.txGh, fontSize: 13 }}>아직 승인된 슬로이스트 없음</div> : approved.map(ed => <div key={ed.id} style={{ display: "flex", gap: 16, alignItems: "center", padding: "16px 0", borderBottom: "1px solid " + S.lnL }}>
+          {tab === "editors" && <div>{approved.length === 0 ? <div style={{ textAlign: "center", padding: "60px 0", color: S.txGh, fontSize: 13 }}>아직 승인된 슬로이스트 없음</div> : approved.map(ed => <div key={ed.id} onClick={() => onOpenRoom && onOpenRoom(ed.id)} style={{ display: "flex", gap: 16, alignItems: "center", padding: "16px 0", borderBottom: "1px solid " + S.lnL, cursor: "pointer" }}>
             {ed.img && <div style={{ width: 40, height: 40, borderRadius: "50%", overflow: "hidden", flexShrink: 0 }}><img src={ed.img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div>}
             <div><div style={{ fontSize: 14, fontWeight: 300 }}>{ed.name} <span style={{ fontSize: 10, color: S.txGh }}>({ed.id})</span></div><div style={{ fontSize: 12, color: S.txQ }}>{ed.bio}</div></div>
           </div>)}</div>}
