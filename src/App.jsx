@@ -71,6 +71,7 @@ export default function Sloist(){
   const [scCat,sScCat]=useState([]);
   const [obCat,sObCat]=useState([]);
   const [fsCat,sFsCat]=useState([]);
+  const [seriesFilter,sSeriesFilter]=useState(null);
   const [spHov,sSpHov]=useState(null);
   const [spView,sSpView]=useState("both"); // "map"|"list"|"both"
   const [objHov,sObjHov]=useState(null);
@@ -268,7 +269,7 @@ export default function Sloist(){
   const isPopping=useRef(false);
   const pushUrl=(path)=>{if(!isPopping.current)window.history.pushState(null,"",path);};
 
-  const goHome=()=>{pushUrl("/");mt(()=>{sView("home");sDetail(null);sEdRoom(null);sActiveCat(null);sSpCat([]);sScCat([]);sObCat([]);sFsCat([]);});};
+  const goHome=()=>{pushUrl("/");mt(()=>{sView("home");sDetail(null);sEdRoom(null);sActiveCat(null);sSpCat([]);sScCat([]);sObCat([]);sFsCat([]);sSeriesFilter(null);});};
   const goTo=v=>{prevState.current={view,activeCat,edRoom,detail,scroll:window.scrollY};pushUrl("/"+v);mt(()=>{sDetail(null);sEdRoom(null);sView(v);});};
   const openDetail=it=>{scrollSave.current=window.scrollY;pushUrl("/"+it.root+"/"+(it.slug||it.id));const v=viewedIds.current;if(!v.includes(it.id)){v.push(it.id);if(v.length>10)v.shift();}mt(()=>sDetail(it));};
   const closeDetail=()=>{
@@ -354,8 +355,11 @@ export default function Sloist(){
   const catItems=useMemo(()=>{
     if(!activeCat)return homeFeed;
     const all=items.filter(i=>i.root===activeCat);
-    const fv=activeCat==="space"?spCat:activeCat==="scene"?scCat:activeCat==="from_sloist"?fsCat:obCat;
-    const fk=activeCat==="space"?"cat":(activeCat==="scene"||activeCat==="from_sloist")?"type":"otype";
+    if(activeCat==="from_sloist"){
+      return seriesFilter?all.filter(i=>i.series===seriesFilter):all;
+    }
+    const fv=activeCat==="space"?spCat:activeCat==="scene"?scCat:obCat;
+    const fk=activeCat==="space"?"cat":activeCat==="scene"?"type":"otype";
     const filtered=fv.length===0?all:all.filter(i=>fv.includes(i[fk]));
     if(activeCat==="space"||fv.length>0)return filtered;
     // scene/objet: 타입별 라운드로빈
@@ -364,7 +368,7 @@ export default function Sloist(){
     const idx=keys.map(()=>0);const result=[];
     while(result.length<filtered.length){for(let j=0;j<keys.length;j++){if(idx[j]<buckets[keys[j]].length){result.push(buckets[keys[j]][idx[j]]);idx[j]++;}}}
     return result;
-  },[activeCat,items,homeFeed,spCat,scCat,obCat,fsCat]);
+  },[activeCat,items,homeFeed,spCat,scCat,obCat,seriesFilter]);
 
   const searchR=useMemo(()=>{
     if(!searchQ.trim())return[];const q=searchQ.trim().toLowerCase();
@@ -372,8 +376,8 @@ export default function Sloist(){
   },[items,searchQ]);
 
   const onCatClick=k=>{
-    if(activeCat===k){if(window.scrollY<10){pushUrl("/");if(k==="space"){sActiveCat(null);sSpCat([]);}else lt(()=>{sActiveCat(null);sSpCat([]);sScCat([]);sObCat([]);sFsCat([]);});return;}window.scrollTo({top:0,behavior:"smooth"});return;}
-    pushUrl("/"+k);if(k==="space"){sActiveCat(k);sDetail(null);sMobFocus(null);sSpCat([]);window.scrollTo({top:0});}else lt(()=>{sActiveCat(k);sDetail(null);sMobFocus(null);sObjHov(null);sSpCat([]);sScCat([]);sObCat([]);sFsCat([]);window.scrollTo({top:0});});
+    if(activeCat===k){if(window.scrollY<10){pushUrl("/");if(k==="space"){sActiveCat(null);sSpCat([]);}else lt(()=>{sActiveCat(null);sSpCat([]);sScCat([]);sObCat([]);sFsCat([]);sSeriesFilter(null);});return;}window.scrollTo({top:0,behavior:"smooth"});return;}
+    pushUrl("/"+k);if(k==="space"){sActiveCat(k);sDetail(null);sMobFocus(null);sSpCat([]);window.scrollTo({top:0});}else lt(()=>{sActiveCat(k);sDetail(null);sMobFocus(null);sObjHov(null);sSpCat([]);sScCat([]);sObCat([]);sFsCat([]);sSeriesFilter(null);window.scrollTo({top:0});});
   };
   const FilterBtns=()=>{
     const opts=activeCat==="space"?SP_C:activeCat==="scene"?SC_C:activeCat==="from_sloist"?FS_C:OB_C;
@@ -401,7 +405,13 @@ export default function Sloist(){
       </div>
       {/* 카테고리 + 필터 */}
       {showCats&&<div style={{position:"absolute",top:r1h,left:0,right:0,background:S.bg,borderTop:"1px solid "+S.lnL,transform:headerVis?"translateY(0)":"translateY(-100%)",transition:"transform .8s cubic-bezier(.22,1,.36,1)",pointerEvents:headerVis?"auto":"none",zIndex:1}}>
-        {mob
+        {activeCat==="from_sloist"
+          ?/* 슬로이스트의 기록 — 시리즈 필터만 */
+          (()=>{const seriesList=[...new Set(FROMSLOIST.map(i=>i.series).filter(Boolean))];return <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?8:0,padding:mob?"4px 20px 8px":"6px 40px",flexWrap:"wrap"}}>
+            <button onClick={()=>sSeriesFilter(null)} style={{fontFamily:S.ui,fontSize:mob?10:10,fontWeight:!seriesFilter?400:300,letterSpacing:"0.1em",color:!seriesFilter?S.txM:S.txGh,background:"none",border:"none",padding:mob?"6px 10px":"5px 12px",cursor:"pointer",transition:"color .5s",minHeight:mob?36:undefined}}>전체</button>
+            {seriesList.map(s=><button key={s} onClick={()=>{window.scrollTo({top:0,behavior:"smooth"});sSeriesFilter(seriesFilter===s?null:s);}} style={{fontFamily:S.ui,fontSize:mob?10:10,fontWeight:seriesFilter===s?400:300,letterSpacing:"0.1em",color:seriesFilter===s?S.txM:S.txGh,background:"none",border:"none",padding:mob?"6px 10px":"5px 12px",cursor:"pointer",transition:"color .5s",flexShrink:0,minHeight:mob?36:undefined}}>{s}</button>)}
+          </div>;})()
+          :mob
           ?/* 모바일: 카테고리 한 줄, 필터 있으면 아래 한 줄 */
           <>
             <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:24,padding:"4px 0"}}>
@@ -1178,7 +1188,7 @@ export default function Sloist(){
     </div>}
 
     {/* 로그인/회원가입 — 독립 페이지 */}
-    {view==="login"&&!auth.isRecovery&&<Auth onAuth={()=>{pushUrl("/");sView("home");sDetail(null);sEdRoom(null);sActiveCat(null);sSpCat([]);sScCat([]);sObCat([]);sFsCat([]);}} onClose={()=>goBack()} signIn={auth.signIn} signUp={auth.signUp}/>}
+    {view==="login"&&!auth.isRecovery&&<Auth onAuth={()=>{pushUrl("/");sView("home");sDetail(null);sEdRoom(null);sActiveCat(null);sSpCat([]);sScCat([]);sObCat([]);sFsCat([]);sSeriesFilter(null);}} onClose={()=>goBack()} signIn={auth.signIn} signUp={auth.signUp}/>}
 
     {/* 비밀번호 재설정 화면 */}
     {auth.isRecovery&&(()=>{const doReset=async()=>{const pwErr=validatePw(rpw,auth.user?.email);if(pwErr){setRmsg(pwErr);return;}if(rpw!==rpw2){setRmsg("비밀번호가 일치하지 않습니다");return;}setRsaving(true);const{error}=await auth.updatePassword(rpw);if(error)setRmsg("변경 실패: "+error.message);else{flash("비밀번호를 변경했습니다");goHome();}setRsaving(false);};return <div style={{position:"fixed",inset:0,zIndex:600,background:S.bg,display:"flex",flexDirection:"column",padding:"0 24px"}}>
