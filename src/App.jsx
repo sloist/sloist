@@ -425,7 +425,11 @@ export default function Sloist(){
   };
   const Foot=()=><div style={{textAlign:"center",padding:mob?"64px 0 48px":"96px 0 56px",flexShrink:0}}>
     <div style={{width:3,height:3,borderRadius:"50%",background:S.ln,margin:"0 auto",marginBottom:mob?24:32}}/>
-    <button onClick={()=>goTo("about")} style={{fontFamily:S.bd,fontSize:11,fontWeight:300,letterSpacing:"0.06em",color:"#C8C5BE",background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txGh} onMouseLeave={e=>e.currentTarget.style.color="#C8C5BE"}>느리게 걷는 사람들의 시선</button>
+    <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:mob?16:20}}>
+      <button onClick={()=>goTo("about")} style={{fontFamily:S.bd,fontSize:11,fontWeight:300,letterSpacing:"0.06em",color:"#C8C5BE",background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txGh} onMouseLeave={e=>e.currentTarget.style.color="#C8C5BE"}>느리게 걷는 사람들의 시선</button>
+      <span style={{color:S.ln,fontSize:9}}>·</span>
+      <button onClick={()=>{sActiveCat("from_sloist");goTo("cat");}} style={{fontFamily:S.bd,fontSize:11,fontWeight:300,letterSpacing:"0.06em",color:"#C8C5BE",background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txGh} onMouseLeave={e=>e.currentTarget.style.color="#C8C5BE"}>슬로이스트의 기록</button>
+    </div>
   </div>;
 
   /* ── Detail — 기록 한 편을 읽는 방 ── */
@@ -540,7 +544,7 @@ export default function Sloist(){
         </div>}
 
         {/* 시리즈 연결 — 같은 시리즈의 다른 기록 */}
-        {dl.series&&(()=>{const seriesItems=items.filter(i=>i.series===dl.series&&i.id!==dl.id).sort((a,b)=>(a.created_at||"")>(b.created_at||"")?1:-1);if(seriesItems.length===0)return null;return <div style={{maxWidth:640,margin:"0 auto",padding:mob?"0 24px":"0 32px"}}>
+        {dl.series&&(()=>{const seriesItems=items.filter(i=>i.series===dl.series&&i.id!==dl.id).sort((a,b)=>(a.created_at||"")>(b.created_at||"")?1:-1).slice(0,3);if(seriesItems.length===0)return null;return <div style={{maxWidth:640,margin:"0 auto",padding:mob?"0 24px":"0 32px"}}>
           <div style={{marginTop:mob?32:48,paddingTop:mob?24:36,borderTop:"1px solid "+S.lnL}}>
             <div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:"0.15em",color:S.txGh,marginBottom:mob?16:24}}>{dl.series}</div>
             <div style={{display:"flex",flexDirection:"column",gap:mob?12:16}}>
