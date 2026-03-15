@@ -458,7 +458,6 @@ export default function Sloist(){
     const heroSub=metaSub||null;
     const deletePost=()=>sConfirmDel({id:dl.id,title:dl.title,from:"detail"});
     const [showMore,setShowMore]=useState(false);
-    const [heroLoaded,setHeroLoaded]=useState(false);
     return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column",background:S.bg}}>
       <Nav/>
       <div style={{flex:"1 0 auto"}}>
@@ -473,8 +472,8 @@ export default function Sloist(){
         :<>
         {/* ── 히어로: 이미지 + 중앙하단 오버레이 제목 ── */}
         <div style={{position:"relative",width:"100%",maxWidth:mob?undefined:(isSpace?900:720),margin:"0 auto",padding:isSpace?0:(mob?"0 16px":"0 48px"),paddingTop:isSpace?0:(mob?8:36)}}>
-          <div style={{width:"100%",aspectRatio:heroAsp,position:"relative",overflow:"hidden",borderRadius:isSpace?0:(mob?2:3),background:"#F0EEE9"}}>
-            {dl.photo&&<img className="hero-reveal" src={dl.photo} alt="" onLoad={()=>setHeroLoaded(true)} style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(0.9) contrast(0.98) brightness(1.01)",clipPath:heroLoaded?"inset(0 0 0 0)":"inset(100% 0 0 0)",transition:"clip-path 1s ease-out"}}/>}
+          <div style={{width:"100%",aspectRatio:heroAsp,position:"relative",overflow:"hidden",borderRadius:isSpace?0:(mob?2:3)}}>
+            {dl.photo&&<img src={dl.photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(0.9) contrast(0.98) brightness(1.01)"}}/>}
             {!dl.photo&&<div style={{width:"100%",height:"100%",background:dl.grad||S.bgAlt}}/>}
             <div style={{position:"absolute",bottom:0,left:0,right:0,height:isSpace?"60%":"50%",background:"linear-gradient(to top, rgba(30,29,26,"+(isSpace?".55":".45")+"), transparent)",pointerEvents:"none"}}/>
             <div style={{position:"absolute",bottom:mob?16:24,left:0,right:0,textAlign:"center",padding:mob?"0 24px":"0 48px"}}>
@@ -501,10 +500,7 @@ export default function Sloist(){
 
           {/* 1) 좌: 보관 · 링크 · 글쓴이 */}
           <div style={{marginTop:mob?40:64,paddingTop:mob?16:20,borderTop:"1px solid "+S.ln,display:"flex",alignItems:"center",gap:mob?14:20}}>
-            <button onClick={()=>keep(dl.id)} style={{fontFamily:S.ui,fontSize:12,fontWeight:300,letterSpacing:"0.08em",color:isSaved(dl.id)?S.ac:S.txF,background:"none",border:"none",cursor:"pointer",padding:mob?"12px 0":"8px 0",minHeight:mob?44:undefined,transition:"color .3s ease",display:"flex",flexDirection:"column",alignItems:"center",gap:0}}>
-              <span>{isSaved(dl.id)?"보관됨":"보관"}</span>
-              <span style={{width:4,height:4,borderRadius:"50%",background:"#6B6560",marginTop:8,opacity:isSaved(dl.id)?1:0,transition:"opacity "+(isSaved(dl.id)?".6s":".4s")+" ease"}}/>
-            </button>
+            <button onClick={()=>keep(dl.id)} style={{fontFamily:S.ui,fontSize:12,fontWeight:300,letterSpacing:"0.08em",color:isSaved(dl.id)?S.ac:S.txF,background:"none",border:"none",cursor:"pointer",padding:mob?"12px 0":"8px 0",minHeight:mob?44:undefined,transition:"color .3s ease"}}>{isSaved(dl.id)?"보관됨":"보관"}</button>
             {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.ui,fontSize:12,fontWeight:300,letterSpacing:"0.08em",color:S.txF,textDecoration:"none",padding:"8px 0",transition:"color .4s"}}>{lLabel(dl)}</a>}
             {creditLine&&<span style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,padding:"8px 0",...(dl.isOfficial?{}:{cursor:"pointer"})}} onClick={()=>{if(!dl.isOfficial&&dl.editor&&ED[dl.editor])openRoom(dl.editor);}}>{creditLine}</span>}
             {hasAdmin&&<><span style={{flex:1}}/><button onClick={()=>{setEditItem(dl);setShowWrite(true);}} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"8px 0",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>수정</button><button onClick={()=>setShowMore(!showMore)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"8px 0",transition:"color .4s"}}>{showMore?"닫기":"관리"}</button></>}
@@ -525,7 +521,6 @@ export default function Sloist(){
         {/* 3) 좌: 관련 기록 */}
         {relatedItems.length>0&&<div style={{maxWidth:640,margin:"0 auto",padding:mob?"0 24px":"0 32px"}}>
           <div style={{marginTop:mob?28:40}}>
-            <div style={{textAlign:"center",marginBottom:16}}><div style={{width:4,height:4,borderRadius:"50%",background:"#6B6560",display:"inline-block"}}/></div>
             <div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.18em",color:S.txGh,marginBottom:mob?20:28}}>{relLabel}</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:mob?16:40}}>
               {relatedItems.map(ri=><div key={ri.id} onClick={()=>openDetail(ri)} style={{cursor:"pointer"}}>
@@ -567,7 +562,7 @@ export default function Sloist(){
   </div>;}
   const h=homeFeed;
   return <div style={{fontFamily:S.bd,background:S.bg,color:S.tx,minHeight:"100vh",WebkitFontSmoothing:"antialiased",animation:"mainIn .4s ease forwards"}}>
-    <style>{`html,body{overscroll-behavior-x:none;overscroll-behavior-y:contain}::selection{background:rgba(130,125,118,.15);color:inherit}button:focus-visible,a:focus-visible,input:focus-visible{outline:1px solid rgba(130,125,118,.3);outline-offset:2px}@keyframes mainIn{from{opacity:0}to{opacity:1}}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@keyframes imageReveal{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0 0 0 0)}}@media(prefers-reduced-motion:reduce){.hero-reveal{animation:none!important;clip-path:none!important}}`}</style>
+    <style>{`html,body{overscroll-behavior-x:none;overscroll-behavior-y:contain}::selection{background:rgba(130,125,118,.15);color:inherit}button:focus-visible,a:focus-visible,input:focus-visible{outline:1px solid rgba(130,125,118,.3);outline-offset:2px}@keyframes mainIn{from{opacity:0}to{opacity:1}}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
     {/* SEARCH — Cereal 검색 오버레이 */}
     {sov&&<div style={{position:"fixed",inset:0,background:"rgba(250,250,248,.97)",backdropFilter:"blur(8px)",zIndex:200,overflowY:"auto",opacity:sovFading?0:1,transition:"opacity .3s ease",animation:sovFading?undefined:"fi .3s ease"}}>
@@ -605,8 +600,8 @@ export default function Sloist(){
           <StickyCover
             curtain={
               <div style={{height:"calc(100 * var(--dvh, 1vh))",background:S.bg,position:"relative"}}>
-                {h[0]&&<div onClick={()=>openDetail(h[0])} style={{cursor:"pointer",position:"absolute",inset:0,overflow:"hidden",background:"#F0EEE9"}}>
-                  {h[0].photo&&<img className="hero-reveal" src={h[0].photo} alt="" onLoad={e=>{if(!e.currentTarget.dataset.revealed){e.currentTarget.dataset.revealed="1";e.currentTarget.style.clipPath="inset(0 0 0 0)";}}} style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(0.9) contrast(0.98) brightness(1.01)",clipPath:"inset(100% 0 0 0)",transition:"clip-path 1s ease-out"}}/>}
+                {h[0]&&<div onClick={()=>openDetail(h[0])} style={{cursor:"pointer",position:"absolute",inset:0,overflow:"hidden"}}>
+                  {h[0].photo&&<img src={h[0].photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(0.9) contrast(0.98) brightness(1.01)"}}/>}
                   <div style={{position:"absolute",bottom:0,left:0,right:0,height:"55%",background:"linear-gradient(to top, rgba(30,29,26,.45), transparent)",pointerEvents:"none"}}/>
                   <div style={{position:"absolute",bottom:mob?28:44,left:mob?24:56,right:mob?24:56}}>
                     <div style={{fontFamily:S.sf,fontSize:mob?24:38,fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,color:"#fff",textShadow:"0 1px 8px rgba(0,0,0,.15)"}}>{h[0].title}</div>
