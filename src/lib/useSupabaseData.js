@@ -69,6 +69,7 @@ export function useSupabaseData(userId) {
         authorId: row.author_id || undefined,
         isOfficial: row.is_official || false,
         isCover: row.is_cover || false,
+        slug: row.slug || undefined,
         created_at: row.created_at || undefined,
       }));
 

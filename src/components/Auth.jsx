@@ -3,15 +3,24 @@ import { useState } from "react";
 import S from "../styles/tokens";
 import { supabase, validatePw } from "../lib/supabase";
 
-export default function Auth({ onAuth, signIn, signUp }) {
+export default function Auth({ onAuth, onClose, signIn, signUp }) {
   const [mode, setMode] = useState("login"); // login | signup | reset
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [name, setName] = useState("");
   const [msg, setMsg] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [fading, setFading] = useState(false);
 
   const mob = typeof window !== "undefined" && window.innerWidth < 768;
+
+  const fadeOut = (cb) => {
+    setFading(true);
+    setTimeout(() => { if (cb) cb(); }, 400);
+  };
+
+  const handleClose = () => fadeOut(onClose || onAuth);
+  const handleAuth = () => fadeOut(onAuth);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -44,7 +53,7 @@ export default function Auth({ onAuth, signIn, signUp }) {
           else if (m.includes("Email not confirmed")) setMsg("이메일 인증을 완료해주세요");
           else setMsg("로그인하지 못했습니다");
         }
-        else if (onAuth) onAuth();
+        else handleAuth();
       }
     } catch {
       setMsg("연결이 원활하지 않습니다");
@@ -68,7 +77,7 @@ export default function Auth({ onAuth, signIn, signUp }) {
   };
 
   return (
-    <div style={{ minHeight: "calc(100 * var(--dvh, 1vh))", background: S.bg, display: "flex", flexDirection: "column", overflowY: "auto" }}>
+    <div style={{ minHeight: "calc(100 * var(--dvh, 1vh))", background: S.bg, display: "flex", flexDirection: "column", overflowY: "auto", opacity: fading ? 0 : 1, transition: "opacity .4s ease", animation: fading ? undefined : "fi .4s ease" }}>
       <style>{`input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px ${S.bg} inset !important;-webkit-text-fill-color:${S.tx} !important;caret-color:${S.tx};transition:background-color 5000s ease-in-out 0s;}input::placeholder{color:${S.txGh};font-weight:300;}`}</style>
 
       {/* 중앙 — 로고 + 문장 + 폼 */}
@@ -145,7 +154,7 @@ export default function Auth({ onAuth, signIn, signUp }) {
           >로그인</button>
         )}
         <button
-          onClick={onAuth}
+          onClick={handleClose}
           style={{ fontFamily: S.ui, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txGh, background: "none", border: "none", cursor: "pointer", padding: mob ? "12px 4px" : "8px 0", minHeight: mob ? 44 : undefined, transition: "color .5s" }}
         >닫기</button>
       </div>
