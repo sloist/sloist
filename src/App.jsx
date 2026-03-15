@@ -430,7 +430,7 @@ export default function Sloist(){
     const editorLine=!hideEditor&&dl.editor&&ED[dl.editor]?aLabel(dl,ED):dl.isOfficial?"by sloist":null;
     const creditLine=editorLine;
     const metaSub=isSpace?dl.location:dl.root==="scene"?dl.sub:dl.root==="objet"?dl.maker:"";
-    const heroMeta=[metaSub,dl.tags].filter(Boolean);
+    const heroSub=metaSub||null;
     const deletePost=()=>sConfirmDel({id:dl.id,title:dl.title,from:"detail"});
     const [showMore,setShowMore]=useState(false);
     return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column",background:S.bg}}>
@@ -442,10 +442,10 @@ export default function Sloist(){
           <div style={{width:"100%",aspectRatio:heroAsp,position:"relative",overflow:"hidden",borderRadius:isSpace?0:(mob?2:3)}}>
             {dl.photo&&<img src={dl.photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"}}/>}
             {!dl.photo&&<div style={{width:"100%",height:"100%",background:dl.grad||S.bgAlt}}/>}
-            <div style={{position:"absolute",bottom:0,left:0,right:0,height:isSpace?"55%":"45%",background:"linear-gradient(to top, rgba(36,35,32,"+(isSpace?".5":".4")+"), transparent)",pointerEvents:"none"}}/>
-            <div style={{position:"absolute",bottom:mob?24:40,left:0,right:0,textAlign:"center",padding:mob?"0 24px":"0 48px"}}>
-              <h1 style={{fontFamily:S.sf,fontSize:mob?22:(isSpace?36:32),fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,margin:0,color:"#fff"}}>{dl.title}</h1>
-              {heroMeta.length>0&&<div style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,letterSpacing:"0.08em",color:"rgba(255,255,255,.55)",marginTop:mob?6:10}}>{heroMeta.join("  ·  ")}</div>}
+            <div style={{position:"absolute",bottom:0,left:0,right:0,height:isSpace?"60%":"50%",background:"linear-gradient(to top, rgba(30,29,26,"+(isSpace?".55":".45")+"), transparent)",pointerEvents:"none"}}/>
+            <div style={{position:"absolute",bottom:mob?28:44,left:0,right:0,textAlign:"center",padding:mob?"0 24px":"0 48px"}}>
+              <h1 style={{fontFamily:S.sf,fontSize:mob?22:(isSpace?36:32),fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,margin:0,color:"#fff",textShadow:"0 1px 8px rgba(0,0,0,.15)"}}>{dl.title}</h1>
+              {heroSub&&<div style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,letterSpacing:"0.1em",color:"rgba(255,255,255,.6)",marginTop:mob?6:10}}>{heroSub}</div>}
             </div>
           </div>
         </div>
