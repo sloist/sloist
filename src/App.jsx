@@ -30,7 +30,6 @@ export default function Sloist(){
   const MS = useMemo(()=>({...S,...(TONES[myTone]||TONES.cream)}),[myTone]);
   const setPref = (key,val) => auth.updateProfile({ preferences: { ...auth.prefs, [key]: val } });
   const [showWrite, setShowWrite] = useState(false);
-  const [showAdmin, setShowAdmin] = useState(false);
   const [showEditorProfile, setShowEditorProfile] = useState(false);
   const [editItem, setEditItem] = useState(null);
 
@@ -132,7 +131,7 @@ export default function Sloist(){
   },[showWrite]);
 
   // Lenis 파괴/재생성: 오버레이가 열릴 때
-  const overlayOpen=sov||sovFading||view==="login"||showWrite||showAdmin||showEditorProfile||!!confirmDel;
+  const overlayOpen=sov||sovFading||view==="login"||showWrite||showEditorProfile||!!confirmDel;
   useEffect(()=>{
     if(overlayOpen){
       stopLenis();
@@ -216,6 +215,7 @@ export default function Sloist(){
     else if(path==="/search"){sView("search");}
     else if(path==="/mypage"){sView("mypage");}
     else if(path==="/archive"){sView("archive");}
+    else if(path==="/admin"){sView("admin");}
     else if(path==="/terms"){sLeg("terms");sView("legal");}
     else if(path==="/privacy"){sLeg("privacy");sView("legal");}
     else if(path==="/space"){sActiveCat("space");}
@@ -303,6 +303,7 @@ export default function Sloist(){
         else if(path==="/reset-password"||path==="/auth/confirm"){sView("home");sDetail(null);}
         else if(path==="/mypage"){sView("mypage");sDetail(null);}
         else if(path==="/archive"){sView("archive");sDetail(null);}
+        else if(path==="/admin"){sView("admin");sDetail(null);}
         else if(path==="/space"){sView("home");sDetail(null);sActiveCat("space");}
         else if(path==="/scene"){sView("home");sDetail(null);sActiveCat("scene");}
         else if(path==="/objet"){sView("home");sDetail(null);sActiveCat("objet");}
@@ -389,7 +390,7 @@ export default function Sloist(){
           {auth.canWrite&&!auth.editorId&&(auth.role==="editor")&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.ac,background:"none",border:"none",cursor:"pointer",padding:mob?"12px 6px":"4px"}}>프로필</button>}
           {auth.editorId&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:mob?"12px 6px":"4px"}}>프로필</button>}
           {(auth.isMaster||auth.isStaff||(auth.role==="editor"&&auth.editorId))&&<button onClick={()=>{setEditItem(null);setShowWrite(true);}} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.ac,background:"none",border:"none",cursor:"pointer",padding:mob?"12px 6px":"4px"}}>기록</button>}
-          {auth.isAdmin&&<button onClick={()=>setShowAdmin(true)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:mob?"12px 6px":"4px"}}>관리</button>}
+          {auth.isAdmin&&<button onClick={()=>goTo("admin")} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:mob?"12px 6px":"4px"}}>관리</button>}
           <button onClick={()=>sSov(true)} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:mob?10:4}}><SIcon/></button>
           <button onClick={()=>{if(auth.user){if(view!=="mypage")goTo("mypage");}else goTo("login");}} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:mob?10:4}}><UIcon/></button>
         </div>
@@ -1163,7 +1164,7 @@ export default function Sloist(){
     {showWrite&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><WriteEditor editorId={auth.editorId} isAdmin={auth.isAdmin} userId={auth.user?.id} isStaff={auth.isStaff} editItem={editItem} onClose={()=>{window.history.back();}} onSaved={()=>{window.history.back();reloadData();}}/></div>}
 
     {/* 관리자 패널 */}
-    {showAdmin&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><AdminPanel onClose={()=>setShowAdmin(false)} onOpenRoom={(eid)=>{setShowAdmin(false);openRoom(eid);prevState.current={view:"archive",activeCat:null,edRoom:null,detail:null,scroll:0};}}/></div>}
+    {view==="admin"&&<div style={{...fd(cVis),minHeight:"100vh"}}><AdminPanel onClose={goBack} onOpenRoom={(eid)=>openRoom(eid)}/></div>}
 
     {/* 슬로이스트 프로필 만들기 */}
     {showEditorProfile&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><EditorProfile userId={auth.user?.id} existingEditor={auth.editorId&&ED[auth.editorId]?{...ED[auth.editorId],id:auth.editorId}:null} onClose={()=>setShowEditorProfile(false)} onSaved={()=>{setShowEditorProfile(false);auth.reloadProfile();reloadData();if(auth.editorId){pushUrl("/room/"+auth.editorId);sEdRoom(auth.editorId);sDetail(null);sView("room");}}}/></div>}
