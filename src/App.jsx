@@ -458,6 +458,7 @@ export default function Sloist(){
     const heroSub=metaSub||null;
     const deletePost=()=>sConfirmDel({id:dl.id,title:dl.title,from:"detail"});
     const [showMore,setShowMore]=useState(false);
+    const [heroLoaded,setHeroLoaded]=useState(false);
     return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column",background:S.bg}}>
       <Nav/>
       <div style={{flex:"1 0 auto"}}>
@@ -473,7 +474,7 @@ export default function Sloist(){
         {/* ── 히어로: 이미지 + 중앙하단 오버레이 제목 ── */}
         <div style={{position:"relative",width:"100%",maxWidth:mob?undefined:(isSpace?900:720),margin:"0 auto",padding:isSpace?0:(mob?"0 16px":"0 48px"),paddingTop:isSpace?0:(mob?8:36)}}>
           <div style={{width:"100%",aspectRatio:heroAsp,position:"relative",overflow:"hidden",borderRadius:isSpace?0:(mob?2:3),background:"#F0EEE9"}}>
-            {dl.photo&&<img className="hero-reveal" src={dl.photo} alt="" onLoad={e=>{e.currentTarget.style.animation="imageReveal 1s ease-out forwards";}} style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(0.9) contrast(0.98) brightness(1.01)",clipPath:"inset(100% 0 0 0)"}}/>}
+            {dl.photo&&<img className="hero-reveal" src={dl.photo} alt="" onLoad={()=>setHeroLoaded(true)} style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(0.9) contrast(0.98) brightness(1.01)",clipPath:heroLoaded?"inset(0 0 0 0)":"inset(100% 0 0 0)",transition:"clip-path 1s ease-out"}}/>}
             {!dl.photo&&<div style={{width:"100%",height:"100%",background:dl.grad||S.bgAlt}}/>}
             <div style={{position:"absolute",bottom:0,left:0,right:0,height:isSpace?"60%":"50%",background:"linear-gradient(to top, rgba(30,29,26,"+(isSpace?".55":".45")+"), transparent)",pointerEvents:"none"}}/>
             <div style={{position:"absolute",bottom:mob?16:24,left:0,right:0,textAlign:"center",padding:mob?"0 24px":"0 48px"}}>
@@ -498,11 +499,8 @@ export default function Sloist(){
 
           {/* ── 지그재그: 좌 → 우 → 좌 ── */}
 
-          {/* 웜그레이 점 — 본문과 액션 사이 숨표 */}
-          <div style={{textAlign:"center",margin:mob?"40px 0":"64px 0"}}><div style={{width:4,height:4,borderRadius:"50%",background:"#6B6560",display:"inline-block"}}/></div>
-
           {/* 1) 좌: 보관 · 링크 · 글쓴이 */}
-          <div style={{paddingTop:mob?16:20,borderTop:"1px solid "+S.ln,display:"flex",alignItems:"center",gap:mob?14:20}}>
+          <div style={{marginTop:mob?40:64,paddingTop:mob?16:20,borderTop:"1px solid "+S.ln,display:"flex",alignItems:"center",gap:mob?14:20}}>
             <button onClick={()=>keep(dl.id)} style={{fontFamily:S.ui,fontSize:12,fontWeight:300,letterSpacing:"0.08em",color:isSaved(dl.id)?S.ac:S.txF,background:"none",border:"none",cursor:"pointer",padding:mob?"12px 0":"8px 0",minHeight:mob?44:undefined,transition:"color .3s ease",display:"flex",flexDirection:"column",alignItems:"center",gap:0}}>
               <span>{isSaved(dl.id)?"보관됨":"보관"}</span>
               <span style={{width:4,height:4,borderRadius:"50%",background:"#6B6560",marginTop:8,opacity:isSaved(dl.id)?1:0,transition:"opacity "+(isSaved(dl.id)?".6s":".4s")+" ease"}}/>
@@ -531,7 +529,7 @@ export default function Sloist(){
             <div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.18em",color:S.txGh,marginBottom:mob?20:28}}>{relLabel}</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:mob?16:40}}>
               {relatedItems.map(ri=><div key={ri.id} onClick={()=>openDetail(ri)} style={{cursor:"pointer"}}>
-                <Img grad={ri.grad} photo={ri.photo} aspect={relAsp(ri)} r={2}/>
+                <Img grad={ri.grad} photo={ri.photo} aspect="4/5" r={2}/>
                 <div style={{fontFamily:S.ui,fontSize:mob?11:12,fontWeight:300,lineHeight:1.5,color:S.txF,marginTop:mob?8:12}}>{ri.title}</div>
               </div>)}
             </div>
@@ -608,7 +606,7 @@ export default function Sloist(){
             curtain={
               <div style={{height:"calc(100 * var(--dvh, 1vh))",background:S.bg,position:"relative"}}>
                 {h[0]&&<div onClick={()=>openDetail(h[0])} style={{cursor:"pointer",position:"absolute",inset:0,overflow:"hidden",background:"#F0EEE9"}}>
-                  {h[0].photo&&<img className="hero-reveal" src={h[0].photo} alt="" onLoad={e=>{e.currentTarget.style.animation="imageReveal 1s ease-out forwards";}} style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(0.9) contrast(0.98) brightness(1.01)",clipPath:"inset(100% 0 0 0)"}}/>}
+                  {h[0].photo&&<img className="hero-reveal" src={h[0].photo} alt="" onLoad={e=>{if(!e.currentTarget.dataset.revealed){e.currentTarget.dataset.revealed="1";e.currentTarget.style.clipPath="inset(0 0 0 0)";}}} style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(0.9) contrast(0.98) brightness(1.01)",clipPath:"inset(100% 0 0 0)",transition:"clip-path 1s ease-out"}}/>}
                   <div style={{position:"absolute",bottom:0,left:0,right:0,height:"55%",background:"linear-gradient(to top, rgba(30,29,26,.45), transparent)",pointerEvents:"none"}}/>
                   <div style={{position:"absolute",bottom:mob?28:44,left:mob?24:56,right:mob?24:56}}>
                     <div style={{fontFamily:S.sf,fontSize:mob?24:38,fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,color:"#fff",textShadow:"0 1px 8px rgba(0,0,0,.15)"}}>{h[0].title}</div>
