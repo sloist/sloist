@@ -1163,7 +1163,7 @@ export default function Sloist(){
     {showWrite&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><WriteEditor editorId={auth.editorId} isAdmin={auth.isAdmin} userId={auth.user?.id} isStaff={auth.isStaff} editItem={editItem} onClose={()=>{window.history.back();}} onSaved={()=>{window.history.back();reloadData();}}/></div>}
 
     {/* 관리자 패널 */}
-    {showAdmin&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><AdminPanel onClose={()=>setShowAdmin(false)} onOpenRoom={(eid)=>{setShowAdmin(false);openRoom(eid);}}/></div>}
+    {showAdmin&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><AdminPanel onClose={()=>setShowAdmin(false)} onOpenRoom={(eid)=>{setShowAdmin(false);openRoom(eid);prevState.current={view:"archive",activeCat:null,edRoom:null,detail:null,scroll:0};}}/></div>}
 
     {/* 슬로이스트 프로필 만들기 */}
     {showEditorProfile&&<div style={{position:"fixed",inset:0,zIndex:500,overflowY:"auto",background:S.bg}}><EditorProfile userId={auth.user?.id} existingEditor={auth.editorId&&ED[auth.editorId]?{...ED[auth.editorId],id:auth.editorId}:null} onClose={()=>setShowEditorProfile(false)} onSaved={()=>{setShowEditorProfile(false);auth.reloadProfile();reloadData();if(auth.editorId){pushUrl("/room/"+auth.editorId);sEdRoom(auth.editorId);sDetail(null);sView("room");}}}/></div>}
