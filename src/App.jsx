@@ -679,38 +679,14 @@ export default function Sloist(){
 
         {/* ── SCENE ── */}
         {activeCat==="scene"&&(()=>{
-          const cols=mob?2:3;const hasF=scCat.length>0;
-          const featured=catItems[0];const rest=catItems.slice(1);
-          return <div style={{...fd(cVis),maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px"}}>
-            {/* 피처: 첫 번째 아이템 */}
-            {featured&&<div onClick={()=>openDetail(featured)} style={{cursor:"pointer",marginBottom:mob?44:72,maxWidth:mob?undefined:720,margin:mob?undefined:"0 auto "+(mob?44:72)+"px"}}>
-              <Img saved={isSaved(featured.id)} grad={featured.grad} photo={featured.photo} aspect={featured.aspect||(featured.type==="영상"||featured.aspect==="16/9"?"16/9":"3/4")} r={2}/>
-              <div style={{padding:"16px 0 0"}}>
-                <div style={{fontFamily:S.sf,fontSize:mob?16:20,fontWeight:300,lineHeight:1.6}}>{featured.title}</div>
-                {(featured.sub||featured.location||featured.maker)&&<div style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,color:S.txF,marginTop:4,letterSpacing:"0.08em"}}>{featured.sub||featured.location||featured.maker}</div>}
-              </div>
-            </div>}
-            {/* 나머지 그리드 */}
-            <div style={{display:"grid",gridTemplateColumns:"repeat("+cols+",1fr)",columnGap:mob?20:40,rowGap:mob?44:72,gridAutoFlow:"dense"}}>{rest.map(it=>{const t=it.type||"";const isWide=t==="영상"||(it.aspect==="16/9");const span=isWide?cols:1;const asp=it.aspect||(isWide?"16/9":"3/4");return <div key={it.id} onClick={()=>openDetail(it)} style={{gridColumn:"span "+span,cursor:"pointer",position:"relative"}}><Img saved={isSaved(it.id)} grad={it.grad} photo={it.photo} aspect={asp} r={2}/><div style={{padding:"16px 0 0"}}><div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:1.6}}>{it.title}</div>{(it.sub||it.location||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txF,marginTop:4,letterSpacing:"0.08em"}}>{it.sub||it.location||it.maker}</div>}</div></div>;})}</div>
-          </div>;
+          const cols=mob?2:3;
+          return <div style={{...fd(cVis),maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"repeat("+cols+",1fr)",columnGap:mob?20:40,rowGap:mob?44:72,gridAutoFlow:"dense"}}>{catItems.map(it=>{const t=it.type||"";const isWide=t==="영상"||(it.aspect==="16/9");const span=isWide?cols:1;const asp=it.aspect||(isWide?"16/9":"3/4");return <div key={it.id} onClick={()=>openDetail(it)} style={{gridColumn:"span "+span,cursor:"pointer",position:"relative"}}><Img saved={isSaved(it.id)} grad={it.grad} photo={it.photo} aspect={asp} r={2}/><div style={{padding:"16px 0 0"}}><div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:1.6}}>{it.title}</div>{(it.sub||it.location||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txF,marginTop:4,letterSpacing:"0.08em"}}>{it.sub||it.location||it.maker}</div>}</div></div>;})}</div>;
         })()}
 
         {/* ── OBJET ── */}
         {activeCat==="objet"&&(()=>{
           const seq=["4/5","4/5","1/1","3/4","4/5","1/1"];const getRatio=(o,i)=>o.aspect||seq[i%seq.length];
-          const feat=catItems[0];const oRest=catItems.slice(1);
-          return <div style={{...fd(cVis),maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px"}}>
-            {/* 피처: 첫 번째 오브제 */}
-            {feat&&<div onClick={()=>openDetail(feat)} onMouseEnter={()=>sObjHov(feat.id)} onMouseLeave={()=>sObjHov(null)} style={{cursor:"pointer",marginBottom:mob?48:80,maxWidth:mob?undefined:560,margin:mob?undefined:"0 auto "+(mob?48:80)+"px"}}>
-              <div style={{overflow:"hidden",borderRadius:2}}><Img saved={isSaved(feat.id)} grad={feat.grad} photo={feat.photo} aspect={feat.aspect||"4/5"} r={2}/></div>
-              <div style={{padding:"14px 0 0"}}>
-                <div style={{fontFamily:S.sf,fontSize:mob?16:20,fontWeight:300,lineHeight:1.6}}>{feat.title}</div>
-                {feat.maker&&<div style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,color:S.txF,marginTop:4,letterSpacing:"0.08em"}}>{feat.maker}</div>}
-              </div>
-            </div>}
-            {/* 나머지 그리드 */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:mob?24:48,rowGap:mob?48:80,alignItems:"start"}}>{oRest.map((o,i)=><div key={o.id} onClick={()=>openDetail(o)} onMouseEnter={()=>sObjHov(o.id)} onMouseLeave={()=>sObjHov(null)} style={{cursor:"pointer",position:"relative"}}><div style={{overflow:"hidden",borderRadius:2}}><Img saved={isSaved(o.id)} grad={o.grad} photo={o.photo} aspect={getRatio(o,i+1)} r={2}/></div><div style={{padding:"14px 0 0"}}><div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:1.6}}>{o.title}</div>{o.maker&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txF,marginTop:4,letterSpacing:"0.08em"}}>{o.maker}</div>}</div></div>)}</div>
-          </div>;
+          return <div style={{...fd(cVis),maxWidth:1100,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:mob?24:48,rowGap:mob?48:80,alignItems:"start"}}>{catItems.map((o,i)=><div key={o.id} onClick={()=>openDetail(o)} onMouseEnter={()=>sObjHov(o.id)} onMouseLeave={()=>sObjHov(null)} style={{cursor:"pointer",position:"relative"}}><div style={{overflow:"hidden",borderRadius:2}}><Img saved={isSaved(o.id)} grad={o.grad} photo={o.photo} aspect={getRatio(o,i)} r={2}/></div><div style={{padding:"14px 0 0"}}><div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:1.6}}>{o.title}</div>{o.maker&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txF,marginTop:4,letterSpacing:"0.08em"}}>{o.maker}</div>}</div></div>)}</div>;
         })()}
       </div>
       <div style={{position:"relative",zIndex:3,background:S.bg,marginLeft:activeCat==="space"&&!mob?"42vw":0}}><Foot/></div>
