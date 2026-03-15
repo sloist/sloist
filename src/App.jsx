@@ -624,7 +624,10 @@ export default function Sloist(){
             ].map(({key,label,desc,items:catArr,asp})=>{
               const usedIds=h.map(x=>x?.id).filter(Boolean);
               const pool=catArr.filter(x=>!usedIds.includes(x.id));
-              const preview=pool.slice(0,mob?3:4);
+              // 날짜 기반 시드로 셔플 — 매일 다른 조합, 같은 날은 동일
+              const seed=new Date().getDate()*7+new Date().getMonth()*31;
+              const shuffled=[...pool].sort((a,b)=>{const ha=(a.id.charCodeAt(0)*seed)%997;const hb=(b.id.charCodeAt(0)*seed)%997;return ha-hb;});
+              const preview=shuffled.slice(0,mob?3:4);
               if(preview.length===0)return null;
               const main=preview[0];const side=preview.slice(1);
               return <ScrollReveal key={key}>
