@@ -130,23 +130,23 @@ export default function Auth({ onAuth, signIn, signUp }) {
           <>
             <button
               onClick={() => { setMode("reset"); setMsg(null); }}
-              style={{ fontFamily: S.ui, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
+              style={{ fontFamily: S.ui, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: mob ? "12px 4px" : "8px 0", minHeight: mob ? 44 : undefined, transition: "color .5s" }}
             >비밀번호 찾기</button>
             <button
               onClick={() => { setMode("signup"); setMsg(null); }}
-              style={{ fontFamily: S.ui, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
+              style={{ fontFamily: S.ui, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: mob ? "12px 4px" : "8px 0", minHeight: mob ? 44 : undefined, transition: "color .5s" }}
             >가입</button>
           </>
         )}
         {(mode === "signup" || mode === "reset") && (
           <button
             onClick={() => { setMode("login"); setMsg(null); }}
-            style={{ fontFamily: S.ui, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
+            style={{ fontFamily: S.ui, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: mob ? "12px 4px" : "8px 0", minHeight: mob ? 44 : undefined, transition: "color .5s" }}
           >로그인</button>
         )}
         <button
           onClick={onAuth}
-          style={{ fontFamily: S.ui, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txGh, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
+          style={{ fontFamily: S.ui, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txGh, background: "none", border: "none", cursor: "pointer", padding: mob ? "12px 4px" : "8px 0", minHeight: mob ? 44 : undefined, transition: "color .5s" }}
         >닫기</button>
       </div>
     </div>

@@ -384,12 +384,12 @@ export default function Sloist(){
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:r1h,padding:mob?"0 24px":"0 48px",background:S.bg,position:"relative",zIndex:2}}>
         {backAction?<button onClick={backAction} style={{fontFamily:S.ui,fontSize:12,fontWeight:400,letterSpacing:"0.1em",color:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .4s",padding:mob?"8px 0":"4px 0",minHeight:44}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>뒤로</button>:<div onClick={goHome} style={{fontFamily:S.sf,fontSize:mob?20:24,fontWeight:300,letterSpacing:mob?6:10,color:S.tx,cursor:"pointer",transition:"opacity .5s ease"}} onMouseEnter={e=>e.currentTarget.style.opacity=".6"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>sloist</div>}
         <div style={{display:"flex",alignItems:"center",gap:mob?12:20}}>
-          {auth.canWrite&&!auth.editorId&&(auth.role==="editor")&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필</button>}
-          {auth.editorId&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:4}}>프로필</button>}
-          {(auth.isMaster||auth.isStaff||(auth.role==="editor"&&auth.editorId))&&<button onClick={()=>{setEditItem(null);setShowWrite(true);}} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.ac,background:"none",border:"none",cursor:"pointer",padding:4}}>기록</button>}
-          {auth.isAdmin&&<button onClick={()=>setShowAdmin(true)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:4}}>관리</button>}
-          <button onClick={()=>sSov(true)} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><SIcon/></button>
-          <button onClick={()=>{if(auth.user){if(view!=="mypage")goTo("mypage");}else goTo("login");}} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:4}}><UIcon/></button>
+          {auth.canWrite&&!auth.editorId&&(auth.role==="editor")&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.ac,background:"none",border:"none",cursor:"pointer",padding:mob?"12px 6px":"4px"}}>프로필</button>}
+          {auth.editorId&&<button onClick={()=>setShowEditorProfile(true)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:mob?"12px 6px":"4px"}}>프로필</button>}
+          {(auth.isMaster||auth.isStaff||(auth.role==="editor"&&auth.editorId))&&<button onClick={()=>{setEditItem(null);setShowWrite(true);}} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.ac,background:"none",border:"none",cursor:"pointer",padding:mob?"12px 6px":"4px"}}>기록</button>}
+          {auth.isAdmin&&<button onClick={()=>setShowAdmin(true)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:mob?"12px 6px":"4px"}}>관리</button>}
+          <button onClick={()=>sSov(true)} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:mob?10:4}}><SIcon/></button>
+          <button onClick={()=>{if(auth.user){if(view!=="mypage")goTo("mypage");}else goTo("login");}} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:mob?10:4}}><UIcon/></button>
         </div>
       </div>
       {/* 카테고리 + 필터 */}
@@ -416,7 +416,7 @@ export default function Sloist(){
       </div>}
     </div>;
   };
-  const Foot=()=><div style={{textAlign:"center",padding:"64px 0 40px",flexShrink:0}}><button onClick={()=>goTo("about")} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txF} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>슬로이스트에 대하여</button></div>;
+  const Foot=()=><div style={{textAlign:"center",padding:"64px 0 40px",flexShrink:0}}><button onClick={()=>goTo("about")} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txF} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>슬로이스트에 대하여</button></div>;
 
   /* ── Detail — 기록 한 편을 읽는 방 ── */
   const DetailView=({hideEditor})=>{
@@ -498,7 +498,7 @@ export default function Sloist(){
 
           {/* 1) 좌: 보관 · 링크 · 글쓴이 */}
           <div style={{marginTop:mob?36:56,paddingTop:mob?14:18,borderTop:"1px solid "+S.ln,display:"flex",alignItems:"center",gap:mob?14:20}}>
-            <button onClick={()=>keep(dl.id)} style={{fontFamily:S.ui,fontSize:12,fontWeight:300,letterSpacing:"0.08em",color:isSaved(dl.id)?S.ac:S.txF,background:"none",border:"none",cursor:"pointer",padding:"8px 0",transition:"color .3s ease"}}>{isSaved(dl.id)?"보관됨":"보관"}</button>
+            <button onClick={()=>keep(dl.id)} style={{fontFamily:S.ui,fontSize:12,fontWeight:300,letterSpacing:"0.08em",color:isSaved(dl.id)?S.ac:S.txF,background:"none",border:"none",cursor:"pointer",padding:mob?"12px 0":"8px 0",minHeight:mob?44:undefined,transition:"color .3s ease"}}>{isSaved(dl.id)?"보관됨":"보관"}</button>
             {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.ui,fontSize:12,fontWeight:300,letterSpacing:"0.08em",color:S.txF,textDecoration:"none",padding:"8px 0",transition:"color .4s"}}>{lLabel(dl)}</a>}
             {creditLine&&<span style={{fontFamily:S.ui,fontSize:12,fontWeight:300,letterSpacing:"0.08em",color:S.txGh,padding:"8px 0",...(dl.isOfficial?{}:{cursor:"pointer"})}} onClick={()=>{if(!dl.isOfficial&&dl.editor&&ED[dl.editor])openRoom(dl.editor);}}>{creditLine}</span>}
             {hasAdmin&&<><span style={{flex:1}}/><button onClick={()=>{setEditItem(dl);setShowWrite(true);}} style={{fontFamily:S.ui,fontSize:12,fontWeight:300,letterSpacing:"0.08em",color:S.txF,background:"none",border:"none",cursor:"pointer",padding:"8px 0",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txF}>수정</button><button onClick={()=>setShowMore(!showMore)} style={{fontFamily:S.ui,fontSize:12,fontWeight:300,letterSpacing:"0.08em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"8px 0",transition:"color .4s"}}>{showMore?"닫기":"관리"}</button></>}
@@ -506,8 +506,8 @@ export default function Sloist(){
 
           {/* 관리 더보기 */}
           {hasAdmin&&showMore&&<div style={{display:"flex",gap:mob?16:20,paddingTop:8}}>
-            {auth.isAdmin&&<button onClick={()=>setCover(dl.id)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:dl.isCover?S.ac:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"4px 0",transition:"color .4s"}}>{dl.isCover?"커버":"커버로 지정"}</button>}
-            <button onClick={deletePost} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"4px 0",transition:"color .4s"}}>삭제</button>
+            {auth.isAdmin&&<button onClick={()=>setCover(dl.id)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:dl.isCover?S.ac:S.txGh,background:"none",border:"none",cursor:"pointer",padding:mob?"8px 0":"4px 0",transition:"color .4s"}}>{dl.isCover?"커버":"커버로 지정"}</button>}
+            <button onClick={deletePost} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:mob?"8px 0":"4px 0",transition:"color .4s"}}>삭제</button>
           </div>}
 
           {/* 2) 우: 태그 */}
@@ -567,7 +567,7 @@ export default function Sloist(){
 
         {/* 추천 태그 — 토글 */}
         {!sq.trim()&&<div style={{marginTop:mob?32:48}}>
-          <button onClick={()=>sShowTags(!showTags)} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.12em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"4px 0",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>{showTags?"태그 닫기":"태그 보기"}</button>
+          <button onClick={()=>sShowTags(!showTags)} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.12em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:mob?"8px 0":"4px 0",minHeight:mob?44:undefined,transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>{showTags?"태그 닫기":"태그 보기"}</button>
           {showTags&&<div style={{marginTop:mob?20:28}}>
           <div style={{display:"grid",gridTemplateColumns:mob?"repeat(3,1fr)":"repeat(5,1fr)",gap:mob?"20px 16px":"32px 28px"}}>
           {Object.entries(TAG_GROUPS).map(([group,tags])=><div key={group}>
@@ -696,7 +696,7 @@ export default function Sloist(){
                       <span style={{fontFamily:S.sf,fontSize:mob?14:16,fontWeight:300,letterSpacing:mob?3:5,color:S.tx}}>{label}</span>
                       <span style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,letterSpacing:"0.08em",color:S.txGh,marginLeft:mob?10:14}}>{desc}</span>
                     </div>
-                    <button onClick={()=>onCatClick(key)} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.12em",color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>더 보기</button>
+                    <button onClick={()=>onCatClick(key)} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.12em",color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s",padding:mob?"8px 0":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>더 보기</button>
                   </div>
                   <div style={{display:"grid",gridTemplateColumns:mob?"repeat(3,1fr)":"repeat(4,1fr)",gap:mob?16:28}}>
                     {preview.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer"}}>
@@ -830,10 +830,10 @@ export default function Sloist(){
             </div>
           </div>
         </div>
-        <div style={{textAlign:"center",marginBottom:mob?48:72}}><span onClick={()=>goTo("archive")} style={{fontFamily:S.sf,fontSize:mob?12:14,fontWeight:300,letterSpacing:mob?3:5,color:S.txQ,cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>모든 기록 보기</span></div>
+        <div style={{textAlign:"center",marginBottom:mob?48:72}}><span onClick={()=>goTo("archive")} style={{fontFamily:S.sf,fontSize:mob?12:14,fontWeight:300,letterSpacing:mob?3:5,color:S.txQ,cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}><span style={{padding:mob?"10px 0":"4px 0",display:"inline-block",minHeight:mob?44:undefined}}>모든 기록 보기</span></span></div>
         <div style={{borderTop:"1px solid "+S.ln,paddingTop:mob?28:40}}>
           <div style={{display:"flex",justifyContent:"center",gap:24,marginBottom:mob?16:20}}>
-            {[["terms","이용약관"],["privacy","개인정보처리방침"]].map(([l,label])=><button key={l} onClick={()=>{sLeg(l);prevState.current={view,activeCat,edRoom,detail,scroll:window.scrollY};pushUrl("/"+l);mt(()=>{sDetail(null);sEdRoom(null);sView("legal");});}} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .3s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txF} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>{label}</button>)}
+            {[["terms","이용약관"],["privacy","개인정보처리방침"]].map(([l,label])=><button key={l} onClick={()=>{sLeg(l);prevState.current={view,activeCat,edRoom,detail,scroll:window.scrollY};pushUrl("/"+l);mt(()=>{sDetail(null);sEdRoom(null);sView("legal");});}} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .3s",padding:mob?"10px 4px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txF} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>{label}</button>)}
           </div>
           <div style={{textAlign:"center",fontSize:10,color:S.txGh,lineHeight:2,letterSpacing:.5}}>&copy; 2026 sloist. all rights reserved.</div>
         </div>
@@ -906,7 +906,7 @@ export default function Sloist(){
             <div style={{fontFamily:S.sf,fontSize:mob?18:22,fontWeight:300,letterSpacing:mob?4:6,marginBottom:14}}>{ed.name}</div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:mob?12:16,flexWrap:"wrap",marginBottom:16}}>
               <span style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txGh,letterSpacing:2}}>{(ed.tags||[]).join(" · ")}</span>
-              <button onClick={()=>toggleFol(edRoom)} style={{fontFamily:S.ui,fontSize:10,fontWeight:following.includes(edRoom)?400:300,letterSpacing:2,color:following.includes(edRoom)?S.bg:S.txM,background:following.includes(edRoom)?S.txM:"transparent",border:following.includes(edRoom)?"none":"1px solid "+S.ln,borderRadius:20,padding:mob?"5px 14px":"5px 16px",cursor:"pointer",transition:"all .4s"}}>{following.includes(edRoom)?"팔로잉":"팔로우"}</button>
+              <button onClick={()=>toggleFol(edRoom)} style={{fontFamily:S.ui,fontSize:10,fontWeight:following.includes(edRoom)?400:300,letterSpacing:2,color:following.includes(edRoom)?S.bg:S.txM,background:following.includes(edRoom)?S.txM:"transparent",border:following.includes(edRoom)?"none":"1px solid "+S.ln,borderRadius:20,padding:mob?"8px 18px":"5px 16px",cursor:"pointer",transition:"all .4s",minHeight:mob?36:undefined}}>{following.includes(edRoom)?"팔로잉":"팔로우"}</button>
             </div>
             <div style={{fontFamily:S.bd,fontSize:12,fontWeight:300,color:S.txQ,lineHeight:2.0}}>{ed.bio}</div>
           </div>
@@ -922,9 +922,9 @@ export default function Sloist(){
       <div style={{flex:"1 0 auto"}}>
         {/* 탭 */}
         <div style={{display:"flex",justifyContent:"center",alignItems:"baseline",gap:mob?24:36,padding:mob?"20px 0 0":"32px 0 0"}}>
-          {[["saved","보관"],["following","팔로잉"]].map(([k,label])=><button key={k} onClick={()=>lt(()=>sMyTab(k))} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:mob?3:4,color:MS.tx,opacity:myTab===k?1:.5,background:"none",border:"none",padding:"6px 0",cursor:"pointer",transition:"opacity .5s ease"}}>{label}</button>)}
-          {auth.isEditor&&<button onClick={()=>lt(()=>sMyTab("posts"))} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:mob?3:4,color:MS.tx,opacity:myTab==="posts"?1:.5,background:"none",border:"none",cursor:"pointer",transition:"opacity .5s"}}>내 기록</button>}
-          <button onClick={()=>lt(()=>sMyTab("settings"))} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:mob?3:4,color:MS.tx,opacity:myTab==="settings"?1:.5,background:"none",border:"none",cursor:"pointer",transition:"opacity .5s"}}>설정</button>
+          {[["saved","보관"],["following","팔로잉"]].map(([k,label])=><button key={k} onClick={()=>lt(()=>sMyTab(k))} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:mob?3:4,color:MS.tx,opacity:myTab===k?1:.5,background:"none",border:"none",padding:mob?"10px 0":"6px 0",minHeight:mob?44:undefined,cursor:"pointer",transition:"opacity .5s ease"}}>{label}</button>)}
+          {auth.isEditor&&<button onClick={()=>lt(()=>sMyTab("posts"))} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:mob?3:4,color:MS.tx,opacity:myTab==="posts"?1:.5,background:"none",border:"none",padding:mob?"10px 0":"6px 0",minHeight:mob?44:undefined,cursor:"pointer",transition:"opacity .5s"}}>내 기록</button>}
+          <button onClick={()=>lt(()=>sMyTab("settings"))} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:mob?3:4,color:MS.tx,opacity:myTab==="settings"?1:.5,background:"none",border:"none",padding:mob?"10px 0":"6px 0",minHeight:mob?44:undefined,cursor:"pointer",transition:"opacity .5s"}}>설정</button>
         </div>
         {/* 한 줄 문장 — 탭 아래, 메모처럼 */}
         {tagline&&<div style={{textAlign:"center",padding:mob?"12px 24px 0":"16px 48px 0"}}><div style={{fontFamily:S.bd,fontSize:mob?11:12,fontWeight:300,color:MS.txGh,letterSpacing:"0.02em",lineHeight:1.6}}>{tagline}</div></div>}
@@ -1071,15 +1071,15 @@ export default function Sloist(){
                   <input type="password" value={curPw} onChange={e=>sCurPw(e.target.value)} placeholder="현재 비밀번호" autoFocus style={{fontFamily:S.ui,fontSize:12,fontWeight:300,background:"transparent",border:"none",borderBottom:"1px solid "+MS.ln,padding:"4px 0",color:MS.tx,outline:"none"}}/>
                   <input type="password" value={newPw} onChange={e=>sNewPw(e.target.value)} placeholder="8자 이상 · 영문과 숫자 포함" onKeyDown={e=>{if(e.key==="Escape"){sEditPw(false);sCurPw("");sNewPw("");}}} style={{fontFamily:S.ui,fontSize:12,fontWeight:300,background:"transparent",border:"none",borderBottom:"1px solid "+MS.ln,padding:"4px 0",color:MS.tx,outline:"none"}}/>
                   <div style={{display:"flex",gap:12,marginTop:6}}>
-                    <button onClick={async()=>{if(!curPw){flash("현재 비밀번호를 입력해주세요");return;}const pwErr=validatePw(newPw,auth.user.email);if(pwErr){flash(pwErr);return;}const{error:e1}=await supabase.auth.signInWithPassword({email:auth.user.email,password:curPw});if(e1){flash("현재 비밀번호가 일치하지 않습니다");return;}const{error:e2}=await supabase.auth.updateUser({password:newPw});if(e2)flash("변경 실패: "+e2.message);else{flash("비밀번호를 변경했습니다");sEditPw(false);sCurPw("");sNewPw("");}}} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:MS.txQ,background:"none",border:"none",cursor:"pointer"}}>변경</button>
-                    <button onClick={()=>{sEditPw(false);sCurPw("");sNewPw("");}} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:MS.txGh,background:"none",border:"none",cursor:"pointer"}}>취소</button>
+                    <button onClick={async()=>{if(!curPw){flash("현재 비밀번호를 입력해주세요");return;}const pwErr=validatePw(newPw,auth.user.email);if(pwErr){flash(pwErr);return;}const{error:e1}=await supabase.auth.signInWithPassword({email:auth.user.email,password:curPw});if(e1){flash("현재 비밀번호가 일치하지 않습니다");return;}const{error:e2}=await supabase.auth.updateUser({password:newPw});if(e2)flash("변경 실패: "+e2.message);else{flash("비밀번호를 변경했습니다");sEditPw(false);sCurPw("");sNewPw("");}}} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:MS.txQ,background:"none",border:"none",cursor:"pointer",padding:mob?"10px 4px":"4px 0",minHeight:mob?44:undefined}}>변경</button>
+                    <button onClick={()=>{sEditPw(false);sCurPw("");sNewPw("");}} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:MS.txGh,background:"none",border:"none",cursor:"pointer",padding:mob?"10px 4px":"4px 0",minHeight:mob?44:undefined}}>취소</button>
                   </div>
                 </div>
               </div>:null}
               <div style={{display:"flex",gap:mob?24:32,flexWrap:"wrap"}}>
-                {!editPw&&<button onClick={()=>sEditPw(true)} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:2,color:MS.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .3s"}} onMouseEnter={e=>e.currentTarget.style.color=MS.tx} onMouseLeave={e=>e.currentTarget.style.color=MS.txQ}>비밀번호 변경</button>}
-                {auth.user&&<button onClick={()=>{auth.signOut();goHome();}} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:2,color:MS.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .3s"}} onMouseEnter={e=>e.currentTarget.style.color=MS.tx} onMouseLeave={e=>e.currentTarget.style.color=MS.txQ}>로그아웃</button>}
-                {auth.user&&!delStep&&<button onClick={()=>{sDelStep(1);sDelPw("");sDelConfirm("");}} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:2,color:MS.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .3s"}} onMouseEnter={e=>e.currentTarget.style.color=MS.txQ} onMouseLeave={e=>e.currentTarget.style.color=MS.txGh}>탈퇴</button>}
+                {!editPw&&<button onClick={()=>sEditPw(true)} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:2,color:MS.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .3s",padding:mob?"10px 0":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=MS.tx} onMouseLeave={e=>e.currentTarget.style.color=MS.txQ}>비밀번호 변경</button>}
+                {auth.user&&<button onClick={()=>{auth.signOut();goHome();}} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:2,color:MS.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .3s",padding:mob?"10px 0":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=MS.tx} onMouseLeave={e=>e.currentTarget.style.color=MS.txQ}>로그아웃</button>}
+                {auth.user&&!delStep&&<button onClick={()=>{sDelStep(1);sDelPw("");sDelConfirm("");}} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:2,color:MS.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .3s",padding:mob?"10px 0":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=MS.txQ} onMouseLeave={e=>e.currentTarget.style.color=MS.txGh}>탈퇴</button>}
               </div>
               {delStep>0&&<div style={{marginTop:24}}>
                 <div style={{display:"flex",gap:16,marginBottom:16}}>{[1,2].map(n=><div key={n} style={{fontFamily:S.ui,fontSize:9,fontWeight:delStep===n?400:300,letterSpacing:2,color:delStep===n?MS.txM:MS.txGh,transition:"all .3s"}}>{n===1?"1. 비밀번호 확인":"2. 최종 확인"}</div>)}</div>
@@ -1087,16 +1087,16 @@ export default function Sloist(){
                   <div style={{fontFamily:S.ui,fontSize:11,fontWeight:300,color:MS.txQ,lineHeight:1.8,marginBottom:14}}>되돌릴 수 없습니다</div>
                   <input type="password" value={delPw} onChange={e=>sDelPw(e.target.value)} placeholder="현재 비밀번호" autoFocus style={{fontFamily:S.ui,fontSize:12,fontWeight:300,width:"100%",background:"transparent",border:"none",borderBottom:"1px solid "+MS.ln,padding:"6px 0",color:MS.tx,outline:"none",marginBottom:14}}/>
                   <div style={{display:"flex",gap:16}}>
-                    <button onClick={async()=>{if(!delPw){flash("비밀번호를 입력해주세요");return;}const{error}=await supabase.auth.signInWithPassword({email:auth.user.email,password:delPw});if(error){flash("비밀번호가 일치하지 않습니다");return;}sDelStep(2);}} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:MS.txM,background:"none",border:"none",cursor:"pointer"}}>다음</button>
-                    <button onClick={()=>sDelStep(0)} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:MS.txGh,background:"none",border:"none",cursor:"pointer"}}>취소</button>
+                    <button onClick={async()=>{if(!delPw){flash("비밀번호를 입력해주세요");return;}const{error}=await supabase.auth.signInWithPassword({email:auth.user.email,password:delPw});if(error){flash("비밀번호가 일치하지 않습니다");return;}sDelStep(2);}} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:MS.txM,background:"none",border:"none",cursor:"pointer",padding:mob?"10px 4px":"4px 0",minHeight:mob?44:undefined}}>다음</button>
+                    <button onClick={()=>sDelStep(0)} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:MS.txGh,background:"none",border:"none",cursor:"pointer",padding:mob?"10px 4px":"4px 0",minHeight:mob?44:undefined}}>취소</button>
                   </div>
                 </div>}
                 {delStep===2&&<div>
                   <div style={{fontFamily:S.ui,fontSize:11,fontWeight:300,color:MS.txQ,lineHeight:1.8,marginBottom:14}}>탈퇴합니다를 입력해주세요</div>
                   <input value={delConfirm} onChange={e=>sDelConfirm(e.target.value)} placeholder="탈퇴합니다" autoFocus style={{fontFamily:S.ui,fontSize:12,fontWeight:300,width:"100%",background:"transparent",border:"none",borderBottom:"1px solid "+MS.ln,padding:"6px 0",color:MS.tx,outline:"none",marginBottom:14}}/>
                   <div style={{display:"flex",gap:16}}>
-                    <button disabled={delConfirm!=="탈퇴합니다"} onClick={async()=>{const{error}=await supabase.rpc("delete_user");if(error){flash("탈퇴 실패: "+error.message);}else{await auth.signOut();goHome();flash("탈퇴했습니다");}}} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:delConfirm==="탈퇴합니다"?MS.txM:MS.txGh,background:"none",border:"none",cursor:delConfirm==="탈퇴합니다"?"pointer":"default",opacity:delConfirm==="탈퇴합니다"?1:.5,transition:"all .3s"}}>탈퇴하기</button>
-                    <button onClick={()=>sDelStep(0)} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:MS.txGh,background:"none",border:"none",cursor:"pointer"}}>취소</button>
+                    <button disabled={delConfirm!=="탈퇴합니다"} onClick={async()=>{const{error}=await supabase.rpc("delete_user");if(error){flash("탈퇴 실패: "+error.message);}else{await auth.signOut();goHome();flash("탈퇴했습니다");}}} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:delConfirm==="탈퇴합니다"?MS.txM:MS.txGh,background:"none",border:"none",cursor:delConfirm==="탈퇴합니다"?"pointer":"default",opacity:delConfirm==="탈퇴합니다"?1:.5,transition:"all .3s",padding:mob?"10px 4px":"4px 0",minHeight:mob?44:undefined}}>탈퇴하기</button>
+                    <button onClick={()=>sDelStep(0)} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:MS.txGh,background:"none",border:"none",cursor:"pointer",padding:mob?"10px 4px":"4px 0",minHeight:mob?44:undefined}}>취소</button>
                   </div>
                 </div>}
               </div>}
@@ -1107,7 +1107,7 @@ export default function Sloist(){
     </div>;})()}
     {view==="mypage"&&detail&&<DetailView/>}
 
-    {showTop&&view!=="about"&&<button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:mob?28:40,right:mob?20:40,width:36,height:36,display:"flex",alignItems:"center",justifyContent:"center",background:S.bg,border:"1px solid "+S.lnL,borderRadius:"50%",cursor:"pointer",transition:"opacity .8s cubic-bezier(.2,0,.3,1)",opacity:.5,zIndex:100,backdropFilter:"blur(8px)"}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>{e.currentTarget.style.opacity="0.5";}}><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={S.txGh} strokeWidth="1.5"><polyline points="6 15 12 9 18 15"/></svg></button>}
+    {showTop&&view!=="about"&&<button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:mob?28:40,right:mob?20:40,width:mob?44:36,height:mob?44:36,display:"flex",alignItems:"center",justifyContent:"center",background:S.bg,border:"1px solid "+S.lnL,borderRadius:"50%",cursor:"pointer",transition:"opacity .8s cubic-bezier(.2,0,.3,1)",opacity:.5,zIndex:100,backdropFilter:"blur(8px)"}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>{e.currentTarget.style.opacity="0.5";}}><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={S.txGh} strokeWidth="1.5"><polyline points="6 15 12 9 18 15"/></svg></button>}
     {toast&&<div style={{position:"fixed",bottom:mob?32:40,left:"50%",transform:"translateX(-50%)",color:S.txQ,fontSize:11,fontWeight:300,letterSpacing:3,zIndex:300,fontFamily:S.ui,opacity:toastVis?1:0,transition:"opacity .8s cubic-bezier(.2,0,.3,1)",pointerEvents:"none"}}>{toast}</div>}
 
     {/* 삭제 확인 다이얼로그 */}
@@ -1116,8 +1116,8 @@ export default function Sloist(){
         <div style={{fontFamily:S.ui,fontSize:11,fontWeight:300,color:S.txQ,lineHeight:1.8,marginBottom:8}}>이 기록을 삭제할까요?</div>
         <div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,color:S.tx,lineHeight:1.6,marginBottom:32}}>{confirmDel.title}</div>
         <div style={{display:"flex",justifyContent:"center",gap:32}}>
-          <button onClick={async()=>{const{error}=await supabase.from("contents").delete().eq("id",confirmDel.id);if(error){flash("삭제하지 못했습니다");}else{flash("삭제했습니다");sItems(p=>p.filter(x=>x.id!==confirmDel.id));if(confirmDel.from==="detail")closeDetail();}sConfirmDel(null);}} style={{fontFamily:S.ui,fontSize:11,fontWeight:400,letterSpacing:3,color:S.tx,background:"none",border:"none",cursor:"pointer",padding:"8px 4px"}}>삭제</button>
-          <button onClick={()=>sConfirmDel(null)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"8px 4px"}}>취소</button>
+          <button onClick={async()=>{const{error}=await supabase.from("contents").delete().eq("id",confirmDel.id);if(error){flash("삭제하지 못했습니다");}else{flash("삭제했습니다");sItems(p=>p.filter(x=>x.id!==confirmDel.id));if(confirmDel.from==="detail")closeDetail();}sConfirmDel(null);}} style={{fontFamily:S.ui,fontSize:11,fontWeight:400,letterSpacing:3,color:S.tx,background:"none",border:"none",cursor:"pointer",padding:mob?"14px 12px":"8px 4px",minHeight:mob?44:undefined}}>삭제</button>
+          <button onClick={()=>sConfirmDel(null)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:3,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:mob?"14px 12px":"8px 4px",minHeight:mob?44:undefined}}>취소</button>
         </div>
       </div>
     </div>}
@@ -1128,7 +1128,7 @@ export default function Sloist(){
     {/* 비밀번호 재설정 화면 */}
     {auth.isRecovery&&(()=>{const doReset=async()=>{const pwErr=validatePw(rpw,auth.user?.email);if(pwErr){setRmsg(pwErr);return;}if(rpw!==rpw2){setRmsg("비밀번호가 일치하지 않습니다");return;}setRsaving(true);const{error}=await auth.updatePassword(rpw);if(error)setRmsg("변경 실패: "+error.message);else{flash("비밀번호를 변경했습니다");goHome();}setRsaving(false);};return <div style={{position:"fixed",inset:0,zIndex:600,background:S.bg,display:"flex",flexDirection:"column",padding:"0 24px"}}>
       <div style={{display:"flex",justifyContent:"flex-end",padding:mob?"16px 4px 0":"20px 16px 0",flexShrink:0}}>
-        <button onClick={()=>goHome()} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:2,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"8px 0"}}>닫기</button>
+        <button onClick={()=>goHome()} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:2,color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:mob?"12px 4px":"8px 0",minHeight:mob?44:undefined}}>닫기</button>
       </div>
       <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center"}}>
       <div style={{width:"100%",maxWidth:300,textAlign:"center"}}>

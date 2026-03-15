@@ -85,7 +85,7 @@ export default function EditorProfile({ userId, existingEditor, onClose, onSaved
     <div style={{ minHeight: "100vh", background: S.bg, display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: mob ? "16px" : "20px 36px", borderBottom: "1px solid " + S.lnL }}>
         <span style={{ fontFamily: S.sf, fontSize: mob ? 14 : 16, letterSpacing: 4, fontWeight: 300 }}>{isEdit ? "프로필 수정" : "프로필 만들기"}</span>
-        <button onClick={onClose} style={{ fontFamily: S.sf, fontSize: 10, letterSpacing: 6, color: S.txGh, background: "none", border: "none", cursor: "pointer" }}>닫기</button>
+        <button onClick={onClose} style={{ fontFamily: S.sf, fontSize: 10, letterSpacing: 6, color: S.txGh, background: "none", border: "none", cursor: "pointer", padding: mob ? "10px 4px" : "4px", minHeight: mob ? 44 : undefined }}>닫기</button>
       </div>
       <div style={{ maxWidth: 520, margin: "0 auto", width: "100%", padding: mob ? "28px 16px" : "48px 24px" }}>
         {!isEdit && <div style={{ marginBottom: 36, padding: "20px 0", borderBottom: "1px solid " + S.lnL }}><p style={{ fontSize: 13, color: S.txQ, lineHeight: 2 }}>슬로이스트는 자기만의 속도로 살아가는 사람들의 시선을 기록합니다<br/>당신의 시선을 남겨주세요</p></div>}

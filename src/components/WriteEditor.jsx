@@ -249,7 +249,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
           <span style={{ fontFamily: S.sf, fontSize: mob ? 14 : 15, letterSpacing: 4, fontWeight: 300 }}>{isEdit ? "수정하기" : "새 기록"}</span>
           {isEdit && <span style={{ fontFamily: S.ui, fontSize: 9, letterSpacing: 2, color: S.txF, background: "rgba(184,164,140,.08)", padding: "3px 10px", borderRadius: 10 }}>{rootLabel}</span>}
         </div>
-        <button onClick={() => { const hasContent = title.trim() || note.trim() || photos.length > 0; if (hasContent && !confirm("작성 중인 내용이 있습니다. 닫을까요?")) return; onClose(); }} style={{ fontFamily: S.sf, fontSize: 10, letterSpacing: 6, color: S.txGh, background: "none", border: "none", cursor: "pointer" }}>닫기</button>
+        <button onClick={() => { const hasContent = title.trim() || note.trim() || photos.length > 0; if (hasContent && !confirm("작성 중인 내용이 있습니다. 닫을까요?")) return; onClose(); }} style={{ fontFamily: S.sf, fontSize: 10, letterSpacing: 6, color: S.txGh, background: "none", border: "none", cursor: "pointer", padding: mob ? "10px 4px" : "4px", minHeight: mob ? 44 : undefined }}>닫기</button>
       </div>
 
       {/* ─── 단일 컬럼 레이아웃 ─── */}
