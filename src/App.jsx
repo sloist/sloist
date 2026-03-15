@@ -465,7 +465,7 @@ export default function Sloist(){
           <div style={{marginTop:mob?36:56,paddingTop:mob?14:18,borderTop:"1px solid "+S.ln,display:"flex",alignItems:"center",gap:mob?14:20}}>
             <span style={{position:"relative",display:"inline-block"}}>
               <button onClick={()=>keep(dl.id)} style={{fontFamily:S.ui,fontSize:mob?13:12,fontWeight:400,letterSpacing:"0.08em",color:isSaved(dl.id)?S.ac:S.txF,background:"none",border:"none",cursor:"pointer",padding:mob?"6px 0":"4px 0",transition:"color .6s"}}>{isSaved(dl.id)?"보관됨":"보관"}</button>
-              {keepRipple>0&&<span key={keepRipple} style={{position:"absolute",bottom:0,left:"-40%",right:"-40%",height:1,background:S.ac,transformOrigin:"center",animation:"keepWave 1.2s cubic-bezier(.2,0,.3,1) forwards"}}/>}
+              {keepRipple>0&&<span key={keepRipple} style={{position:"absolute",bottom:0,left:0,right:0,height:1,background:S.ac,transformOrigin:"center",animation:"keepWave 3.6s cubic-bezier(.2,0,.3,1) forwards"}}/>}
             </span>
             {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.ui,fontSize:mob?13:12,fontWeight:400,letterSpacing:"0.08em",color:S.txF,textDecoration:"none",padding:mob?"6px 0":"4px 0",transition:"color .4s"}}>{lLabel(dl)}</a>}
             {creditLine&&<span style={{fontFamily:S.ui,fontSize:mob?11:11,fontWeight:300,letterSpacing:"0.08em",color:S.txGh,...(dl.isOfficial?{}:{cursor:"pointer"})}} onClick={()=>{if(!dl.isOfficial&&dl.editor&&ED[dl.editor])openRoom(dl.editor);}}>{creditLine}</span>}
@@ -512,7 +512,7 @@ export default function Sloist(){
   </div>;}
   const h=homeFeed;
   return <div style={{fontFamily:S.bd,background:S.bg,color:S.tx,minHeight:"100vh",WebkitFontSmoothing:"antialiased",animation:"mainIn 1s cubic-bezier(.2,0,.3,1) forwards"}}>
-    <style>{`html,body{overscroll-behavior:none}::selection{background:rgba(130,125,118,.15);color:inherit}button:focus-visible,a:focus-visible,input:focus-visible{outline:1px solid rgba(130,125,118,.3);outline-offset:2px}@keyframes mainIn{from{opacity:0}to{opacity:1}}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0}to{opacity:1}}@keyframes keepWave{0%{transform:scaleX(0);opacity:.4}50%{transform:scaleX(1);opacity:.25}100%{transform:scaleX(1);opacity:0}}`}</style>
+    <style>{`html,body{overscroll-behavior:none}::selection{background:rgba(130,125,118,.15);color:inherit}button:focus-visible,a:focus-visible,input:focus-visible{outline:1px solid rgba(130,125,118,.3);outline-offset:2px}@keyframes mainIn{from{opacity:0}to{opacity:1}}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0}to{opacity:1}}@keyframes keepWave{0%{transform:scaleX(0);opacity:.3}40%{transform:scaleX(1);opacity:.2}100%{transform:scaleX(1);opacity:0}}`}</style>
 
     {/* SEARCH — Cereal 검색 오버레이 */}
     {sov&&<div style={{position:"fixed",inset:0,background:"rgba(250,250,248,.96)",backdropFilter:"blur(40px)",zIndex:200,overflowY:"auto",animation:"fi .6s cubic-bezier(.2,0,.3,1)"}}>
