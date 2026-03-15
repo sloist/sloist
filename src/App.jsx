@@ -419,7 +419,10 @@ export default function Sloist(){
       </div>}
     </div>;
   };
-  const Foot=()=><div style={{textAlign:"center",padding:mob?"56px 0 40px":"80px 0 48px",flexShrink:0}}><button onClick={()=>goTo("about")} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txF} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>슬로이스트에 대하여</button></div>;
+  const Foot=()=><div style={{textAlign:"center",padding:mob?"64px 0 48px":"96px 0 56px",flexShrink:0}}>
+    <div style={{width:3,height:3,borderRadius:"50%",background:S.ln,margin:"0 auto",marginBottom:mob?24:32}}/>
+    <button onClick={()=>goTo("about")} style={{fontFamily:S.sf,fontSize:10,letterSpacing:6,color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txF} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>슬로이스트에 대하여</button>
+  </div>;
 
   /* ── Detail — 기록 한 편을 읽는 방 ── */
   const DetailView=({hideEditor})=>{
@@ -603,32 +606,32 @@ export default function Sloist(){
               <div style={{height:"calc(100 * var(--dvh, 1vh))",background:S.bg,position:"relative"}}>
                 {h[0]&&<div onClick={()=>openDetail(h[0])} style={{cursor:"pointer",position:"absolute",inset:0,overflow:"hidden"}}>
                   {h[0].photo&&<img src={h[0].photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(0.9) contrast(0.98) brightness(1.01)"}}/>}
-                  <div style={{position:"absolute",bottom:0,left:0,right:0,height:"55%",background:"linear-gradient(to top, rgba(30,29,26,.45), transparent)",pointerEvents:"none"}}/>
-                  <div style={{position:"absolute",bottom:mob?28:44,left:mob?24:56,right:mob?24:56}}>
-                    <div style={{fontFamily:S.sf,fontSize:mob?24:38,fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,color:"#fff",textShadow:"0 1px 8px rgba(0,0,0,.15)"}}>{h[0].title}</div>
-                    {(h[0].location||h[0].sub||h[0].maker)&&<div style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,letterSpacing:"0.1em",color:"rgba(255,255,255,.55)",marginTop:mob?6:10}}>{h[0].location||h[0].sub||h[0].maker}</div>}
+                  <div style={{position:"absolute",bottom:0,left:0,right:0,height:"60%",background:"linear-gradient(to top, rgba(30,29,26,.5), transparent)",pointerEvents:"none"}}/>
+                  <div style={{position:"absolute",bottom:mob?36:56,left:mob?28:64,right:mob?28:64}}>
+                    <div style={{fontFamily:S.sf,fontSize:mob?24:40,fontWeight:300,lineHeight:1.45,letterSpacing:mob?0:2,color:"#fff",textShadow:"0 1px 12px rgba(0,0,0,.12)"}}>{h[0].title}</div>
+                    {(h[0].location||h[0].sub||h[0].maker)&&<div style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,letterSpacing:"0.12em",color:"rgba(255,255,255,.5)",marginTop:mob?8:12}}>{h[0].location||h[0].sub||h[0].maker}</div>}
                   </div>
                 </div>}
               </div>
             }
             reveal={
-              <div style={{height:"calc(100 * var(--dvh, 1vh))",background:S.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:mob?"0 24px":"0 56px"}}>
+              <div style={{height:"calc(100 * var(--dvh, 1vh))",background:S.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:mob?"0 28px":"0 64px"}}>
                 {mob
-                  ?<div style={{width:"100%",display:"flex",flexDirection:"column",gap:28}}>
-                    {h.slice(1,3).map((it,i)=>it&&<div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer",width:i===0?"85%":"72%",alignSelf:i===0?"flex-start":"flex-end"}}>
+                  ?<div style={{width:"100%",display:"flex",flexDirection:"column",gap:32}}>
+                    {h.slice(1,3).map((it,i)=>it&&<div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer",width:i===0?"82%":"70%",alignSelf:i===0?"flex-start":"flex-end"}}>
                       <Img grad={it.grad} photo={it.photo} aspect="4/5" r={2}/>
-                      <div style={{marginTop:10}}>
-                        <div style={{fontFamily:S.sf,fontSize:14,fontWeight:300,lineHeight:1.5,color:S.tx}}>{it.title}</div>
-                        {(it.location||it.sub||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:S.txF,marginTop:3}}>{it.location||it.sub||it.maker}</div>}
+                      <div style={{marginTop:12}}>
+                        <div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,lineHeight:1.5,color:S.tx}}>{it.title}</div>
+                        {(it.location||it.sub||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:S.txF,marginTop:4}}>{it.location||it.sub||it.maker}</div>}
                       </div>
                     </div>)}
                   </div>
-                  :<div style={{width:"100%",maxWidth:960,display:"grid",gridTemplateColumns:"1fr 1fr",gap:56}}>
-                    {h.slice(1,3).map((it,i)=>it&&<div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer",marginTop:i===1?60:0}}>
+                  :<div style={{width:"100%",maxWidth:920,display:"grid",gridTemplateColumns:"1fr 1fr",gap:64}}>
+                    {h.slice(1,3).map((it,i)=>it&&<div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer",marginTop:i===1?72:0}}>
                       <Img grad={it.grad} photo={it.photo} aspect="4/5" r={2}/>
-                      <div style={{marginTop:16}}>
-                        <div style={{fontFamily:S.sf,fontSize:17,fontWeight:300,lineHeight:1.5,color:S.tx}}>{it.title}</div>
-                        {(it.location||it.sub||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:S.txF,marginTop:4}}>{it.location||it.sub||it.maker}</div>}
+                      <div style={{marginTop:18}}>
+                        <div style={{fontFamily:S.sf,fontSize:18,fontWeight:300,lineHeight:1.5,color:S.tx,letterSpacing:1}}>{it.title}</div>
+                        {(it.location||it.sub||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.1em",color:S.txF,marginTop:6}}>{it.location||it.sub||it.maker}</div>}
                       </div>
                     </div>)}
                   </div>
@@ -642,41 +645,42 @@ export default function Sloist(){
 
           {/* ── 문장 패널: 호흡 ── */}
           <ScrollReveal>
-            <div style={{padding:mob?"48px 32px":"88px 56px",textAlign:"center",maxWidth:640,margin:"0 auto"}}>
-              <div style={{fontFamily:S.bd,fontSize:mob?15:18,fontWeight:300,lineHeight:2.2,color:S.txM,letterSpacing:mob?0:1}}>{DAILY_QUOTES[new Date().getDay()%DAILY_QUOTES.length]}</div>
-              <div style={{fontFamily:S.bd,fontSize:12,fontWeight:300,color:"#D3D1C7",letterSpacing:"0.04em",marginTop:mob?24:36}}>{(()=>{const hr=new Date().getHours();if(hr>=5&&hr<7)return"안개가 걷히기 전입니다";if(hr>=7&&hr<11)return"천천히 눈을 떠도 됩니다";if(hr>=11&&hr<17)return"햇살이 비스듬한 시간입니다";if(hr>=17&&hr<20)return"하루가 느려지는 중입니다";return"고요한 시간입니다";})()}</div>
+            <div style={{padding:mob?"64px 32px":"112px 56px",textAlign:"center",maxWidth:600,margin:"0 auto"}}>
+              <div style={{width:3,height:3,borderRadius:"50%",background:S.ln,margin:"0 auto",marginBottom:mob?28:40}}/>
+              <div style={{fontFamily:S.bd,fontSize:mob?15:17,fontWeight:300,lineHeight:2.4,color:S.txM,letterSpacing:mob?0:"0.02em"}}>{DAILY_QUOTES[new Date().getDay()%DAILY_QUOTES.length]}</div>
+              <div style={{fontFamily:S.bd,fontSize:12,fontWeight:300,color:"#D3D1C7",letterSpacing:"0.04em",marginTop:mob?28:40}}>{(()=>{const hr=new Date().getHours();if(hr>=5&&hr<7)return"안개가 걷히기 전입니다";if(hr>=7&&hr<11)return"천천히 눈을 떠도 됩니다";if(hr>=11&&hr<17)return"햇살이 비스듬한 시간입니다";if(hr>=17&&hr<20)return"하루가 느려지는 중입니다";return"고요한 시간입니다";})()}</div>
             </div>
           </ScrollReveal>
 
           {/* 패널 B — 슬로이스트의 시선 (from_sloist 우선) 또는 한 편의 기록 */}
-          {(()=>{const fsItem=FROMSLOIST.length>0?FROMSLOIST[new Date().getDate()%FROMSLOIST.length]:null;const pick=fsItem||h[3];if(!pick)return null;const isFs=pick.root==="from_sloist";return <div style={{margin:"0 auto",padding:mob?"0 24px":"0 24px",maxWidth:mob?undefined:600}}>
+          {(()=>{const fsItem=FROMSLOIST.length>0?FROMSLOIST[new Date().getDate()%FROMSLOIST.length]:null;const pick=fsItem||h[3];if(!pick)return null;const isFs=pick.root==="from_sloist";return <div style={{margin:"0 auto",padding:mob?"0 28px":"0 24px",maxWidth:mob?undefined:560}}>
             <ScrollReveal>
               {isFs
                 ?/* from sloist — 텍스트 중심 질감 */
                 <div onClick={()=>openDetail(pick)} style={{cursor:"pointer",width:mob?"88%":"100%",margin:mob?"0 auto":undefined}}>
                   {pick.photo
                     ?<><Img grad={pick.grad} photo={pick.photo} aspect="3/2" r={2}/>
-                      <div style={{marginTop:mob?12:20}}>
-                        <div style={{fontFamily:S.ui,fontSize:8,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:mob?4:6}}>슬로이스트의 기록</div>
-                        <div style={{fontFamily:S.sf,fontSize:mob?15:20,fontWeight:300,lineHeight:1.5}}>{pick.title}</div>
-                        {pick.sub&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:S.txF,marginTop:4}}>{pick.sub}</div>}
+                      <div style={{marginTop:mob?14:22}}>
+                        <div style={{fontFamily:S.sf,fontSize:mob?9:10,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:mob?5:8}}>from sloist</div>
+                        <div style={{fontFamily:S.sf,fontSize:mob?16:20,fontWeight:300,lineHeight:1.55,letterSpacing:mob?0:1}}>{pick.title}</div>
+                        {pick.sub&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.1em",color:S.txF,marginTop:mob?5:6}}>{pick.sub}</div>}
                       </div></>
-                    :<div style={{background:S.bgAlt,borderRadius:2,padding:mob?"48px 28px":"64px 40px",textAlign:"center"}}>
-                      <div style={{fontFamily:S.ui,fontSize:8,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:mob?14:20}}>슬로이스트의 기록</div>
+                    :<div style={{background:S.bgAlt,borderRadius:2,padding:mob?"56px 32px":"72px 48px",textAlign:"center"}}>
+                      <div style={{fontFamily:S.sf,fontSize:mob?9:10,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:mob?16:24}}>from sloist</div>
                       <div style={{fontFamily:S.sf,fontSize:mob?18:24,fontWeight:300,lineHeight:1.6,color:S.tx,letterSpacing:mob?0:1}}>{pick.title}</div>
-                      {pick.sub&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txF,marginTop:mob?10:14,letterSpacing:"0.08em"}}>{pick.sub}</div>}
-                      {pick.note&&<div style={{fontFamily:S.bd,fontSize:mob?12:13,fontWeight:300,color:S.txQ,lineHeight:2,marginTop:mob?14:20,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{pick.note}</div>}
+                      {pick.sub&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txF,marginTop:mob?10:14,letterSpacing:"0.1em"}}>{pick.sub}</div>}
+                      {pick.note&&<div style={{fontFamily:S.bd,fontSize:mob?12:13,fontWeight:300,color:S.txQ,lineHeight:2.2,marginTop:mob?16:24,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{pick.note}</div>}
                     </div>
                   }
                 </div>
                 :/* 일반 기록 */
-                <><div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:mob?4:6,color:S.txGh,textAlign:mob?"center":undefined,marginBottom:mob?16:24}}>한 편의 기록</div>
+                <><div style={{fontFamily:S.sf,fontSize:mob?10:11,fontWeight:300,letterSpacing:mob?4:6,color:S.txGh,textAlign:mob?"center":undefined,marginBottom:mob?18:28}}>한 편의 기록</div>
                 <div onClick={()=>openDetail(pick)} style={{cursor:"pointer",width:mob?"88%":"100%",margin:mob?"0 auto":undefined}}>
                   <Img grad={pick.grad} photo={pick.photo} aspect="3/2" r={2}/>
-                  <div style={{marginTop:mob?12:20}}>
-                    <div style={{fontFamily:S.sf,fontSize:mob?15:20,fontWeight:300,lineHeight:1.5}}>{pick.title}</div>
-                    {(pick.location||pick.sub||pick.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:S.txF,marginTop:4}}>{pick.location||pick.sub||pick.maker}</div>}
-                    {pick.note&&<div style={{fontFamily:S.bd,fontSize:mob?12:13,fontWeight:300,color:S.txQ,lineHeight:2,marginTop:mob?10:14,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{pick.note}</div>}
+                  <div style={{marginTop:mob?14:22}}>
+                    <div style={{fontFamily:S.sf,fontSize:mob?16:20,fontWeight:300,lineHeight:1.55,letterSpacing:mob?0:1}}>{pick.title}</div>
+                    {(pick.location||pick.sub||pick.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.1em",color:S.txF,marginTop:mob?5:6}}>{pick.location||pick.sub||pick.maker}</div>}
+                    {pick.note&&<div style={{fontFamily:S.bd,fontSize:mob?12:13,fontWeight:300,color:S.txQ,lineHeight:2.2,marginTop:mob?12:16,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{pick.note}</div>}
                   </div>
                 </div></>
               }
@@ -684,33 +688,33 @@ export default function Sloist(){
           </div>;})()}
 
           {/* ── 카테고리 입구 ── */}
-          <div style={{padding:mob?"72px 0 0":"136px 0 0"}}>
+          <div style={{padding:mob?"80px 0 0":"144px 0 0"}}>
             {[
               {key:"space",label:"space",desc:"장소의 기록",items:SPACE,asp:"4/5"},
               {key:"scene",label:"scene",desc:"장면의 기록",items:SCENE,asp:"3/4"},
               {key:"objet",label:"objet",desc:"물건의 기록",items:OBJET,asp:"1/1"},
-            ].map(({key,label,desc,items:catArr,asp})=>{
+            ].map(({key,label,desc,items:catArr,asp},ci)=>{
               const usedIds=h.map(x=>x?.id).filter(Boolean);
               const pool=catArr.filter(x=>!usedIds.includes(x.id));
-              // 날짜 기반 시드로 셔플 — 매일 다른 조합, 같은 날은 동일
               const seed=new Date().getDate()*13+new Date().getMonth()*47+new Date().getHours();
               const shuffled=[...pool].sort((a,b)=>{const ha=(a.id.charCodeAt(0)*seed)%997;const hb=(b.id.charCodeAt(0)*seed)%997;return ha-hb;});
               const preview=shuffled.slice(0,mob?3:4);
               if(preview.length===0)return null;
               return <ScrollReveal key={key}>
-                <div style={{padding:mob?"0 24px 64px":"0 56px 96px",maxWidth:1100,margin:"0 auto"}}>
+                <div style={{padding:mob?"0 28px 72px":"0 56px 112px",maxWidth:1100,margin:"0 auto"}}>
+                  {ci>0&&<div style={{width:mob?24:32,height:1,background:S.lnL,margin:mob?"0 auto 40px":"0 auto 56px"}}/>}
                   {/* 카테고리 헤더 */}
-                  <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",marginBottom:mob?20:28}}>
+                  <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",marginBottom:mob?22:32}}>
                     <div>
-                      <span style={{fontFamily:S.sf,fontSize:mob?14:16,fontWeight:300,letterSpacing:mob?3:5,color:S.tx}}>{label}</span>
-                      <span style={{fontFamily:S.ui,fontSize:mob?9:10,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,marginLeft:mob?12:18}}>{desc}</span>
+                      <span style={{fontFamily:S.sf,fontSize:mob?15:17,fontWeight:300,letterSpacing:mob?4:6,color:S.tx}}>{label}</span>
+                      <span style={{fontFamily:S.ui,fontSize:mob?9:10,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,marginLeft:mob?14:20}}>{desc}</span>
                     </div>
-                    <button onClick={()=>onCatClick(key)} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.12em",color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s",padding:mob?"8px 0":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>더 보기</button>
+                    <button onClick={()=>onCatClick(key)} style={{fontFamily:S.sf,fontSize:10,fontWeight:300,letterSpacing:"0.15em",color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s",padding:mob?"8px 0":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>more</button>
                   </div>
-                  <div style={{display:"grid",gridTemplateColumns:mob?"repeat(3,1fr)":"repeat(4,1fr)",gap:mob?16:28}}>
+                  <div style={{display:"grid",gridTemplateColumns:mob?"repeat(3,1fr)":"repeat(4,1fr)",gap:mob?16:32}}>
                     {preview.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer"}}>
                       <Img grad={it.grad} photo={it.photo} aspect={asp} r={2}/>
-                      <div style={{marginTop:mob?8:12}}>
+                      <div style={{marginTop:mob?8:14}}>
                         <div style={{fontFamily:S.sf,fontSize:mob?11:13,fontWeight:300,lineHeight:1.5,color:S.tx,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.title}</div>
                       </div>
                     </div>)}
