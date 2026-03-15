@@ -233,16 +233,18 @@ export default function Sloist(){
   },[activeCat,userLoc]);
 
   const toastTimer=useRef(null);
-  const flash=useCallback(m=>{if(toastTimer.current)clearTimeout(toastTimer.current);sToast(m);sToastVis(true);toastTimer.current=setTimeout(()=>{sToastVis(false);setTimeout(()=>sToast(null),600);},1800);},[]);
+  const [toastAction,sToastAction]=useState(null);
+  const flash=useCallback(m=>{if(toastTimer.current)clearTimeout(toastTimer.current);sToastAction(null);sToast(m);sToastVis(true);toastTimer.current=setTimeout(()=>{sToastVis(false);setTimeout(()=>{sToast(null);sToastAction(null);},600);},1800);},[]);
+  const flashLogin=useCallback(()=>{if(toastTimer.current)clearTimeout(toastTimer.current);sToast("로그인이 필요합니다");sToastAction(()=>()=>goTo("login"));sToastVis(true);toastTimer.current=setTimeout(()=>{sToastVis(false);setTimeout(()=>{sToast(null);sToastAction(null);},600);},3000);},[]);
   const isSaved=useCallback(id=>savedIds.includes(id),[savedIds]);
-  const keep=useCallback(async(id)=>{if(!auth.user){pendingAction.current={type:"keep",id};flash("로그인이 필요합니다");setTimeout(()=>goTo("login"),1200);return;}const was=savedIds.includes(id);
+  const keep=useCallback(async(id)=>{if(!auth.user){pendingAction.current={type:"keep",id};flashLogin();return;}const was=savedIds.includes(id);
     setSavedIds(p=>was?p.filter(x=>x!==id):[...p,id]);
     const{error}=was
       ?await supabase.from("saves").delete().eq("user_id",auth.user.id).eq("content_id",id)
       :await supabase.from("saves").insert({user_id:auth.user.id,content_id:id});
     if(error){setSavedIds(p=>was?[...p,id]:p.filter(x=>x!==id));flash("보관하지 못했습니다");}
   },[savedIds,flash,auth.user,setSavedIds]);
-  const toggleFol=async(eid)=>{if(!auth.user){pendingAction.current={type:"fol",id:eid};flash("로그인이 필요합니다");setTimeout(()=>goTo("login"),1200);return;}const was=following.includes(eid);
+  const toggleFol=async(eid)=>{if(!auth.user){pendingAction.current={type:"fol",id:eid};flashLogin();return;}const was=following.includes(eid);
     setFollowingIds(p=>was?p.filter(x=>x!==eid):[...p,eid]);
     flash(was?"팔로우를 해제했습니다":"팔로우했습니다");
     const{error}=was
@@ -1141,7 +1143,7 @@ export default function Sloist(){
     {view==="mypage"&&detail&&<DetailView/>}
 
     {showTop&&view!=="about"&&<button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:mob?28:40,right:mob?20:40,width:mob?44:36,height:mob?44:36,display:"flex",alignItems:"center",justifyContent:"center",background:S.bg,border:"1px solid "+S.lnL,borderRadius:"50%",cursor:"pointer",transition:"opacity .3s ease",opacity:.5,zIndex:100,backdropFilter:"blur(8px)"}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>{e.currentTarget.style.opacity="0.5";}}><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={S.txGh} strokeWidth="1.5"><polyline points="6 15 12 9 18 15"/></svg></button>}
-    {toast&&<div style={{position:"fixed",bottom:mob?28:36,left:"50%",transform:toastVis?"translate(-50%,0)":"translate(-50%,12px)",background:"rgba(44,43,40,.88)",backdropFilter:"blur(8px)",color:"#fff",fontSize:12,fontWeight:300,letterSpacing:2,zIndex:300,fontFamily:S.ui,opacity:toastVis?1:0,transition:"opacity .3s ease,transform .3s ease",pointerEvents:"none",padding:mob?"12px 28px":"10px 32px",borderRadius:24,whiteSpace:"nowrap"}}>{toast}</div>}
+    {toast&&<div onClick={()=>{if(toastAction){toastAction();sToastVis(false);setTimeout(()=>{sToast(null);sToastAction(null);},400);}}} style={{position:"fixed",bottom:mob?28:36,left:"50%",transform:toastVis?"translate(-50%,0)":"translate(-50%,12px)",background:"rgba(44,43,40,.88)",backdropFilter:"blur(8px)",color:"#fff",fontSize:12,fontWeight:300,letterSpacing:2,zIndex:300,fontFamily:S.ui,opacity:toastVis?1:0,transition:"opacity .3s ease,transform .3s ease",pointerEvents:toastVis?"auto":"none",cursor:toastAction?"pointer":"default",padding:mob?"12px 28px":"10px 32px",borderRadius:24,whiteSpace:"nowrap"}}>{toast}{toastAction&&<span style={{marginLeft:12,opacity:.6,fontSize:11}}>→</span>}</div>}
 
     {/* 삭제 확인 다이얼로그 */}
     {confirmDel&&<div style={{position:"fixed",inset:0,zIndex:400,background:"rgba(249,248,247,.85)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",animation:"fi .3s ease"}}>
