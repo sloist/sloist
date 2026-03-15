@@ -848,10 +848,15 @@ export default function Sloist(){
     {view==="room"&&detail&&<DetailView hideEditor={true}/>}
 
     {/* MY PAGE */}
-    {view==="mypage"&&!detail&&(()=>{const saveName=async()=>{if(!nameVal.trim())return;await auth.updateProfile({name:nameVal.trim()});sEditName(false);flash("이름 변경됨");};return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/>
+    {view==="mypage"&&!detail&&(()=>{const saveName=async()=>{if(!nameVal.trim())return;await auth.updateProfile({name:nameVal.trim()});sEditName(false);flash("이름 변경됨");};const savedAll=[...sv("space"),...sv("scene"),...sv("objet")];return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/>
       <div style={{flex:"1 0 auto"}}>
-        {/* 탭 — keep / following + 에디터 보조 링크 */}
-        <div style={{display:"flex",justifyContent:"center",alignItems:"baseline",gap:mob?28:44,padding:mob?"28px 0 36px":"44px 0 52px"}}>
+        {/* 인사 + 보관 수 */}
+        <div style={{textAlign:"center",padding:mob?"32px 24px 0":"52px 48px 0"}}>
+          <div style={{fontFamily:S.sf,fontSize:mob?18:22,fontWeight:300,letterSpacing:mob?2:4,color:S.tx}}>{auth.profile?.name||"guest"}</div>
+          {savedAll.length>0&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,marginTop:mob?8:12}}>{savedAll.length}개의 보관된 기록</div>}
+        </div>
+        {/* 탭 */}
+        <div style={{display:"flex",justifyContent:"center",alignItems:"baseline",gap:mob?28:44,padding:mob?"24px 0 32px":"36px 0 44px"}}>
           {[["saved","보관"],["following","팔로잉"]].map(([k,label])=><button key={k} onClick={()=>lt(()=>sMyTab(k))} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:mob?3:4,color:S.tx,opacity:(k==="saved"?(myTab==="saved"||myTab==="posts"):myTab===k)?1:.35,background:"none",border:"none",padding:"6px 0",cursor:"pointer",transition:"opacity .5s"}}>{label}</button>)}
           {auth.isEditor&&<button onClick={()=>lt(()=>sMyTab("posts"))} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:3,color:S.tx,opacity:myTab==="posts"?1:.35,background:"none",border:"none",cursor:"pointer",transition:"opacity .4s"}}>내 기록</button>}
         </div>
@@ -892,8 +897,8 @@ export default function Sloist(){
             </div>;}):
             <div style={{textAlign:"center",padding:"80px 0",fontFamily:S.ui,fontSize:12,fontWeight:300,color:S.txGh,letterSpacing:1}}>아직 남겨진 기록이 없습니다</div>}</div>;})()}
 
-          {/* keep — 콘텐츠 카드 */}
-          {myTab==="saved"&&(()=>{const all=[...sv("space"),...sv("scene"),...sv("objet")];const savedAsp=(it)=>it.aspect||(it.root==="scene"?(it.type==="영상"?"16/9":"3/4"):(it.root==="objet"?"4/5":"4/3"));return all.length>0?<div style={{maxWidth:860,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:mob?20:40,rowGap:mob?44:64,alignItems:"start"}}>{all.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer"}}><Img grad={it.grad} photo={it.photo} aspect={savedAsp(it)} r={2}/><div style={{marginTop:mob?10:14}}><div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:1.5,marginBottom:4}}>{it.title}</div><div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:4,color:S.txGh}}>{it.root}</div></div></div>)}</div>:<div style={{textAlign:"center",padding:"80px 0",fontFamily:S.ui,fontSize:12,fontWeight:300,color:S.txGh,letterSpacing:1}}>아직 보관한 기록이 없습니다</div>;})()}
+          {/* keep — 보관된 기록 */}
+          {myTab==="saved"&&(()=>{const savedAsp=(it)=>it.aspect||(it.root==="scene"?(it.type==="영상"?"16/9":"3/4"):(it.root==="objet"?"4/5":"4/3"));return savedAll.length>0?<div style={{maxWidth:860,margin:"0 auto",padding:mob?"0 20px":"0 48px",display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:mob?20:40,rowGap:mob?48:72,alignItems:"start"}}>{savedAll.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer"}}><Img grad={it.grad} photo={it.photo} aspect={savedAsp(it)} r={2}/><div style={{marginTop:mob?10:14}}><div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:1.5}}>{it.title}</div>{(it.location||it.sub||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txF,marginTop:3,letterSpacing:"0.06em"}}>{it.location||it.sub||it.maker}</div>}</div></div>)}</div>:<div style={{textAlign:"center",padding:mob?"80px 24px":"120px 48px"}}><div style={{fontFamily:S.bd,fontSize:mob?14:16,fontWeight:300,color:S.txQ,lineHeight:2}}>아직 보관한 기록이 없습니다</div><div style={{fontFamily:S.ui,fontSize:11,fontWeight:300,color:S.txGh,marginTop:12,letterSpacing:"0.06em"}}>마음에 닿는 기록을 천천히 모아보세요</div></div>;})()}
 
           {/* following — 기록자 카드 */}
           {myTab==="following"&&<div style={{maxWidth:860,margin:"0 auto",padding:mob?"0 20px":"0 48px"}}>{following.length>0?<div style={{display:"flex",flexDirection:"column",gap:mob?36:48}}>
@@ -913,7 +918,7 @@ export default function Sloist(){
           {/* 프로필 정보 */}
           <div style={{padding:mob?"24px 0 20px":"28px 0 24px"}}>
             {editName?<div style={{display:"flex",gap:12,alignItems:"center"}}><input value={nameVal} onChange={e=>sNameVal(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")saveName();if(e.key==="Escape")sEditName(false);}} autoFocus style={{fontFamily:S.ui,fontSize:13,fontWeight:300,background:"transparent",border:"none",borderBottom:"1px solid "+S.ln,padding:"4px 0",color:S.tx,outline:"none",flex:1}}/><button onClick={saveName} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:S.txQ,background:"none",border:"none",cursor:"pointer"}}>저장</button><button onClick={()=>sEditName(false)} style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:2,color:S.txGh,background:"none",border:"none",cursor:"pointer"}}>취소</button></div>
-            :<div><span style={{fontFamily:S.ui,fontSize:13,fontWeight:300}}>{auth.profile?.name||"guest"}</span><span style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txGh,marginLeft:mob?12:16}}>{auth.user?.email||""}</span></div>}
+            :<div><span style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txGh}}>{auth.user?.email||""}</span></div>}
           </div>
           {/* 기능 링크 — 한 줄 */}
           {!editPw&&!editName&&<div style={{display:"flex",gap:mob?20:24,paddingBottom:delStep>0?0:20}}>
