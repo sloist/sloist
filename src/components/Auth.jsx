@@ -103,7 +103,7 @@ export default function Auth({ onAuth, signIn, signUp }) {
 
               {/* 메시지 */}
               <div style={{ minHeight: 18 }}>
-                {msg && <div style={{ fontFamily: S.ui, fontSize: 11, fontWeight: 300, color: msg.includes("완료") || msg.includes("전송") ? S.ac : "#c47", lineHeight: 1.7, textAlign: "center" }}>{msg}</div>}
+                {msg && <div style={{ fontFamily: S.ui, fontSize: 11, fontWeight: 300, color: msg.includes("완료") || msg.includes("전송") ? S.ac : "#B07060", lineHeight: 1.7, textAlign: "center" }}>{msg}</div>}
               </div>
 
               <button
@@ -113,7 +113,8 @@ export default function Auth({ onAuth, signIn, signUp }) {
                   fontFamily: S.ui, fontSize: 12, fontWeight: 400, letterSpacing: 4,
                   color: "#fff", background: S.txM, border: "none", borderRadius: 3,
                   padding: "14px 0", cursor: "pointer",
-                  opacity: loading ? 0.5 : 1, transition: "opacity .5s",
+                  opacity: loading ? 0.6 : 1, transition: "opacity .5s",
+                  pointerEvents: loading ? "none" : "auto",
                 }}
               >
                 {loading ? "..." : mode === "login" ? "로그인" : mode === "signup" ? "가입하기" : "전송"}

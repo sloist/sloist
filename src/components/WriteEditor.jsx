@@ -209,7 +209,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
             {items.map(t => {
               const sel = tags.split(" · ").filter(Boolean);
               const active = sel.includes(t);
-              return <button key={t} onClick={() => { if (active) setTags(sel.filter(x => x !== t).join(" · ")); else if (sel.length < 3) setTags([...sel, t].join(" · ")); }} style={{ fontFamily: S.ui, fontSize: 11, fontWeight: active ? 400 : 300, color: active ? S.tx : S.txGh, background: active ? "rgba(184,164,140,.12)" : "none", border: "1px solid " + (active ? S.ac : S.lnL), borderRadius: 20, padding: "4px 10px", cursor: sel.length >= 3 && !active ? "default" : "pointer", opacity: sel.length >= 3 && !active ? 0.4 : 1, transition: "all .3s" }}>{t}</button>;
+              return <button key={t} onClick={() => { if (active) setTags(sel.filter(x => x !== t).join(" · ")); else if (sel.length < 3) setTags([...sel, t].join(" · ")); }} style={{ fontFamily: S.ui, fontSize: 11, fontWeight: active ? 400 : 300, color: active ? S.tx : S.txGh, background: active ? "rgba(184,164,140,.12)" : "none", border: "1px solid " + (active ? S.ac : S.lnL), borderRadius: 20, padding: mob ? "6px 12px" : "5px 10px", cursor: sel.length >= 3 && !active ? "default" : "pointer", opacity: sel.length >= 3 && !active ? 0.4 : 1, transition: "all .3s" }}>{t}</button>;
             })}
           </div>
         </div>
@@ -259,8 +259,8 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
 
       {/* ─── 발행 버튼 ─── */}
       <div style={{ maxWidth: 640, margin: "0 auto", width: "100%", padding: mob ? "0 16px 48px" : "0 36px 48px" }}>
-        {msg && <div style={{ fontSize: 12, letterSpacing: 2, marginBottom: 16, textAlign: "center", color: msg.includes("완료") ? S.ac : "#c47" }}>{msg}</div>}
-        <button onClick={handleSave} disabled={saving} style={{ width: "100%", fontFamily: S.sf, fontSize: 12, letterSpacing: 4, color: "#fff", background: S.tx, border: "none", padding: "14px 0", cursor: "pointer", opacity: saving ? 0.5 : 1 }}>
+        {msg && <div style={{ fontSize: 12, letterSpacing: 2, marginBottom: 16, textAlign: "center", color: msg.includes("완료") ? S.ac : "#B07060" }}>{msg}</div>}
+        <button onClick={handleSave} disabled={saving} style={{ width: "100%", fontFamily: S.sf, fontSize: 12, letterSpacing: 4, color: "#fff", background: S.tx, border: "none", padding: "14px 0", cursor: "pointer", opacity: saving ? 0.6 : 1, pointerEvents: saving ? "none" : "auto" }}>
           {saving ? "저장 중..." : isEdit ? "수정하기" : "발행하기"}
         </button>
       </div>

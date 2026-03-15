@@ -9,7 +9,7 @@ const S = {
   txM: "#4A4844",
   txQ: "#636160",
   txF: "#8A8880",
-  txGh: "#B5B3AB",
+  txGh: "#9E9C95",
   ac: "#6B6560",
   ln: "#E8E6E1",
   lnL: "rgba(232,230,225,.5)",
@@ -32,18 +32,17 @@ const S = {
   easeOut: "cubic-bezier(.2,0,.3,1)",
   easeInOut: "cubic-bezier(.4,0,.2,1)",
   dur: {
-    fast: ".4s",
-    mid: ".6s",
-    slow: ".8s",
-    hover: ".5s",
+    fast: ".3s",   // 즉각 피드백 (버튼 클릭 등)
+    mid: ".5s",    // 호버, 상태 전환
+    slow: ".8s",   // 페이지/콘텐츠 전환
   },
 };
 
 // ── 마이페이지 톤 ──
 export const TONES = {
-  cream: { bg:"#FAFAF8", bgAlt:"#F5F3EF", tx:"#2C2B28", txM:"#4A4844", txQ:"#636160", txF:"#8A8880", txGh:"#B5B3AB", ln:"#E8E6E1", lnL:"rgba(232,230,225,.5)" },
-  cool:  { bg:"#F4F5F7", bgAlt:"#ECEEF2", tx:"#2A2D33", txM:"#484C54", txQ:"#60646C", txF:"#888C94", txGh:"#B0B4BC", ln:"#E2E4E8", lnL:"rgba(226,228,232,.5)" },
-  warm:  { bg:"#F7F5F3", bgAlt:"#F0EDE9", tx:"#2E2B28", txM:"#4C4844", txQ:"#666260", txF:"#8C8880", txGh:"#B8B4AC", ln:"#EAE6E0", lnL:"rgba(234,230,224,.5)" },
+  cream: { bg:"#FAFAF8", bgAlt:"#F5F3EF", tx:"#2C2B28", txM:"#4A4844", txQ:"#636160", txF:"#8A8880", txGh:"#9E9C95", ln:"#E8E6E1", lnL:"rgba(232,230,225,.5)" },
+  cool:  { bg:"#F4F5F7", bgAlt:"#ECEEF2", tx:"#2A2D33", txM:"#484C54", txQ:"#60646C", txF:"#888C94", txGh:"#9A9EA6", ln:"#E2E4E8", lnL:"rgba(226,228,232,.5)" },
+  warm:  { bg:"#F7F5F3", bgAlt:"#F0EDE9", tx:"#2E2B28", txM:"#4C4844", txQ:"#666260", txF:"#8C8880", txGh:"#A09C96", ln:"#EAE6E0", lnL:"rgba(234,230,224,.5)" },
 };
 
 export default S;
