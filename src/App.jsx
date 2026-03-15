@@ -555,7 +555,7 @@ export default function Sloist(){
                 {h[0]&&<div onClick={()=>openDetail(h[0])} style={{cursor:"pointer",position:"absolute",inset:0,overflow:"hidden"}}>
                   {h[0].photo&&<img src={h[0].photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"}}/>}
                   <div style={{position:"absolute",bottom:0,left:0,right:0,height:"55%",background:"linear-gradient(to top, rgba(30,29,26,.5), transparent)",pointerEvents:"none"}}/>
-                  <div style={{position:"absolute",bottom:mob?24:40,left:0,right:0,textAlign:"center",padding:mob?"0 24px":"0 56px"}}>
+                  <div style={{position:"absolute",bottom:mob?24:40,left:mob?24:56,right:mob?24:56}}>
                     <div style={{fontFamily:S.sf,fontSize:mob?22:36,fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,color:"#fff",textShadow:"0 1px 8px rgba(0,0,0,.15)"}}>{h[0].title}</div>
                     {(h[0].location||h[0].sub||h[0].maker)&&<div style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,letterSpacing:"0.1em",color:"rgba(255,255,255,.6)",marginTop:mob?6:10}}>{h[0].location||h[0].sub||h[0].maker}</div>}
                   </div>
