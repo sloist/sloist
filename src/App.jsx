@@ -595,7 +595,7 @@ export default function Sloist(){
 
           {/* ── 문장 패널: 호흡 ── */}
           <ScrollReveal>
-            <div style={{padding:mob?"64px 32px":"120px 56px",textAlign:"center",maxWidth:640,margin:"0 auto"}}>
+            <div style={{padding:mob?"40px 32px":"72px 56px",textAlign:"center",maxWidth:640,margin:"0 auto"}}>
               <div style={{fontFamily:S.bd,fontSize:mob?15:18,fontWeight:300,lineHeight:2.2,color:S.txM,letterSpacing:mob?0:1}}>{DAILY_QUOTES[new Date().getDay()%DAILY_QUOTES.length]}</div>
             </div>
           </ScrollReveal>
@@ -637,14 +637,12 @@ export default function Sloist(){
                     </div>
                     <button onClick={()=>onCatClick(key)} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.12em",color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>더 보기</button>
                   </div>
-                  {/* 가로 스크롤 — 갤러리 느낌 */}
-                  <div style={{display:"flex",gap:mob?14:24,overflowX:"auto",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",paddingBottom:4,msOverflowStyle:"none"}}>
-                    <style>{`.cat-scroll::-webkit-scrollbar{display:none}`}</style>
-                    {preview.map((it,i)=><div key={it.id} className="cat-scroll" onClick={()=>openDetail(it)} style={{cursor:"pointer",flexShrink:0,width:mob?(i===0?"60%":"40%"):(i===0?280:200)}}>
-                      <Img grad={it.grad} photo={it.photo} aspect={i===0?asp:"1/1"} r={2}/>
+                  {/* 균일 그리드 */}
+                  <div style={{display:"grid",gridTemplateColumns:mob?"repeat(3,1fr)":"repeat(4,1fr)",gap:mob?16:28}}>
+                    {preview.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer"}}>
+                      <Img grad={it.grad} photo={it.photo} aspect={asp} r={2}/>
                       <div style={{marginTop:mob?8:12}}>
-                        <div style={{fontFamily:S.sf,fontSize:mob?12:13,fontWeight:300,lineHeight:1.5,color:S.tx,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.title}</div>
-                        {i===0&&(it.location||it.sub||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txF,marginTop:3,letterSpacing:"0.06em"}}>{it.location||it.sub||it.maker}</div>}
+                        <div style={{fontFamily:S.sf,fontSize:mob?11:13,fontWeight:300,lineHeight:1.5,color:S.tx,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.title}</div>
                       </div>
                     </div>)}
                   </div>
