@@ -548,17 +548,16 @@ export default function Sloist(){
         {/* ── HOME EDITORIAL ── */}
         {!activeCat&&<div style={fd(cVis)}>
 
-          {/* ① 커튼: 풀블리드 장면 하나 */}
+          {/* ① 커튼: 풀블리드 커버 */}
           <StickyCover
             curtain={
-              <div style={{height:"calc(100 * var(--dvh, 1vh))",background:S.bg,display:"flex",flexDirection:"column",justifyContent:"center",position:"relative"}}>
+              <div style={{height:"calc(100 * var(--dvh, 1vh))",background:S.bg,position:"relative"}}>
                 {h[0]&&<div onClick={()=>openDetail(h[0])} style={{cursor:"pointer",position:"absolute",inset:0,overflow:"hidden"}}>
                   {h[0].photo&&<img src={h[0].photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"}}/>}
-                  {/* 하단 그라데이션 + 타이틀 */}
-                  <div style={{position:"absolute",bottom:0,left:0,right:0,height:"50%",background:"linear-gradient(to top, rgba(42,41,38,.52), transparent)",pointerEvents:"none"}}/>
-                  <div style={{position:"absolute",bottom:mob?48:72,left:mob?24:56,right:mob?24:56}}>
-                    <div style={{fontFamily:S.sf,fontSize:mob?20:32,fontWeight:300,lineHeight:1.5,letterSpacing:mob?0:1,color:"#f9f8f7"}}>{h[0].title}</div>
-                    <div style={{fontFamily:S.ui,fontSize:mob?9:10,fontWeight:300,letterSpacing:3,color:"rgba(249,248,247,.6)",marginTop:mob?8:12}}>{h[0].root}{h[0].location?" · "+h[0].location:h[0].tags?" · "+h[0].tags:""}</div>
+                  <div style={{position:"absolute",bottom:0,left:0,right:0,height:"55%",background:"linear-gradient(to top, rgba(30,29,26,.5), transparent)",pointerEvents:"none"}}/>
+                  <div style={{position:"absolute",bottom:mob?24:40,left:0,right:0,textAlign:"center",padding:mob?"0 24px":"0 56px"}}>
+                    <div style={{fontFamily:S.sf,fontSize:mob?22:36,fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,color:"#fff",textShadow:"0 1px 8px rgba(0,0,0,.15)"}}>{h[0].title}</div>
+                    {(h[0].location||h[0].sub||h[0].maker)&&<div style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,letterSpacing:"0.1em",color:"rgba(255,255,255,.6)",marginTop:mob?6:10}}>{h[0].location||h[0].sub||h[0].maker}</div>}
                   </div>
                 </div>}
               </div>
@@ -566,22 +565,16 @@ export default function Sloist(){
             reveal={
               <div style={{height:"calc(100 * var(--dvh, 1vh))",background:S.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:mob?"0 24px":"0 56px"}}>
                 {mob
-                  ?<div style={{width:"100%",display:"flex",flexDirection:"column",alignItems:"center",gap:24}}>
-                    {h.slice(1,3).map((it,i)=>it&&<div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer",position:"relative",width:i===0?"85%":"72%",alignSelf:i===0?"flex-start":"flex-end"}}>
-                      <Img saved={isSaved(it.id)} grad={it.grad} photo={it.photo} aspect="4/5" r={4}/>
-                      <div style={{marginTop:10}}>
-                        <div style={{fontFamily:S.sf,fontSize:13,fontWeight:300,lineHeight:1.5,marginBottom:3}}>{it.title}</div>
-                        <div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txF}}>{it.root}</div>
-                      </div>
+                  ?<div style={{width:"100%",display:"flex",flexDirection:"column",gap:28}}>
+                    {h.slice(1,3).map((it,i)=>it&&<div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer",width:i===0?"85%":"72%",alignSelf:i===0?"flex-start":"flex-end"}}>
+                      <Img grad={it.grad} photo={it.photo} aspect="4/5" r={2}/>
+                      <div style={{fontFamily:S.sf,fontSize:14,fontWeight:300,lineHeight:1.5,color:S.tx,marginTop:10}}>{it.title}</div>
                     </div>)}
                   </div>
                   :<div style={{width:"100%",maxWidth:960,display:"grid",gridTemplateColumns:"1fr 1fr",gap:56}}>
-                    {h.slice(1,3).map((it,i)=>it&&<div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer",position:"relative",marginTop:i===1?60:0}}>
-                      <Img saved={isSaved(it.id)} grad={it.grad} photo={it.photo} aspect="4/5" r={4}/>
-                      <div style={{marginTop:20}}>
-                        <div style={{fontFamily:S.sf,fontSize:17,fontWeight:300,lineHeight:1.5,marginBottom:4}}>{it.title}</div>
-                        <div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txF}}>{it.root}</div>
-                      </div>
+                    {h.slice(1,3).map((it,i)=>it&&<div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer",marginTop:i===1?60:0}}>
+                      <Img grad={it.grad} photo={it.photo} aspect="4/5" r={2}/>
+                      <div style={{fontFamily:S.sf,fontSize:17,fontWeight:300,lineHeight:1.5,color:S.tx,marginTop:16}}>{it.title}</div>
                     </div>)}
                   </div>
                 }
@@ -593,40 +586,34 @@ export default function Sloist(){
           <div style={{position:"relative",zIndex:2,background:S.bg}}>
 
           {/* 패널 B — 중앙 1점 */}
-          {h[3]&&<div style={{margin:"0 auto",padding:mob?"48px 24px 0":"120px 24px 0",maxWidth:mob?undefined:560}}>
+          {h[3]&&<div style={{margin:"0 auto",padding:mob?"48px 24px 0":"100px 24px 0",maxWidth:mob?undefined:560}}>
             <ScrollReveal>
-              <div onClick={()=>openDetail(h[3])} style={{cursor:"pointer",position:"relative",width:mob?"88%":"100%",margin:mob?"0 auto":undefined}}>
-                <Img saved={isSaved(h[3].id)} grad={h[3].grad} photo={h[3].photo} aspect="3/2" r={4}/>
-                <div style={{marginTop:mob?12:20,textAlign:"center"}}>
-                  <div style={{fontFamily:S.sf,fontSize:mob?15:20,fontWeight:300,lineHeight:1.5,marginBottom:6}}>{h[3].title}</div>
-                  <div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txF}}>{h[3].root}{h[3].location?" · "+h[3].location:""}</div>
+              <div onClick={()=>openDetail(h[3])} style={{cursor:"pointer",width:mob?"88%":"100%",margin:mob?"0 auto":undefined}}>
+                <Img grad={h[3].grad} photo={h[3].photo} aspect="3/2" r={2}/>
+                <div style={{marginTop:mob?10:16,textAlign:"center"}}>
+                  <div style={{fontFamily:S.sf,fontSize:mob?15:20,fontWeight:300,lineHeight:1.5}}>{h[3].title}</div>
+                  {(h[3].location||h[3].sub||h[3].maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:S.txF,marginTop:4}}>{h[3].location||h[3].sub||h[3].maker}</div>}
                 </div>
               </div>
             </ScrollReveal>
           </div>}
 
-          {/* 패널 C — 3점 */}
+          {/* 패널 C — 3점 지그재그 */}
           {mob
             ?<div style={{padding:"40px 24px 0"}}>
               {h.slice(4,7).map((it,i)=>it&&<ScrollReveal key={it.id} delay={i*100}>
-                <div onClick={()=>openDetail(it)} style={{cursor:"pointer",position:"relative",width:"88%",marginBottom:40,margin:"0 auto 40px",marginLeft:i===0?"0":i===1?"auto":i===2?"0":undefined}}>
-                  <Img saved={isSaved(it.id)} grad={it.grad} photo={it.photo} aspect="4/5" r={4}/>
-                  <div style={{marginTop:10}}>
-                    <div style={{fontFamily:S.sf,fontSize:13,fontWeight:300,lineHeight:1.5,marginBottom:3}}>{it.title}</div>
-                    <div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txF}}>{it.root}</div>
-                  </div>
+                <div onClick={()=>openDetail(it)} style={{cursor:"pointer",width:"82%",marginBottom:40,marginLeft:i%2===0?"0":"auto"}}>
+                  <Img grad={it.grad} photo={it.photo} aspect="4/5" r={2}/>
+                  <div style={{fontFamily:S.sf,fontSize:13,fontWeight:300,lineHeight:1.5,color:S.tx,marginTop:10}}>{it.title}</div>
                 </div>
               </ScrollReveal>)}
             </div>
-            :<div style={{maxWidth:1140,margin:"0 auto",padding:"120px 56px 0"}}>
+            :<div style={{maxWidth:1100,margin:"0 auto",padding:"100px 56px 0"}}>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:40}}>
                 {h.slice(4,7).map((it,i)=>it&&<ScrollReveal key={it.id} delay={i*120}>
-                  <div onClick={()=>openDetail(it)} style={{cursor:"pointer",position:"relative"}}>
-                    <Img saved={isSaved(it.id)} grad={it.grad} photo={it.photo} aspect="4/5" r={4}/>
-                    <div style={{marginTop:16}}>
-                      <div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,lineHeight:1.5,marginBottom:4}}>{it.title}</div>
-                      <div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:3,color:S.txF}}>{it.root}</div>
-                    </div>
+                  <div onClick={()=>openDetail(it)} style={{cursor:"pointer"}}>
+                    <Img grad={it.grad} photo={it.photo} aspect="4/5" r={2}/>
+                    <div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,lineHeight:1.5,color:S.tx,marginTop:14}}>{it.title}</div>
                   </div>
                 </ScrollReveal>)}
               </div>
@@ -635,8 +622,8 @@ export default function Sloist(){
 
           {/* archive 입구 */}
           <ScrollReveal>
-            <div style={{textAlign:"center",padding:mob?"56px 0 20px":"100px 0 24px"}}>
-              <span onClick={()=>goTo("archive")} style={{fontFamily:S.sf,fontSize:mob?12:14,fontWeight:300,letterSpacing:mob?3:5,color:S.txQ,cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>all sloists are here</span>
+            <div style={{textAlign:"center",padding:mob?"56px 0 20px":"80px 0 24px"}}>
+              <span onClick={()=>goTo("archive")} style={{fontFamily:S.sf,fontSize:mob?12:14,fontWeight:300,letterSpacing:mob?3:5,color:S.txGh,cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>all sloists are here</span>
             </div>
           </ScrollReveal>
 
