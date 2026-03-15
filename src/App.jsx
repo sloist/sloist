@@ -510,32 +510,34 @@ export default function Sloist(){
     <style>{`html,body{overscroll-behavior:none}::selection{background:rgba(130,125,118,.15);color:inherit}button:focus-visible,a:focus-visible,input:focus-visible{outline:1px solid rgba(130,125,118,.3);outline-offset:2px}@keyframes mainIn{from{opacity:0}to{opacity:1}}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0}to{opacity:1}}`}</style>
 
     {/* SEARCH — Cereal 검색 오버레이 */}
-    {sov&&<div style={{position:"fixed",inset:0,background:"rgba(250,250,248,.96)",backdropFilter:"blur(40px)",zIndex:200,overflowY:"auto",animation:"fi .6s cubic-bezier(.2,0,.3,1)"}}>
-      <div style={{display:"flex",justifyContent:"flex-end",padding:mob?"16px 24px":"20px 48px"}}>
-        <button onClick={()=>sSov(false)} style={{fontFamily:S.ui,fontSize:12,fontWeight:400,letterSpacing:"0.1em",color:S.txQ,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>닫기</button>
+    {sov&&<div style={{position:"fixed",inset:0,background:"rgba(250,250,248,.97)",backdropFilter:"blur(40px)",zIndex:200,overflowY:"auto",animation:"fi .6s cubic-bezier(.2,0,.3,1)"}}>
+      <div style={{display:"flex",justifyContent:"flex-end",padding:mob?"14px 20px":"18px 48px"}}>
+        <button onClick={()=>sSov(false)} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.12em",color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>닫기</button>
       </div>
-      <div style={{maxWidth:600,margin:"0 auto",padding:mob?"8vh 24px 40px":"14vh 32px 80px"}}>
-        {/* 큰 검색 입력 */}
-        <input ref={sqRef} placeholder="기록 검색" value={sq} onChange={e=>sSq(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&sq.trim())doSearch(sq.trim());}} style={{width:"100%",background:"transparent",border:"none",borderBottom:"1px solid "+S.ln,padding:"16px 0",fontFamily:S.ui,fontSize:mob?24:32,fontWeight:300,color:S.tx,letterSpacing:"-0.01em",outline:"none"}}/>
+      <div style={{maxWidth:560,margin:"0 auto",padding:mob?"6vh 24px 40px":"12vh 32px 80px"}}>
+        <input ref={sqRef} placeholder="찾고 싶은 기록" value={sq} onChange={e=>sSq(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&sq.trim())doSearch(sq.trim());}} style={{width:"100%",background:"transparent",border:"none",borderBottom:"1px solid "+S.ln,padding:"14px 0",fontFamily:S.sf,fontSize:mob?22:28,fontWeight:300,color:S.tx,letterSpacing:0,outline:"none"}}/>
 
         {/* 추천 태그 */}
-        {!sq.trim()&&<div style={{marginTop:mob?36:56}}>
-          <div style={{display:"grid",gridTemplateColumns:mob?"repeat(3,1fr)":"repeat(5,1fr)",gap:mob?"24px 16px":"32px 20px"}}>
-          {Object.entries(TAG_GROUPS).map(([group,tags],gi)=><div key={group}>
-            <div style={{fontFamily:S.ui,fontSize:11,fontWeight:500,letterSpacing:"0.12em",color:S.txGh,marginBottom:mob?8:12}}>{group}</div>
-            <div style={{display:"flex",flexDirection:"column",gap:2}}>{tags.map(t=><button key={t} onClick={()=>doSearch(t)} style={{fontFamily:S.ui,fontSize:mob?13:14,fontWeight:300,color:S.txQ,background:"none",border:"none",cursor:"pointer",padding:"4px 0",textAlign:"left",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>{t}</button>)}</div>
+        {!sq.trim()&&<div style={{marginTop:mob?32:48}}>
+          <div style={{display:"grid",gridTemplateColumns:mob?"repeat(3,1fr)":"repeat(5,1fr)",gap:mob?"20px 16px":"28px 20px"}}>
+          {Object.entries(TAG_GROUPS).map(([group,tags])=><div key={group}>
+            <div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.12em",color:S.txGh,marginBottom:mob?6:10}}>{group}</div>
+            <div style={{display:"flex",flexDirection:"column",gap:1}}>{tags.map(t=><button key={t} onClick={()=>doSearch(t)} style={{fontFamily:S.ui,fontSize:mob?12:13,fontWeight:300,color:S.txF,background:"none",border:"none",cursor:"pointer",padding:"3px 0",textAlign:"left",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txF}>{t}</button>)}</div>
           </div>)}
           </div>
         </div>}
 
-        {/* 실시간 검색 결과 미리보기 */}
-        {sq.trim()&&(()=>{const q=sq.trim().toLowerCase();const preview=items.filter(i=>[i.title,i.tags||"",i.sub||"",i.maker||"",i.location||"",i.note||""].some(f=>f.toLowerCase().includes(q))).slice(0,6);return preview.length>0?<div style={{marginTop:mob?24:36}}>
-          {preview.map(it=><div key={it.id} onClick={()=>{sSov(false);setTimeout(()=>openDetail(it),150);}} style={{display:"flex",gap:mob?14:20,padding:"16px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",alignItems:"center"}}>
-            <div style={{width:mob?56:72,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="1/1" r={2}/></div>
-            <div style={{fontFamily:S.ui,fontSize:mob?14:15,fontWeight:300,color:S.tx}}>{it.title}</div>
+        {/* 실시간 검색 결과 */}
+        {sq.trim()&&(()=>{const q=sq.trim().toLowerCase();const preview=items.filter(i=>[i.title,i.tags||"",i.sub||"",i.maker||"",i.location||"",i.note||""].some(f=>f.toLowerCase().includes(q))).slice(0,6);return preview.length>0?<div style={{marginTop:mob?20:32}}>
+          {preview.map(it=><div key={it.id} onClick={()=>{sSov(false);setTimeout(()=>openDetail(it),150);}} style={{display:"flex",gap:mob?14:20,padding:mob?"14px 0":"16px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",alignItems:"center"}}>
+            <div style={{width:mob?52:64,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="1/1" r={2}/></div>
+            <div>
+              <div style={{fontFamily:S.sf,fontSize:mob?14:15,fontWeight:300,color:S.tx}}>{it.title}</div>
+              {(it.location||it.sub||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:S.txF,marginTop:2}}>{it.location||it.sub||it.maker}</div>}
+            </div>
           </div>)}
-          <button onClick={()=>{if(sq.trim())doSearch(sq.trim());}} style={{fontFamily:S.ui,fontSize:13,fontWeight:400,letterSpacing:"0.08em",color:S.txQ,background:"none",border:"none",cursor:"pointer",padding:"20px 0",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=S.txQ}>모든 결과 보기</button>
-        </div>:<div style={{marginTop:mob?32:48,fontFamily:S.ui,fontSize:14,fontWeight:300,color:S.txGh}}>아직 기록되지 않은 이야기입니다</div>;})()}
+          <button onClick={()=>{if(sq.trim())doSearch(sq.trim());}} style={{fontFamily:S.ui,fontSize:12,fontWeight:300,letterSpacing:"0.08em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"20px 0",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>전체 결과</button>
+        </div>:<div style={{marginTop:mob?32:48,fontFamily:S.ui,fontSize:13,fontWeight:300,color:S.txGh}}>아직 기록되지 않은 이야기입니다</div>;})()}
       </div>
     </div>}
 
