@@ -26,28 +26,28 @@ export default function Auth({ onAuth, signIn, signUp }) {
         if (error) {
           const m = error.message;
           if (m.includes("already registered")) setMsg("이미 가입된 이메일입니다");
-          else if (m.includes("valid email")) setMsg("올바른 이메일을 입력하세요");
-          else setMsg("가입 실패: 다시 시도해주세요");
+          else if (m.includes("valid email")) setMsg("올바른 이메일을 입력해주세요");
+          else setMsg("가입하지 못했습니다");
         }
-        else setMsg("가입 완료. 이메일을 확인하세요.");
+        else setMsg("가입이 완료되었습니다. 이메일을 확인해주세요");
       } else if (mode === "reset") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: window.location.origin + "/reset-password",
         });
-        if (error) setMsg("전송 실패: " + error.message);
-        else setMsg("해당 이메일로 가입된 계정이 있다면 재설정 링크가 전송됩니다.");
+        if (error) setMsg("보내지 못했습니다");
+        else setMsg("재설정 링크를 보냈습니다");
       } else {
         const { error } = await signIn(email, pw);
         if (error) {
           const m = error.message;
-          if (m.includes("Invalid login")) setMsg("이메일 또는 비밀번호를 확인하세요");
+          if (m.includes("Invalid login")) setMsg("이메일 또는 비밀번호를 확인해주세요");
           else if (m.includes("Email not confirmed")) setMsg("이메일 인증을 완료해주세요");
-          else setMsg("로그인 실패: 다시 시도해주세요");
+          else setMsg("로그인하지 못했습니다");
         }
         else if (onAuth) onAuth();
       }
     } catch {
-      setMsg("네트워크 오류: 다시 시도해주세요");
+      setMsg("연결이 원활하지 않습니다");
     }
     setLoading(false);
   }
@@ -103,7 +103,7 @@ export default function Auth({ onAuth, signIn, signUp }) {
 
               {/* 메시지 */}
               <div style={{ minHeight: 18 }}>
-                {msg && <div style={{ fontFamily: S.ui, fontSize: 11, fontWeight: 300, color: msg.includes("완료") || msg.includes("전송") ? S.ac : "#B07060", lineHeight: 1.7, textAlign: "center" }}>{msg}</div>}
+                {msg && <div style={{ fontFamily: S.ui, fontSize: 11, fontWeight: 300, color: msg.includes("완료") || msg.includes("보냈습니다") ? S.ac : "#B07060", lineHeight: 1.7, textAlign: "center" }}>{msg}</div>}
               </div>
 
               <button
@@ -117,7 +117,7 @@ export default function Auth({ onAuth, signIn, signUp }) {
                   pointerEvents: loading ? "none" : "auto",
                 }}
               >
-                {loading ? "..." : mode === "login" ? "로그인" : mode === "signup" ? "가입하기" : "전송"}
+                {loading ? "..." : mode === "login" ? "로그인" : mode === "signup" ? "가입" : "보내기"}
               </button>
             </div>
           </div>
@@ -135,14 +135,14 @@ export default function Auth({ onAuth, signIn, signUp }) {
             <button
               onClick={() => { setMode("signup"); setMsg(null); }}
               style={{ fontFamily: S.ui, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
-            >가입하기</button>
+            >가입</button>
           </>
         )}
         {(mode === "signup" || mode === "reset") && (
           <button
             onClick={() => { setMode("login"); setMsg(null); }}
             style={{ fontFamily: S.ui, fontSize: 10, fontWeight: 300, letterSpacing: 2, color: S.txF, background: "none", border: "none", cursor: "pointer", padding: "8px 0", transition: "color .5s" }}
-          >로그인으로 돌아가기</button>
+          >로그인</button>
         )}
         <button
           onClick={onAuth}

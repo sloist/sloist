@@ -4,8 +4,8 @@ import S from "../styles/tokens";
 
 // 에디터 라벨 (ED를 외부에서 받음)
 export function aLabel(it, ED) {
-  if (it.isOfficial) return "by sloist";
-  if (ED && it.editor && ED[it.editor]) return "sloist " + ED[it.editor].name;
+  if (it.isOfficial) return "sloist";
+  if (ED && it.editor && ED[it.editor]) return ED[it.editor].name;
   return "";
 }
 

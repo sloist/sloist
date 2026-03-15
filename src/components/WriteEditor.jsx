@@ -93,7 +93,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
     }
 
     if (error) setMsg("저장 실패: " + error.message);
-    else { setMsg(isEdit ? "수정 완료" : "발행 완료"); if (onSaved) setTimeout(() => onSaved(), 800); }
+    else { setMsg(isEdit ? "수정 완료" : "저장했습니다"); if (onSaved) setTimeout(() => onSaved(), 800); }
     setSaving(false);
   }
 
@@ -103,7 +103,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
   const labelStyle = { fontSize: 10, letterSpacing: 4, color: S.txGh, marginBottom: 4, display: "block" };
   const catBtn = (active) => ({ fontFamily: S.sf, fontSize: 12, letterSpacing: 3, color: active ? S.tx : S.txGh, fontWeight: active ? 400 : 300, background: "none", border: "none", borderBottom: active ? "1px solid " + S.ac : "1px solid transparent", padding: "6px 0", cursor: "pointer" });
 
-  const rootLabel = root === "space" ? "장소" : root === "scene" ? "장면" : root === "from_sloist" ? "from" : "물건";
+  const rootLabel = root === "space" ? "장소" : root === "scene" ? "장면" : root === "from_sloist" ? "기록" : "물건";
 
   // ── 공통 필드 블록들 ──
   const CategorySelect = !isEdit && (
@@ -113,7 +113,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
           { k: "space", label: "space", desc: "장소의 기록" },
           { k: "scene", label: "scene", desc: "장면의 기록" },
           { k: "objet", label: "objet", desc: "물건의 기록" },
-          { k: "from_sloist", label: "from", desc: "슬로이스트의 시선" },
+          { k: "from_sloist", label: "기록", desc: "슬로이스트의 기록" },
         ].map(({ k, label, desc }) => (
           <button key={k} onClick={() => { setRoot(k); setCat(""); setType(""); setOtype(""); }}
             style={{
@@ -146,7 +146,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
   const TitleField = (
     <div style={{ marginBottom: g }}>
       <span style={labelStyle}>제목</span>
-      <input value={title} onChange={e => setTitle(e.target.value)} placeholder="기록의 제목" style={inputStyle} />
+      <input value={title} onChange={e => setTitle(e.target.value)} placeholder="제목" style={inputStyle} />
     </div>
   );
 
@@ -154,8 +154,8 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
     <div style={{ marginBottom: g }}>
       <span style={labelStyle}>위치</span>
       <div style={{ display: "flex", gap: 12, alignItems: "flex-end" }}>
-        <input value={location} onChange={e => setLocation(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); geocodeAddress(location); } }} placeholder="주소 입력 (예: 충남 공주 한옥마을)" style={{ ...inputStyle, flex: 1 }} />
-        <button onClick={() => geocodeAddress(location)} disabled={geoLoading} style={{ fontFamily: S.ui, fontSize: 10, letterSpacing: 2, color: S.txQ, background: "none", border: "none", borderBottom: "1px solid " + S.ln, padding: "10px 0", cursor: "pointer", whiteSpace: "nowrap", opacity: geoLoading ? 0.5 : 1 }}>{geoLoading ? "검색 중..." : "좌표 검색"}</button>
+        <input value={location} onChange={e => setLocation(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); geocodeAddress(location); } }} placeholder="주소를 입력하세요" style={{ ...inputStyle, flex: 1 }} />
+        <button onClick={() => geocodeAddress(location)} disabled={geoLoading} style={{ fontFamily: S.ui, fontSize: 10, letterSpacing: 2, color: S.txQ, background: "none", border: "none", borderBottom: "1px solid " + S.ln, padding: "10px 0", cursor: "pointer", whiteSpace: "nowrap", opacity: geoLoading ? 0.5 : 1 }}>{geoLoading ? "찾는 중..." : "좌표 검색"}</button>
       </div>
       {(lat && lng) && <div style={{ fontFamily: S.ui, fontSize: 10, color: S.txF, marginTop: 6, letterSpacing: 1 }}>📍 {Number(lat).toFixed(4)}, {Number(lng).toFixed(4)}</div>}
     </div>
@@ -164,7 +164,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
   const MakerField = (
     <div style={{ marginBottom: g }}>
       <span style={labelStyle}>만든 이</span>
-      <input value={maker} onChange={e => setMaker(e.target.value)} placeholder="공방 이름" style={inputStyle} />
+      <input value={maker} onChange={e => setMaker(e.target.value)} placeholder="만든 이를 입력하세요" style={inputStyle} />
     </div>
   );
 
@@ -178,7 +178,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
   const NoteField = (
     <div style={{ marginBottom: g }}>
       <span style={labelStyle}>본문</span>
-      <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="느리게 기록하세요" style={textareaStyle} />
+      <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="본문을 입력하세요" style={textareaStyle} />
     </div>
   );
 
@@ -194,7 +194,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
       <span style={labelStyle}>썸네일 비율</span>
       <div style={{ display: "flex", gap: 14, marginTop: 6 }}>
         {ASPECT_OPTIONS.map(a => <button key={a} onClick={() => setAspect(aspect === a ? "" : a)} style={catBtn(aspect === a)}>{a}</button>)}
-        <span style={{ fontFamily: S.ui, fontSize: 10, color: S.txGh, alignSelf: "center" }}>미선택 시 기본값</span>
+        <span style={{ fontFamily: S.ui, fontSize: 10, color: S.txGh, alignSelf: "center" }}>선택하지 않으면 기본값으로 적용됩니다</span>
       </div>
     </div>
   );
@@ -249,7 +249,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
           <span style={{ fontFamily: S.sf, fontSize: mob ? 14 : 15, letterSpacing: 4, fontWeight: 300 }}>{isEdit ? "수정하기" : "새 기록"}</span>
           {isEdit && <span style={{ fontFamily: S.ui, fontSize: 9, letterSpacing: 2, color: S.txF, background: "rgba(184,164,140,.08)", padding: "3px 10px", borderRadius: 10 }}>{rootLabel}</span>}
         </div>
-        <button onClick={() => { const hasContent = title.trim() || note.trim() || photos.length > 0; if (hasContent && !confirm("작성 중인 내용이 있습니다. 닫으시겠습니까?")) return; onClose(); }} style={{ fontFamily: S.sf, fontSize: 10, letterSpacing: 6, color: S.txGh, background: "none", border: "none", cursor: "pointer" }}>닫기</button>
+        <button onClick={() => { const hasContent = title.trim() || note.trim() || photos.length > 0; if (hasContent && !confirm("작성 중인 내용이 있습니다. 닫을까요?")) return; onClose(); }} style={{ fontFamily: S.sf, fontSize: 10, letterSpacing: 6, color: S.txGh, background: "none", border: "none", cursor: "pointer" }}>닫기</button>
       </div>
 
       {/* ─── 단일 컬럼 레이아웃 ─── */}
@@ -261,7 +261,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
       <div style={{ maxWidth: 640, margin: "0 auto", width: "100%", padding: mob ? "0 16px 48px" : "0 36px 48px" }}>
         {msg && <div style={{ fontSize: 12, letterSpacing: 2, marginBottom: 16, textAlign: "center", color: msg.includes("완료") ? S.ac : "#B07060" }}>{msg}</div>}
         <button onClick={handleSave} disabled={saving} style={{ width: "100%", fontFamily: S.sf, fontSize: 12, letterSpacing: 4, color: "#fff", background: S.tx, border: "none", padding: "14px 0", cursor: "pointer", opacity: saving ? 0.6 : 1, pointerEvents: saving ? "none" : "auto" }}>
-          {saving ? "저장 중..." : isEdit ? "수정하기" : "발행하기"}
+          {saving ? "저장 중..." : isEdit ? "수정하기" : "저장하기"}
         </button>
       </div>
     </div>

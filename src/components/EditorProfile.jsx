@@ -68,7 +68,7 @@ export default function EditorProfile({ userId, existingEditor, onClose, onSaved
     if (error) {
       setMsg("저장 실패: " + error.message);
     } else {
-      setMsg(isEdit ? "수정 완료" : "프로필이 제출되었습니다. 관리자 검토 후 공개됩니다.");
+      setMsg(isEdit ? "수정 완료" : "프로필이 저장되었습니다. 검토 후 공개됩니다");
       if (onSaved) setTimeout(() => onSaved(), 1500);
     }
     setSaving(false);
@@ -84,18 +84,18 @@ export default function EditorProfile({ userId, existingEditor, onClose, onSaved
   return (
     <div style={{ minHeight: "100vh", background: S.bg, display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: mob ? "16px" : "20px 36px", borderBottom: "1px solid " + S.lnL }}>
-        <span style={{ fontFamily: S.sf, fontSize: mob ? 14 : 16, letterSpacing: 4, fontWeight: 300 }}>{isEdit ? "프로필 수정" : "슬로이스트 프로필 만들기"}</span>
+        <span style={{ fontFamily: S.sf, fontSize: mob ? 14 : 16, letterSpacing: 4, fontWeight: 300 }}>{isEdit ? "프로필 수정" : "프로필 만들기"}</span>
         <button onClick={onClose} style={{ fontFamily: S.sf, fontSize: 10, letterSpacing: 6, color: S.txGh, background: "none", border: "none", cursor: "pointer" }}>닫기</button>
       </div>
       <div style={{ maxWidth: 520, margin: "0 auto", width: "100%", padding: mob ? "28px 16px" : "48px 24px" }}>
-        {!isEdit && <div style={{ marginBottom: 36, padding: "20px 0", borderBottom: "1px solid " + S.lnL }}><p style={{ fontSize: 13, color: S.txQ, lineHeight: 2 }}>슬로이스트는 자기만의 속도로 살아가는 사람들의 시선을 기록합니다.<br/>당신의 시선을 알려주세요.</p></div>}
+        {!isEdit && <div style={{ marginBottom: 36, padding: "20px 0", borderBottom: "1px solid " + S.lnL }}><p style={{ fontSize: 13, color: S.txQ, lineHeight: 2 }}>슬로이스트는 자기만의 속도로 살아가는 사람들의 시선을 기록합니다<br/>당신의 시선을 남겨주세요</p></div>}
 
         <div style={{ marginBottom: 28 }}>
           <span style={labelStyle}>프로필 사진</span>
           <ImageUpload value={img} onChange={setImg} folder="profiles" shape="circle" />
         </div>
-        <div style={{ marginBottom: 28 }}><span style={labelStyle}>슬로이스트 이름</span><input value={name} onChange={e => setName(e.target.value)} placeholder="당신을 부를 이름" style={inputStyle} /></div>
-        <div style={{ marginBottom: 28 }}><span style={labelStyle}>한 줄 소개</span><input value={bio} onChange={e => setBio(e.target.value)} placeholder="당신의 시선을 한 문장으로" style={inputStyle} /></div>
+        <div style={{ marginBottom: 28 }}><span style={labelStyle}>이름</span><input value={name} onChange={e => setName(e.target.value)} placeholder="이름을 입력하세요" style={inputStyle} /></div>
+        <div style={{ marginBottom: 28 }}><span style={labelStyle}>한 줄 소개</span><input value={bio} onChange={e => setBio(e.target.value)} placeholder="한 줄을 남겨보세요" style={inputStyle} /></div>
         <div style={{ marginBottom: 28 }}>
           <span style={labelStyle}>관심 태그 (최대 3개)</span>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
@@ -105,21 +105,21 @@ export default function EditorProfile({ userId, existingEditor, onClose, onSaved
           </div>
         </div>
         <div style={{ marginBottom: 36 }}>
-          <span style={labelStyle}>외부 링크 (최대 3개, 선택)</span>
+          <span style={labelStyle}>외부 링크</span>
           {[
             { label: link1Label, url: link1Url, setLabel: setLink1Label, setUrl: setLink1Url },
             { label: link2Label, url: link2Url, setLabel: setLink2Label, setUrl: setLink2Url },
             { label: link3Label, url: link3Url, setLabel: setLink3Label, setUrl: setLink3Url },
           ].map((l, i) => (
             <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 12, marginBottom: 12 }}>
-              <input value={l.label} onChange={e => l.setLabel(e.target.value)} placeholder="라벨 (예: instagram)" style={{ ...inputStyle, fontSize: 12 }} />
+              <input value={l.label} onChange={e => l.setLabel(e.target.value)} placeholder="이름" style={{ ...inputStyle, fontSize: 12 }} />
               <input value={l.url} onChange={e => l.setUrl(e.target.value)} placeholder="https://..." style={{ ...inputStyle, fontSize: 12 }} />
             </div>
           ))}
         </div>
-        {msg && <div style={{ fontSize: 12, letterSpacing: 2, marginBottom: 20, textAlign: "center", color: msg.includes("실패") ? "#c47" : S.ac, lineHeight: 1.8 }}>{msg}</div>}
+        {msg && <div style={{ fontSize: 12, letterSpacing: 2, marginBottom: 20, textAlign: "center", color: msg.includes("실패") ? "#B07060" : S.ac, lineHeight: 1.8 }}>{msg}</div>}
         <button onClick={handleSave} disabled={saving} style={{ width: "100%", fontFamily: S.sf, fontSize: 12, letterSpacing: 4, color: "#fff", background: S.tx, border: "none", padding: "14px 0", cursor: "pointer", opacity: saving ? 0.5 : 1, marginBottom: 60 }}>
-          {saving ? "저장 중..." : isEdit ? "수정하기" : "제출하기"}
+          {saving ? "저장 중..." : isEdit ? "수정하기" : "저장하기"}
         </button>
       </div>
     </div>

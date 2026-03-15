@@ -79,7 +79,7 @@ export default function ImageUpload({ value, onChange, folder = "general", shape
             }}
           >
             <span style={{ fontSize: 11, color: S.txGh, letterSpacing: 2 }}>
-              {uploading ? "업로드 중..." : `+ 사진 (${photos.length}/${max})`}
+              {uploading ? "업로드 중..." : `사진 추가 (${photos.length}/${max})`}
             </span>
           </div>
         )}
