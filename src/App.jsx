@@ -436,9 +436,11 @@ export default function Sloist(){
   const Foot=()=><div style={{textAlign:"center",padding:mob?"64px 0 48px":"96px 0 56px",flexShrink:0}}>
     <div style={{width:3,height:3,borderRadius:"50%",background:S.ln,margin:"0 auto",marginBottom:mob?24:32}}/>
     <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:mob?16:20}}>
-      <button onClick={()=>goTo("about")} style={{fontFamily:S.bd,fontSize:11,fontWeight:300,letterSpacing:"0.06em",color:"#C8C5BE",background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txGh} onMouseLeave={e=>e.currentTarget.style.color="#C8C5BE"}>느리게 걷는 사람들의 시선</button>
+      <button onClick={()=>goTo("about")} style={{fontFamily:S.bd,fontSize:11,fontWeight:300,letterSpacing:"0.06em",color:"#C8C5BE",background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txGh} onMouseLeave={e=>e.currentTarget.style.color="#C8C5BE"}>슬로이스트</button>
       <span style={{color:S.ln,fontSize:9}}>·</span>
-      <button onClick={()=>{pushUrl("/from_sloist");mt(()=>{sDetail(null);sEdRoom(null);sView("home");sActiveCat("from_sloist");});}} style={{fontFamily:S.bd,fontSize:11,fontWeight:300,letterSpacing:"0.06em",color:"#C8C5BE",background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txGh} onMouseLeave={e=>e.currentTarget.style.color="#C8C5BE"}>슬로이스트의 기록</button>
+      <button onClick={()=>goTo("archive")} style={{fontFamily:S.bd,fontSize:11,fontWeight:300,letterSpacing:"0.06em",color:"#C8C5BE",background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txGh} onMouseLeave={e=>e.currentTarget.style.color="#C8C5BE"}>에디터</button>
+      <span style={{color:S.ln,fontSize:9}}>·</span>
+      <button onClick={()=>{pushUrl("/from_sloist");mt(()=>{sDetail(null);sEdRoom(null);sView("home");sActiveCat("from_sloist");});}} style={{fontFamily:S.bd,fontSize:11,fontWeight:300,letterSpacing:"0.06em",color:"#C8C5BE",background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txGh} onMouseLeave={e=>e.currentTarget.style.color="#C8C5BE"}>기록</button>
     </div>
   </div>;
 
