@@ -474,14 +474,14 @@ export default function Sloist(){
           </div>}
 
           {/* 2) 우: 태그 */}
-          {dl.tags&&<div style={{marginTop:mob?20:28,textAlign:"right"}}>
+          {dl.tags&&<div style={{marginTop:mob?12:16,textAlign:"right"}}>
             <TagLinks tags={dl.tags} size={mob?11:11} color={S.txGh}/>
           </div>}
         </div>
 
         {/* 3) 좌: 관련 기록 */}
         {relatedItems.length>0&&<div style={{maxWidth:640,margin:"0 auto",padding:mob?"0 24px":"0 32px"}}>
-          <div style={{marginTop:mob?28:40}}>
+          <div style={{marginTop:mob?16:24}}>
             <div style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.15em",color:S.txGh,marginBottom:mob?20:28}}>{relLabel}</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:mob?16:40}}>
               {relatedItems.map(ri=><div key={ri.id} onClick={()=>openDetail(ri)} style={{cursor:"pointer"}}>
