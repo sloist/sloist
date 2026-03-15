@@ -37,6 +37,8 @@ export default function Sloist(){
   const [edRoom,sEdRoom]=useState(null);
   const [toast,sToast]=useState(null);
   const [toastVis,sToastVis]=useState(false);
+  const [keepFlash,sKeepFlash]=useState(null);
+  const keepFlashTimer=useRef(null);
   const [sov,sSov]=useState(false);
   const [sq,sSq]=useState("");
   const [showTags,sShowTags]=useState(false);
@@ -218,7 +220,9 @@ export default function Sloist(){
     setSavedIds(p=>was?p.filter(x=>x!==id):[...p,id]);
     const keepIn=["잘 두었습니다","잠시 맡아둘게요","기억해둘게요","여기 두겠습니다"];
     const keepOut=["다시 놓아둡니다","가볍게 내려놓았습니다","조용히 돌려놓았습니다"];
-    flash(was?keepOut[Math.floor(Math.random()*keepOut.length)]:keepIn[Math.floor(Math.random()*keepIn.length)]);
+    const msg=was?keepOut[Math.floor(Math.random()*keepOut.length)]:keepIn[Math.floor(Math.random()*keepIn.length)];
+    if(keepFlashTimer.current)clearTimeout(keepFlashTimer.current);
+    sKeepFlash(msg);keepFlashTimer.current=setTimeout(()=>sKeepFlash(null),1800);
     const{error}=was
       ?await supabase.from("saves").delete().eq("user_id",auth.user.id).eq("content_id",id)
       :await supabase.from("saves").insert({user_id:auth.user.id,content_id:id});
@@ -464,7 +468,7 @@ export default function Sloist(){
 
           {/* 1) 좌: 보관 · 링크 · 글쓴이 */}
           <div style={{marginTop:mob?36:56,paddingTop:mob?14:18,borderTop:"1px solid "+S.ln,display:"flex",alignItems:"center",gap:mob?14:20}}>
-            <button onClick={()=>keep(dl.id)} style={{fontFamily:S.ui,fontSize:mob?13:12,fontWeight:400,letterSpacing:"0.08em",color:isSaved(dl.id)?S.ac:S.txF,background:"none",border:"none",cursor:"pointer",padding:mob?"6px 0":"4px 0",transition:"color .4s"}}>{isSaved(dl.id)?"보관됨":"보관"}</button>
+            <button onClick={()=>keep(dl.id)} style={{fontFamily:S.ui,fontSize:mob?13:12,fontWeight:400,letterSpacing:"0.08em",color:isSaved(dl.id)?S.ac:S.txF,background:"none",border:"none",cursor:"pointer",padding:mob?"6px 0":"4px 0",transition:"color .4s,opacity .4s"}}>{keepFlash||( isSaved(dl.id)?"보관됨":"보관")}</button>
             {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.ui,fontSize:mob?13:12,fontWeight:400,letterSpacing:"0.08em",color:S.txF,textDecoration:"none",padding:mob?"6px 0":"4px 0",transition:"color .4s"}}>{lLabel(dl)}</a>}
             {creditLine&&<span style={{fontFamily:S.ui,fontSize:mob?11:11,fontWeight:300,letterSpacing:"0.08em",color:S.txGh,...(dl.isOfficial?{}:{cursor:"pointer"})}} onClick={()=>{if(!dl.isOfficial&&dl.editor&&ED[dl.editor])openRoom(dl.editor);}}>{creditLine}</span>}
             {hasAdmin&&<><span style={{flex:1}}/><button onClick={()=>setShowMore(!showMore)} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"4px 0",transition:"color .4s"}}>{showMore?"닫기":"···"}</button></>}
