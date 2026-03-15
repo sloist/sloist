@@ -212,7 +212,7 @@ export default function Sloist(){
     // 기타 딥링크 라우팅
     if(path==="/login"){sView("login");}
     else if(path==="/about"){sView("about");}
-    else if(path==="/search"){const sq=params.get("q");if(sq)sSearchQ(sq);sView("search");}
+    else if(path.startsWith("/search")){const m=path.match(/^\/search\/(.+)$/);if(m)sSearchQ(decodeURIComponent(m[1]));sView("search");}
     else if(path==="/mypage"){sView("mypage");}
     else if(path==="/archive"){sView("archive");}
     else if(path==="/admin"){sView("admin");}
@@ -277,7 +277,7 @@ export default function Sloist(){
   const openRoom=eid=>{prevState.current={view,activeCat,edRoom,detail,scroll:window.scrollY};pushUrl("/room/"+eid);mt(()=>{sEdRoom(eid);sDetail(null);sView("room");});};
   const goBack=()=>{const p=prevState.current;if(p){pushUrl(p.view==="home"?"/":"/"+p.view);sCVis(false);setTimeout(()=>{sView(p.view);sActiveCat(p.activeCat||null);sEdRoom(p.edRoom||null);sDetail(p.detail||null);prevState.current=null;setTimeout(()=>{window.scrollTo({top:p.scroll});setTimeout(()=>sCVis(true),80);},50);},350);}else goHome();};
   const closeSov=(cb)=>{sSovFading(true);setTimeout(()=>{sSov(false);sSovFading(false);if(cb)cb();},300);};
-  const doSearch=q=>{sSearchQ(q);pushUrl("/search?q="+encodeURIComponent(q));sDetail(null);sEdRoom(null);sView("search");window.scrollTo({top:0});sSovFading(true);setTimeout(()=>{sSov(false);sSovFading(false);},300);};
+  const doSearch=q=>{sSearchQ(q);pushUrl("/search/"+encodeURIComponent(q));sDetail(null);sEdRoom(null);sView("search");window.scrollTo({top:0});sSovFading(true);setTimeout(()=>{sSov(false);sSovFading(false);},300);};
 
   // popstate 핸들러 (브라우저 뒤로/앞으로가기)
   useEffect(()=>{
@@ -295,7 +295,7 @@ export default function Sloist(){
           const m=path.match(/^\/(space|scene|objet|from_sloist)\/(.+)$/);
           const it=items.find(i=>i.id===m[2]);
           if(it){sDetail(it);} else {sView("home");sDetail(null);}
-        } else if(path==="/search"){const sq=new URLSearchParams(window.location.search).get("q");if(sq)sSearchQ(sq);sView("search");sDetail(null);}
+        } else if(path.startsWith("/search")){const m=path.match(/^\/search\/(.+)$/);if(m)sSearchQ(decodeURIComponent(m[1]));sView("search");sDetail(null);}
         else if(path==="/login"){sView("login");sDetail(null);}
         else if(path==="/about"){sView("about");sDetail(null);}
         else if(path==="/terms"){sLeg("terms");sView("legal");sDetail(null);}
