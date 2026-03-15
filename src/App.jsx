@@ -214,7 +214,8 @@ export default function Sloist(){
   const isSaved=useCallback(id=>savedIds.includes(id),[savedIds]);
   const keep=useCallback(async(id)=>{if(!auth.user){pendingAction.current={type:"keep",id};goTo("login");return;}const was=savedIds.includes(id);
     setSavedIds(p=>was?p.filter(x=>x!==id):[...p,id]);
-    flash(was?"보관 해제":"보관됨");
+    const keepMsgs=["잘 두었습니다","잠시 맡아둘게요","기억해둘게요","여기 두겠습니다"];
+    flash(was?"보관 해제":keepMsgs[Math.floor(Math.random()*keepMsgs.length)]);
     const{error}=was
       ?await supabase.from("saves").delete().eq("user_id",auth.user.id).eq("content_id",id)
       :await supabase.from("saves").insert({user_id:auth.user.id,content_id:id});
@@ -506,7 +507,7 @@ export default function Sloist(){
   </div>;}
   const h=homeFeed;
   return <div style={{fontFamily:S.bd,background:S.bg,color:S.tx,minHeight:"100vh",WebkitFontSmoothing:"antialiased",animation:"mainIn 1s cubic-bezier(.2,0,.3,1) forwards"}}>
-    <style>{`html,body{overscroll-behavior:none}::selection{background:rgba(130,125,118,.15);color:inherit}button:focus-visible,a:focus-visible,input:focus-visible{outline:1px solid rgba(130,125,118,.3);outline-offset:2px}@keyframes mainIn{from{opacity:0}to{opacity:1}}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0}to{opacity:1}}`}</style>
+    <style>{`html,body{overscroll-behavior:none}::selection{background:rgba(130,125,118,.15);color:inherit}button:focus-visible,a:focus-visible,input:focus-visible{outline:1px solid rgba(130,125,118,.3);outline-offset:2px}@keyframes mainIn{from{opacity:0}to{opacity:1}}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0}to{opacity:1}}@keyframes dotDrift{0%{left:0;opacity:0}5%{opacity:1}90%{opacity:1}100%{left:100%;opacity:0}}`}</style>
 
     {/* SEARCH — Cereal 검색 오버레이 */}
     {sov&&<div style={{position:"fixed",inset:0,background:"rgba(250,250,248,.96)",backdropFilter:"blur(40px)",zIndex:200,overflowY:"auto",animation:"fi .6s cubic-bezier(.2,0,.3,1)"}}>
@@ -515,7 +516,12 @@ export default function Sloist(){
       </div>
       <div style={{maxWidth:600,margin:"0 auto",padding:mob?"8vh 24px 40px":"14vh 32px 80px"}}>
         {/* 큰 검색 입력 */}
-        <input ref={sqRef} placeholder="기록 검색" value={sq} onChange={e=>sSq(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&sq.trim())doSearch(sq.trim());}} style={{width:"100%",background:"transparent",border:"none",borderBottom:"1px solid "+S.ln,padding:"16px 0",fontFamily:S.ui,fontSize:mob?24:32,fontWeight:300,color:S.tx,letterSpacing:"-0.01em",outline:"none"}}/>
+        <div style={{position:"relative"}}>
+          <input ref={sqRef} placeholder="기록 검색" value={sq} onChange={e=>sSq(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&sq.trim())doSearch(sq.trim());}} style={{width:"100%",background:"transparent",border:"none",borderBottom:"1px solid "+S.ln,padding:"16px 0",fontFamily:S.ui,fontSize:mob?24:32,fontWeight:300,color:S.tx,letterSpacing:"-0.01em",outline:"none"}}/>
+          {!sq.trim()&&<div style={{position:"absolute",bottom:-1,left:0,right:0,height:3,overflow:"hidden",pointerEvents:"none"}}>
+            <div style={{position:"absolute",bottom:0,width:3,height:3,borderRadius:"50%",background:S.txGh,animation:"dotDrift 45s linear infinite",opacity:0}}/>
+          </div>}
+        </div>
 
         {/* 추천 태그 */}
         {!sq.trim()&&<div style={{marginTop:mob?36:56}}>
