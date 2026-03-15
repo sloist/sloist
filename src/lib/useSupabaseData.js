@@ -70,6 +70,7 @@ export function useSupabaseData(userId) {
         isOfficial: row.is_official || false,
         isCover: row.is_cover || false,
         slug: row.slug || undefined,
+        series: row.series || undefined,
         created_at: row.created_at || undefined,
       }));
 

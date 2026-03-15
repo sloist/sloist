@@ -539,6 +539,22 @@ export default function Sloist(){
           </div>
         </div>}
 
+        {/* 시리즈 연결 — 같은 시리즈의 다른 기록 */}
+        {dl.series&&(()=>{const seriesItems=items.filter(i=>i.series===dl.series&&i.id!==dl.id).sort((a,b)=>(a.created_at||"")>(b.created_at||"")?1:-1);if(seriesItems.length===0)return null;return <div style={{maxWidth:640,margin:"0 auto",padding:mob?"0 24px":"0 32px"}}>
+          <div style={{marginTop:mob?32:48,paddingTop:mob?24:36,borderTop:"1px solid "+S.lnL}}>
+            <div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:"0.15em",color:S.txGh,marginBottom:mob?16:24}}>{dl.series}</div>
+            <div style={{display:"flex",flexDirection:"column",gap:mob?12:16}}>
+              {seriesItems.map(si=><div key={si.id} onClick={()=>openDetail(si)} style={{display:"flex",gap:mob?14:18,alignItems:"center",cursor:"pointer",padding:"8px 0"}}>
+                {si.photo&&<div style={{width:mob?48:56,flexShrink:0}}><Img grad={si.grad} photo={si.photo} aspect="1/1" r={2}/></div>}
+                <div style={{flex:1}}>
+                  <div style={{fontFamily:S.sf,fontSize:mob?13:14,fontWeight:300,lineHeight:1.5,color:S.tx}}>{si.title}</div>
+                  {(si.location||si.sub||si.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txF,marginTop:2,letterSpacing:"0.06em"}}>{si.location||si.sub||si.maker}</div>}
+                </div>
+              </div>)}
+            </div>
+          </div>
+        </div>;})()}
+
         {/* 슬로이스트의 기록 조용한 입구 — 현재 글이 from_sloist가 아닐 때만 */}
         {dl.root!=="from_sloist"&&FROMSLOIST.length>0&&(()=>{const seed=(dl.id||"").charCodeAt(0)||1;const pick=FROMSLOIST[seed%FROMSLOIST.length];if(!pick||pick.id===dl.id)return null;return <div style={{maxWidth:640,margin:"0 auto",padding:mob?"0 24px":"0 32px"}}>
           <div style={{marginTop:mob?32:48,paddingTop:mob?24:36,borderTop:"1px solid "+S.lnL}} onClick={()=>openDetail(pick)} >

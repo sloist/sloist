@@ -24,6 +24,8 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
   const [link, setLink] = useState(editItem?.link || "");
   const [tags, setTags] = useState(editItem?.tags || "");
   const [aspect, setAspect] = useState(editItem?.aspect || "");
+  const [series, setSeries] = useState(editItem?.series || "");
+  const [slug, setSlug] = useState(editItem?.slug || "");
   const [lat, setLat] = useState(editItem?.lat || "");
   const [lng, setLng] = useState(editItem?.lng || "");
   const [geoLoading, setGeoLoading] = useState(false);
@@ -73,6 +75,8 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
       otype: root === "objet" ? otype || null : null,
       maker: maker.trim() || null,
       aspect: aspect || null,
+      series: series.trim() || null,
+      slug: slug.trim() || null,
       link: link.trim() || null,
       lat: lat ? parseFloat(lat) : null,
       lng: lng ? parseFloat(lng) : null,
@@ -199,6 +203,20 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
     </div>
   );
 
+  const SeriesField = (
+    <div style={{ marginBottom: g }}>
+      <span style={labelStyle}>시리즈 (선택)</span>
+      <input value={series} onChange={e => setSeries(e.target.value)} placeholder="예: 느린 순서, 곁에 둔 것" style={inputStyle} />
+    </div>
+  );
+
+  const SlugField = (
+    <div style={{ marginBottom: g }}>
+      <span style={labelStyle}>URL 슬러그 (선택)</span>
+      <input value={slug} onChange={e => setSlug(e.target.value)} placeholder="예: buyeo-gungnamji" style={inputStyle} />
+    </div>
+  );
+
   const TagField = (
     <div style={{ marginBottom: g }}>
       <span style={labelStyle}>태그 (최대 3개)</span>
@@ -237,7 +255,7 @@ export default function WriteEditor({ editorId, isAdmin, userId, isStaff, onClos
     else if (root === "objet") fields.push(MakerField);
     else if (root === "scene") fields.push(SubField("출처"));
     else if (root === "from_sloist") fields.push(SubField("글쓴이"));
-    fields.push(NoteField, ImageField, AspectField, TagField, LinkField);
+    fields.push(NoteField, ImageField, AspectField, TagField, LinkField, SeriesField, SlugField);
     return fields;
   };
 
