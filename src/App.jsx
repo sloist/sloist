@@ -316,7 +316,7 @@ export default function Sloist(){
     const order=["space","scene","objet"];
     const idx=[0,0,0];
     const picked=[];
-    for(let r=0;r<7;r++){
+    for(let r=0;r<4;r++){
       const ci=r%3;
       if(idx[ci]<buckets[order[ci]].length){picked.push(buckets[order[ci]][idx[ci]]);idx[ci]++;}
       else{for(let j=1;j<=2;j++){const ai=(ci+j)%3;if(idx[ai]<buckets[order[ai]].length){picked.push(buckets[order[ai]][idx[ai]]);idx[ai]++;break;}}}
@@ -593,50 +593,63 @@ export default function Sloist(){
           {/* ── 전시 패널 ── */}
           <div style={{position:"relative",zIndex:2,background:S.bg}}>
 
-          {/* 패널 B — 중앙 1점 */}
-          {h[3]&&<div style={{margin:"0 auto",padding:mob?"48px 24px 0":"100px 24px 0",maxWidth:mob?undefined:560}}>
+          {/* ── 문장 패널: 호흡 ── */}
+          <ScrollReveal>
+            <div style={{padding:mob?"64px 32px":"120px 56px",textAlign:"center",maxWidth:640,margin:"0 auto"}}>
+              <div style={{fontFamily:S.bd,fontSize:mob?15:18,fontWeight:300,lineHeight:2.2,color:S.txM,letterSpacing:mob?0:1}}>{DAILY_QUOTES[new Date().getDay()%DAILY_QUOTES.length]}</div>
+            </div>
+          </ScrollReveal>
+
+          {/* 패널 B — 중앙 1점 + 본문 발췌 */}
+          {h[3]&&<div style={{margin:"0 auto",padding:mob?"0 24px":"0 24px",maxWidth:mob?undefined:600}}>
             <ScrollReveal>
               <div onClick={()=>openDetail(h[3])} style={{cursor:"pointer",width:mob?"88%":"100%",margin:mob?"0 auto":undefined}}>
                 <Img grad={h[3].grad} photo={h[3].photo} aspect="3/2" r={2}/>
-                <div style={{marginTop:mob?10:16}}>
+                <div style={{marginTop:mob?12:20}}>
                   <div style={{fontFamily:S.sf,fontSize:mob?15:20,fontWeight:300,lineHeight:1.5}}>{h[3].title}</div>
                   {(h[3].location||h[3].sub||h[3].maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:S.txF,marginTop:4}}>{h[3].location||h[3].sub||h[3].maker}</div>}
+                  {h[3].note&&<div style={{fontFamily:S.bd,fontSize:mob?12:13,fontWeight:300,color:S.txQ,lineHeight:2,marginTop:mob?10:14,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{h[3].note}</div>}
                 </div>
               </div>
             </ScrollReveal>
           </div>}
 
-          {/* 패널 C — 3점 지그재그 */}
-          {mob
-            ?<div style={{padding:"40px 24px 0"}}>
-              {h.slice(4,7).map((it,i)=>it&&<ScrollReveal key={it.id} delay={i*100}>
-                <div onClick={()=>openDetail(it)} style={{cursor:"pointer",width:"82%",marginBottom:40,marginLeft:i%2===0?"0":"auto"}}>
-                  <Img grad={it.grad} photo={it.photo} aspect="4/5" r={2}/>
-                  <div style={{marginTop:10}}>
-                    <div style={{fontFamily:S.sf,fontSize:13,fontWeight:300,lineHeight:1.5,color:S.tx}}>{it.title}</div>
-                    {(it.location||it.sub||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:S.txF,marginTop:3}}>{it.location||it.sub||it.maker}</div>}
+          {/* ── 카테고리 입구 ── */}
+          <div style={{padding:mob?"64px 0 0":"120px 0 0"}}>
+            {[
+              {key:"space",label:"space",desc:"장소의 기록",items:SPACE},
+              {key:"scene",label:"scene",desc:"장면의 기록",items:SCENE},
+              {key:"objet",label:"objet",desc:"물건의 기록",items:OBJET},
+            ].map(({key,label,desc,items:catArr})=>{
+              const preview=catArr.slice(0,mob?3:4);
+              if(preview.length===0)return null;
+              return <ScrollReveal key={key}>
+                <div style={{padding:mob?"0 24px 56px":"0 56px 80px",maxWidth:1100,margin:"0 auto"}}>
+                  {/* 카테고리 헤더 */}
+                  <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",marginBottom:mob?20:28}}>
+                    <div>
+                      <span style={{fontFamily:S.sf,fontSize:mob?14:16,fontWeight:300,letterSpacing:mob?3:5,color:S.tx}}>{label}</span>
+                      <span style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,letterSpacing:"0.08em",color:S.txGh,marginLeft:mob?10:14}}>{desc}</span>
+                    </div>
+                    <button onClick={()=>onCatClick(key)} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.12em",color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>더 보기</button>
+                  </div>
+                  {/* 미리보기 그리드 */}
+                  <div style={{display:"grid",gridTemplateColumns:mob?"repeat(3,1fr)":"repeat(4,1fr)",gap:mob?16:28}}>
+                    {preview.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer"}}>
+                      <Img grad={it.grad} photo={it.photo} aspect={key==="scene"?"3/4":"1/1"} r={2}/>
+                      <div style={{marginTop:mob?8:12}}>
+                        <div style={{fontFamily:S.sf,fontSize:mob?11:13,fontWeight:300,lineHeight:1.5,color:S.tx,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.title}</div>
+                      </div>
+                    </div>)}
                   </div>
                 </div>
-              </ScrollReveal>)}
-            </div>
-            :<div style={{maxWidth:1100,margin:"0 auto",padding:"100px 56px 0"}}>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:40}}>
-                {h.slice(4,7).map((it,i)=>it&&<ScrollReveal key={it.id} delay={i*120}>
-                  <div onClick={()=>openDetail(it)} style={{cursor:"pointer"}}>
-                    <Img grad={it.grad} photo={it.photo} aspect="4/5" r={2}/>
-                    <div style={{marginTop:14}}>
-                      <div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,lineHeight:1.5,color:S.tx}}>{it.title}</div>
-                      {(it.location||it.sub||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:S.txF,marginTop:4}}>{it.location||it.sub||it.maker}</div>}
-                    </div>
-                  </div>
-                </ScrollReveal>)}
-              </div>
-            </div>
-          }
+              </ScrollReveal>;
+            })}
+          </div>
 
           {/* archive 입구 */}
           <ScrollReveal>
-            <div style={{textAlign:"center",padding:mob?"56px 0 20px":"80px 0 24px"}}>
+            <div style={{textAlign:"center",padding:mob?"0 0 20px":"0 0 24px"}}>
               <span onClick={()=>goTo("archive")} style={{fontFamily:S.sf,fontSize:mob?12:14,fontWeight:300,letterSpacing:mob?3:5,color:S.txGh,cursor:"pointer",transition:"color .5s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>all sloists are here</span>
             </div>
           </ScrollReveal>
