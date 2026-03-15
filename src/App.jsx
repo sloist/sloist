@@ -535,7 +535,7 @@ export default function Sloist(){
           </div>
         </div>}
 
-        {/* from sloist 조용한 입구 — 현재 글이 from_sloist가 아닐 때만 */}
+        {/* 슬로이스트의 기록 조용한 입구 — 현재 글이 from_sloist가 아닐 때만 */}
         {dl.root!=="from_sloist"&&FROMSLOIST.length>0&&(()=>{const seed=(dl.id||"").charCodeAt(0)||1;const pick=FROMSLOIST[seed%FROMSLOIST.length];if(!pick||pick.id===dl.id)return null;return <div style={{maxWidth:640,margin:"0 auto",padding:mob?"0 24px":"0 32px"}}>
           <div style={{marginTop:mob?32:48,paddingTop:mob?24:36,borderTop:"1px solid "+S.lnL}} onClick={()=>openDetail(pick)} >
             <div style={{cursor:"pointer",background:S.bgAlt,borderRadius:2,padding:mob?"32px 24px":"40px 32px",textAlign:"center"}}>
@@ -656,17 +656,17 @@ export default function Sloist(){
           {(()=>{const fsItem=FROMSLOIST.length>0?FROMSLOIST[new Date().getDate()%FROMSLOIST.length]:null;const pick=fsItem||h[3];if(!pick)return null;const isFs=pick.root==="from_sloist";return <div style={{margin:"0 auto",padding:mob?"0 28px":"0 24px",maxWidth:mob?undefined:560}}>
             <ScrollReveal>
               {isFs
-                ?/* from sloist — 텍스트 중심 질감 */
+                ?/* 슬로이스트의 기록 — 텍스트 중심 질감 */
                 <div onClick={()=>openDetail(pick)} style={{cursor:"pointer",width:mob?"88%":"100%",margin:mob?"0 auto":undefined}}>
                   {pick.photo
                     ?<><Img grad={pick.grad} photo={pick.photo} aspect="3/2" r={2}/>
                       <div style={{marginTop:mob?14:22}}>
-                        <div style={{fontFamily:S.sf,fontSize:mob?9:10,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:mob?5:8}}>from sloist</div>
+                        <div style={{fontFamily:S.sf,fontSize:mob?9:10,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:mob?5:8}}>슬로이스트의 기록</div>
                         <div style={{fontFamily:S.sf,fontSize:mob?16:20,fontWeight:300,lineHeight:1.55,letterSpacing:mob?0:1}}>{pick.title}</div>
                         {pick.sub&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.1em",color:S.txF,marginTop:mob?5:6}}>{pick.sub}</div>}
                       </div></>
                     :<div style={{background:S.bgAlt,borderRadius:2,padding:mob?"56px 32px":"72px 48px",textAlign:"center"}}>
-                      <div style={{fontFamily:S.sf,fontSize:mob?9:10,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:mob?16:24}}>from sloist</div>
+                      <div style={{fontFamily:S.sf,fontSize:mob?9:10,fontWeight:300,letterSpacing:4,color:S.txGh,marginBottom:mob?16:24}}>슬로이스트의 기록</div>
                       <div style={{fontFamily:S.sf,fontSize:mob?18:24,fontWeight:300,lineHeight:1.6,color:S.tx,letterSpacing:mob?0:1}}>{pick.title}</div>
                       {pick.sub&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txF,marginTop:mob?10:14,letterSpacing:"0.1em"}}>{pick.sub}</div>}
                       {pick.note&&<div style={{fontFamily:S.bd,fontSize:mob?12:13,fontWeight:300,color:S.txQ,lineHeight:2.2,marginTop:mob?16:24,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{pick.note}</div>}
@@ -709,7 +709,7 @@ export default function Sloist(){
                       <span style={{fontFamily:S.sf,fontSize:mob?15:17,fontWeight:300,letterSpacing:mob?4:6,color:S.tx}}>{label}</span>
                       <span style={{fontFamily:S.ui,fontSize:mob?9:10,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,marginLeft:mob?14:20}}>{desc}</span>
                     </div>
-                    <button onClick={()=>onCatClick(key)} style={{fontFamily:S.sf,fontSize:10,fontWeight:300,letterSpacing:"0.15em",color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s",padding:mob?"8px 0":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>more</button>
+                    <button onClick={()=>onCatClick(key)} style={{fontFamily:S.sf,fontSize:10,fontWeight:300,letterSpacing:"0.15em",color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s",padding:mob?"8px 0":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>더 보기</button>
                   </div>
                   <div style={{display:"grid",gridTemplateColumns:mob?"repeat(3,1fr)":"repeat(4,1fr)",gap:mob?16:32}}>
                     {preview.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer"}}>
