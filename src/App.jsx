@@ -430,7 +430,7 @@ export default function Sloist(){
     const editorLine=!hideEditor&&dl.editor&&ED[dl.editor]?aLabel(dl,ED):dl.isOfficial?"by sloist":null;
     const creditLine=editorLine;
     const metaSub=isSpace?dl.location:dl.root==="scene"?dl.sub:dl.root==="objet"?dl.maker:"";
-    const metaParts=[dl.root,metaSub,creditLine].filter(Boolean);
+    const heroMeta=[metaSub,dl.tags].filter(Boolean);
     const deletePost=()=>sConfirmDel({id:dl.id,title:dl.title,from:"detail"});
     const [showMore,setShowMore]=useState(false);
     return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column",background:S.bg}}>
@@ -445,7 +445,7 @@ export default function Sloist(){
             <div style={{position:"absolute",bottom:0,left:0,right:0,height:isSpace?"55%":"45%",background:"linear-gradient(to top, rgba(36,35,32,"+(isSpace?".5":".4")+"), transparent)",pointerEvents:"none"}}/>
             <div style={{position:"absolute",bottom:mob?24:40,left:0,right:0,textAlign:"center",padding:mob?"0 24px":"0 48px"}}>
               <h1 style={{fontFamily:S.sf,fontSize:mob?22:(isSpace?36:32),fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,margin:0,color:"#fff"}}>{dl.title}</h1>
-              {metaParts.length>0&&<div style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,letterSpacing:"0.08em",color:"rgba(255,255,255,.55)",marginTop:mob?6:10}}>{metaParts.join("  ·  ")}</div>}
+              {heroMeta.length>0&&<div style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,letterSpacing:"0.08em",color:"rgba(255,255,255,.55)",marginTop:mob?6:10}}>{heroMeta.join("  ·  ")}</div>}
             </div>
           </div>
         </div>
@@ -473,10 +473,6 @@ export default function Sloist(){
             <button onClick={deletePost} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"4px 0",transition:"color .4s"}}>삭제</button>
           </div>}
 
-          {/* 2) 우: 태그 — 작고 연하게 */}
-          {dl.tags&&<div style={{marginTop:mob?16:24,textAlign:"right"}}>
-            <TagLinks tags={dl.tags} size={mob?10:10} color={S.txGh}/>
-          </div>}
         </div>
 
         {/* 3) 좌: 관련 기록 */}
