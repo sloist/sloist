@@ -40,7 +40,6 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
   const styleRef = useRef(null);
   const callbacksRef = useRef({ onHover, onClick });
   const spacesRef = useRef(spaces);
-  const lastTappedRef = useRef(null);
   const readyRef = useRef(false);
 
   callbacksRef.current = { onHover, onClick };
@@ -75,8 +74,16 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
     ];
 
     const isMobile = "ontouchstart" in window;
-    const pinRadius = isMobile ? 10 : 6;
-    const hoverRadius = isMobile ? 13 : 8;
+    // 줌 레벨에 따라 핀 크기 보간 (넓으면 작게, 좁으면 크게)
+    const pinRadius = isMobile
+      ? ["interpolate", ["linear"], ["zoom"], 3, 5, 8, 10, 14, 16]
+      : ["interpolate", ["linear"], ["zoom"], 3, 3, 8, 6, 14, 12];
+    const hoverRadius = isMobile
+      ? ["interpolate", ["linear"], ["zoom"], 3, 7, 8, 13, 14, 20]
+      : ["interpolate", ["linear"], ["zoom"], 3, 5, 8, 8, 14, 14];
+    const hitRadius = isMobile
+      ? ["interpolate", ["linear"], ["zoom"], 3, 14, 8, 22, 14, 30]
+      : ["interpolate", ["linear"], ["zoom"], 3, 10, 8, 14, 14, 20];
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
@@ -113,7 +120,7 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
         type: "circle",
         source: "spaces",
         paint: {
-          "circle-radius": isMobile ? 22 : 14,
+          "circle-radius": hitRadius,
           "circle-color": "transparent",
           "circle-stroke-width": 0,
         },
@@ -180,7 +187,7 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
           .addTo(map);
       });
 
-      // 클릭/터치
+      // 클릭/터치 — 한 번 탭으로 팝업 표시 (팝업 클릭 시 상세 진입)
       map.on("click", "spaces-hit", (e) => {
         const features = map.queryRenderedFeatures(e.point, { layers: ["spaces-pins"] });
         if (!features || features.length === 0) return;
@@ -188,31 +195,27 @@ export default function SpaceMap({ spaces, hovId, onHover, onClick, style }) {
         const f = features[0];
         const id = f.properties.id;
 
-        if (isMobile && lastTappedRef.current !== id) {
-          // 첫 터치: 미리보기 팝업
-          lastTappedRef.current = id;
-          callbacksRef.current.onHover?.(id);
-          if (popupRef.current) popupRef.current.remove();
-          popupRef.current = new mapboxgl.Popup({
-            closeButton: false, closeOnClick: false, offset: 14, className: "sloist-popup",
-          })
-            .setLngLat(f.geometry.coordinates)
-            .setHTML(popupHtml(f))
-            .addTo(map);
-          return;
+        callbacksRef.current.onHover?.(id);
+        if (popupRef.current) popupRef.current.remove();
+        popupRef.current = new mapboxgl.Popup({
+          closeButton: false, closeOnClick: false, offset: 14, className: "sloist-popup",
+        })
+          .setLngLat(f.geometry.coordinates)
+          .setHTML(popupHtml(f))
+          .addTo(map);
+
+        // 데스크톱: 바로 상세 진입
+        if (!isMobile) {
+          const sp2 = spacesRef.current;
+          const s = sp2?.find(x => x.id === id);
+          if (s) callbacksRef.current.onClick?.(s);
         }
-        // 두 번째 탭 또는 데스크톱 클릭 → 상세 진입
-        lastTappedRef.current = null;
-        const sp2 = spacesRef.current;
-        const s = sp2?.find(x => x.id === id);
-        if (s) callbacksRef.current.onClick?.(s);
       });
 
       // 빈 영역 클릭 → 리셋
       map.on("click", (e) => {
         const features = map.queryRenderedFeatures(e.point, { layers: ["spaces-hit"] });
         if (!features.length) {
-          lastTappedRef.current = null;
           if (popupRef.current) { popupRef.current.remove(); popupRef.current = null; }
           callbacksRef.current.onHover?.(null);
         }
