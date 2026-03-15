@@ -423,7 +423,7 @@ export default function Sloist(){
   };
   const Foot=()=><div style={{textAlign:"center",padding:mob?"64px 0 48px":"96px 0 56px",flexShrink:0}}>
     <div style={{width:3,height:3,borderRadius:"50%",background:S.ln,margin:"0 auto",marginBottom:mob?24:32}}/>
-    <button onClick={()=>goTo("about")} style={{fontFamily:S.bd,fontSize:11,fontWeight:300,letterSpacing:"0.06em",color:"#C8C5BE",background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txGh} onMouseLeave={e=>e.currentTarget.style.color="#C8C5BE"}>슬로이스트에 대하여</button>
+    <button onClick={()=>goTo("about")} style={{fontFamily:S.bd,fontSize:11,fontWeight:300,letterSpacing:"0.06em",color:"#C8C5BE",background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txGh} onMouseLeave={e=>e.currentTarget.style.color="#C8C5BE"}>느리게 걷는 사람들의 시선</button>
   </div>;
 
   /* ── Detail — 기록 한 편을 읽는 방 ── */
@@ -738,30 +738,33 @@ export default function Sloist(){
             return da-db;
           }):f0;
           if(f.length===0)return <div style={{textAlign:"center",padding:"120px 0",fontFamily:S.ui,fontSize:13,fontWeight:300,color:S.txGh}}>아직 등록된 공간이 없습니다</div>;
-          const spToggle=<div style={{display:"flex",justifyContent:"center",gap:mob?16:20,padding:mob?"10px 0":"12px 0"}}>
-            {[{k:"both",l:"둘 다"},{k:"map",l:"지도"},{k:"list",l:"리스트"}].map(({k,l})=><button key={k} onClick={()=>sSpView(k)} style={{fontFamily:S.ui,fontSize:10,fontWeight:spView===k?400:300,letterSpacing:"0.1em",color:spView===k?S.txM:S.txGh,background:"none",border:"none",cursor:"pointer",padding:mob?"8px 6px":"4px 6px",minHeight:mob?36:undefined,transition:"color .4s"}}>{l}</button>)}
+          const SpToggle=()=><div style={{display:"flex",justifyContent:"center",gap:0,padding:"6px 0",background:S.bg,borderBottom:"1px solid "+S.lnL}}>
+            {[{k:"both",l:"지도+리스트"},{k:"map",l:"지도"},{k:"list",l:"리스트"}].map(({k,l})=><button key={k} onClick={()=>sSpView(k)} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:spView===k?S.txM:S.txGh,background:"none",border:"none",borderBottom:spView===k?"1px solid "+S.txM:"1px solid transparent",cursor:"pointer",padding:mob?"10px 14px":"8px 16px",minHeight:mob?40:undefined,transition:"color .3s,border-color .3s"}}>{l}</button>)}
           </div>;
+          /* 모바일 */
           if(mob)return <div>
-            {spView!=="list"&&<div style={{position:"sticky",top:44,zIndex:12,width:"100%",height:spView==="map"?"calc(100 * var(--dvh, 1vh) - 88px)":"40vh",minHeight:200,maxHeight:spView==="map"?undefined:360,overflow:"hidden",borderBottom:"1px solid "+S.ln,transition:"height .4s ease"}}>
+            <SpToggle/>
+            {spView!=="list"&&<div style={{width:"100%",height:spView==="map"?"calc(100 * var(--dvh, 1vh) - 132px)":"36vh",minHeight:180,maxHeight:spView==="map"?undefined:320,overflow:"hidden",borderBottom:"1px solid "+S.ln}}>
               <SpaceMap spaces={f} hovId={mobFocus} onHover={id=>sMobFocus(id)} onClick={s=>openDetail(s)} style={{width:"100%",height:"100%"}}/>
             </div>}
-            {spToggle}
-            {spView!=="map"&&<div style={{background:S.bg,position:"relative",padding:"0 20px 40px"}}>{f.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{display:"flex",gap:16,padding:"20px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer",position:"relative",transition:"background .5s"}}><div style={{width:80,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="1/1" r={2} saved={isSaved(it.id)}/></div><div style={{paddingTop:2,flex:1}}><div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:5}}>{it.location}</div><div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,marginBottom:4}}>{it.title}</div><div style={{fontFamily:S.ui,fontSize:11,fontWeight:300,color:S.txF,lineHeight:1.6,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.note}</div></div></div>)}</div>}
+            {spView!=="map"&&<div style={{background:S.bg,padding:"4px 20px 40px"}}>{f.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{display:"flex",gap:16,padding:"18px 0",borderBottom:"1px solid "+S.lnL,cursor:"pointer"}}><div style={{width:72,flexShrink:0}}><Img grad={it.grad} photo={it.photo} aspect="1/1" r={2}/></div><div style={{paddingTop:2,flex:1}}><div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:4}}>{it.location}</div><div style={{fontFamily:S.sf,fontSize:14,fontWeight:300,marginBottom:3}}>{it.title}</div><div style={{fontFamily:S.ui,fontSize:11,fontWeight:300,color:S.txF,lineHeight:1.5,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.note}</div></div></div>)}</div>}
           </div>;
-          const mapW=spView==="map"?"100%":spView==="list"?"0":"60vw";
-          const listML=spView==="map"?"0":spView==="list"?"0":"60vw";
-          return <div style={{display:"flex",flexDirection:"row",minHeight:"100vh"}}>
-            {spView!=="list"&&<div style={{width:mapW,flexShrink:0,position:"fixed",left:0,top:52,height:"calc(100 * var(--dvh, 1vh) - 52px)",borderRight:spView==="map"?"none":"1px solid "+S.lnL,zIndex:2,transition:"width .4s ease"}}>
-              <SpaceMap spaces={f} hovId={spHov} onHover={id=>sSpHov(id)} onClick={s=>openDetail(s)} style={{width:"100%",height:"100%"}}/>
-              <div style={{position:"absolute",top:12,right:12,zIndex:10}}>{spToggle}</div>
-            </div>}
-            {spView!=="map"&&<div style={{flex:1,padding:"48px 40px 100px",marginLeft:listML,minHeight:"calc(100 * var(--dvh, 1vh) - 60px)",transition:"margin-left .4s ease"}}>
-              {spView==="list"&&<div style={{marginBottom:12}}>{spToggle}</div>}
-              {(()=>{const cover=f.find(x=>x.isCover)||f[0];const rest=f.filter(x=>x.id!==cover.id);return <>
-                <div onClick={()=>openDetail(cover)} onMouseEnter={()=>sSpHov(cover.id)} onMouseLeave={()=>sSpHov(null)} style={{cursor:"pointer",position:"relative",marginBottom:80}}><Img saved={isSaved(cover.id)} grad={cover.grad} photo={cover.photo} aspect="3/2" r={3}/><div style={{marginTop:32}}><div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:14}}>{cover.location}</div><div style={{fontFamily:S.sf,fontSize:28,fontWeight:300,lineHeight:1.45,letterSpacing:1,marginBottom:16}}>{cover.title}</div><div style={{fontFamily:S.bd,fontSize:14,fontWeight:300,color:S.txM,lineHeight:2.0,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{cover.note}</div></div></div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:40}}>{rest.map(it=><div key={it.id} onClick={()=>openDetail(it)} onMouseEnter={()=>sSpHov(it.id)} onMouseLeave={()=>sSpHov(null)} style={{cursor:"pointer",position:"relative",marginBottom:24}}><Img saved={isSaved(it.id)} grad={it.grad} photo={it.photo} aspect="4/3" r={2}/><div style={{marginTop:14}}><div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:6}}>{it.location}</div><div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,lineHeight:1.5}}>{it.title}</div></div></div>)}</div>
-              </>;})()}
-            </div>}
+          /* 데스크톱 */
+          const showMap=spView!=="list";
+          const showList=spView!=="map";
+          return <div style={{minHeight:"100vh"}}>
+            <SpToggle/>
+            <div style={{display:"flex",flexDirection:"row"}}>
+              {showMap&&<div style={{width:showList?"60%":"100%",flexShrink:0,position:"fixed",left:0,top:92,height:"calc(100 * var(--dvh, 1vh) - 92px)",borderRight:showList?"1px solid "+S.lnL:"none",zIndex:2}}>
+                <SpaceMap spaces={f} hovId={spHov} onHover={id=>sSpHov(id)} onClick={s=>openDetail(s)} style={{width:"100%",height:"100%"}}/>
+              </div>}
+              {showList&&<div style={{flex:1,padding:"48px 40px 100px",marginLeft:showMap?"60%":"0",minHeight:"calc(100 * var(--dvh, 1vh) - 100px)"}}>
+                {(()=>{const cover=f.find(x=>x.isCover)||f[0];const rest=f.filter(x=>x.id!==cover.id);return <>
+                  <div onClick={()=>openDetail(cover)} onMouseEnter={()=>sSpHov(cover.id)} onMouseLeave={()=>sSpHov(null)} style={{cursor:"pointer",marginBottom:72}}><Img grad={cover.grad} photo={cover.photo} aspect="3/2" r={3}/><div style={{marginTop:28}}><div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:12}}>{cover.location}</div><div style={{fontFamily:S.sf,fontSize:26,fontWeight:300,lineHeight:1.45,letterSpacing:1,marginBottom:14}}>{cover.title}</div><div style={{fontFamily:S.bd,fontSize:14,fontWeight:300,color:S.txM,lineHeight:2.0,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{cover.note}</div></div></div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:36}}>{rest.map(it=><div key={it.id} onClick={()=>openDetail(it)} onMouseEnter={()=>sSpHov(it.id)} onMouseLeave={()=>sSpHov(null)} style={{cursor:"pointer",marginBottom:20}}><Img grad={it.grad} photo={it.photo} aspect="4/3" r={2}/><div style={{marginTop:12}}><div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:3,color:S.ac,marginBottom:5}}>{it.location}</div><div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,lineHeight:1.5}}>{it.title}</div></div></div>)}</div>
+                </>;})()}
+              </div>}
+            </div>
           </div>;
         })()}
 
@@ -1138,7 +1141,7 @@ export default function Sloist(){
     {view==="mypage"&&detail&&<DetailView/>}
 
     {showTop&&view!=="about"&&<button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:mob?28:40,right:mob?20:40,width:mob?44:36,height:mob?44:36,display:"flex",alignItems:"center",justifyContent:"center",background:S.bg,border:"1px solid "+S.lnL,borderRadius:"50%",cursor:"pointer",transition:"opacity .3s ease",opacity:.5,zIndex:100,backdropFilter:"blur(8px)"}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>{e.currentTarget.style.opacity="0.5";}}><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={S.txGh} strokeWidth="1.5"><polyline points="6 15 12 9 18 15"/></svg></button>}
-    {toast&&<div style={{position:"fixed",bottom:mob?32:40,left:"50%",transform:"translateX(-50%)",color:S.txQ,fontSize:11,fontWeight:300,letterSpacing:3,zIndex:300,fontFamily:S.ui,opacity:toastVis?1:0,transition:"opacity .3s ease",pointerEvents:"none"}}>{toast}</div>}
+    {toast&&<div style={{position:"fixed",bottom:mob?28:36,left:"50%",transform:toastVis?"translate(-50%,0)":"translate(-50%,12px)",background:"rgba(44,43,40,.88)",backdropFilter:"blur(8px)",color:"#fff",fontSize:12,fontWeight:300,letterSpacing:2,zIndex:300,fontFamily:S.ui,opacity:toastVis?1:0,transition:"opacity .3s ease,transform .3s ease",pointerEvents:"none",padding:mob?"12px 28px":"10px 32px",borderRadius:24,whiteSpace:"nowrap"}}>{toast}</div>}
 
     {/* 삭제 확인 다이얼로그 */}
     {confirmDel&&<div style={{position:"fixed",inset:0,zIndex:400,background:"rgba(249,248,247,.85)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",animation:"fi .3s ease"}}>
