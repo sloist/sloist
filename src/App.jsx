@@ -445,7 +445,7 @@ export default function Sloist(){
             <div style={{position:"absolute",bottom:0,left:0,right:0,height:isSpace?"60%":"50%",background:"linear-gradient(to top, rgba(30,29,26,"+(isSpace?".55":".45")+"), transparent)",pointerEvents:"none"}}/>
             <div style={{position:"absolute",bottom:mob?28:44,left:0,right:0,textAlign:"center",padding:mob?"0 24px":"0 48px"}}>
               <h1 style={{fontFamily:S.sf,fontSize:mob?22:(isSpace?36:32),fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,margin:0,color:"#fff",textShadow:"0 1px 8px rgba(0,0,0,.15)"}}>{dl.title}</h1>
-              {heroSub&&<div style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,letterSpacing:"0.1em",color:"rgba(255,255,255,.6)",marginTop:mob?6:10}}>{heroSub}</div>}
+              {heroSub&&<div style={{fontFamily:S.ui,fontSize:mob?12:13,fontWeight:300,letterSpacing:"0.1em",color:"rgba(255,255,255,.6)",marginTop:mob?6:10}}>{heroSub}</div>}
             </div>
           </div>
         </div>
@@ -473,6 +473,10 @@ export default function Sloist(){
             <button onClick={deletePost} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"4px 0",transition:"color .4s"}}>삭제</button>
           </div>}
 
+          {/* 2) 우: 태그 */}
+          {dl.tags&&<div style={{marginTop:mob?20:28,textAlign:"right"}}>
+            <TagLinks tags={dl.tags} size={mob?11:11} color={S.txGh}/>
+          </div>}
         </div>
 
         {/* 3) 좌: 관련 기록 */}
