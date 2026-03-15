@@ -461,10 +461,7 @@ export default function Sloist(){
 
           {/* 1) 좌: 보관 · 링크 · 글쓴이 */}
           <div style={{marginTop:mob?36:56,paddingTop:mob?14:18,borderTop:"1px solid "+S.ln,display:"flex",alignItems:"center",gap:mob?14:20}}>
-            <span style={{position:"relative"}}>
-              <button onClick={()=>keep(dl.id)} style={{fontFamily:S.ui,fontSize:mob?12:12,fontWeight:300,letterSpacing:"0.08em",color:isSaved(dl.id)?S.ac:S.txF,background:"none",border:"none",cursor:"pointer",padding:mob?"6px 0":"4px 0",transition:"color .6s"}}>{isSaved(dl.id)?"보관됨":"보관"}</button>
-              <span style={{position:"absolute",bottom:-6,left:"50%",marginLeft:-1.5,width:3,height:3,borderRadius:"50%",background:S.ac,opacity:isSaved(dl.id)?1:0,transition:"opacity 1.4s ease"}}/>
-            </span>
+            <button onClick={()=>keep(dl.id)} style={{fontFamily:S.ui,fontSize:mob?12:12,fontWeight:300,letterSpacing:"0.08em",color:isSaved(dl.id)?S.ac:S.txF,background:"none",border:"none",cursor:"pointer",padding:mob?"6px 0":"4px 0",transition:"color 3s ease"}}>{isSaved(dl.id)?"보관됨":"보관"}</button>
             {dl.link&&<a href={dl.link} target="_blank" rel="noopener noreferrer" style={{fontFamily:S.ui,fontSize:mob?12:12,fontWeight:300,letterSpacing:"0.08em",color:S.txF,textDecoration:"none",padding:mob?"6px 0":"4px 0",transition:"color .4s"}}>{lLabel(dl)}</a>}
             {creditLine&&<span style={{fontFamily:S.ui,fontSize:mob?12:12,fontWeight:300,letterSpacing:"0.08em",color:S.txGh,...(dl.isOfficial?{}:{cursor:"pointer"})}} onClick={()=>{if(!dl.isOfficial&&dl.editor&&ED[dl.editor])openRoom(dl.editor);}}>{creditLine}</span>}
             {hasAdmin&&<><span style={{flex:1}}/><button onClick={()=>setShowMore(!showMore)} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.1em",color:S.txGh,background:"none",border:"none",cursor:"pointer",padding:"4px 0",transition:"color .4s"}}>{showMore?"닫기":"···"}</button></>}
