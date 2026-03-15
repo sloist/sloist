@@ -556,10 +556,14 @@ export default function Sloist(){
               <div style={{height:"calc(100 * var(--dvh, 1vh))",background:S.bg,position:"relative"}}>
                 {h[0]&&<div onClick={()=>openDetail(h[0])} style={{cursor:"pointer",position:"absolute",inset:0,overflow:"hidden"}}>
                   {h[0].photo&&<img src={h[0].photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"}}/>}
-                  <div style={{position:"absolute",bottom:0,left:0,right:0,height:"55%",background:"linear-gradient(to top, rgba(30,29,26,.5), transparent)",pointerEvents:"none"}}/>
-                  <div style={{position:"absolute",bottom:mob?24:40,left:mob?24:56,right:mob?24:56}}>
-                    <div style={{fontFamily:S.sf,fontSize:mob?22:36,fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,color:"#fff",textShadow:"0 1px 8px rgba(0,0,0,.15)"}}>{h[0].title}</div>
-                    {(h[0].location||h[0].sub||h[0].maker)&&<div style={{fontFamily:S.ui,fontSize:mob?10:11,fontWeight:300,letterSpacing:"0.1em",color:"rgba(255,255,255,.6)",marginTop:mob?6:10}}>{h[0].location||h[0].sub||h[0].maker}</div>}
+                  <div style={{position:"absolute",bottom:0,left:0,right:0,height:"65%",background:"linear-gradient(to top, rgba(30,29,26,.6), transparent)",pointerEvents:"none"}}/>
+                  <div style={{position:"absolute",bottom:mob?56:72,left:mob?24:56,right:mob?24:56}}>
+                    <div style={{fontFamily:S.sf,fontSize:mob?26:42,fontWeight:300,lineHeight:1.35,letterSpacing:mob?1:2,color:"#fff",textShadow:"0 2px 12px rgba(0,0,0,.2)"}}>{h[0].title}</div>
+                    {(h[0].location||h[0].sub||h[0].maker)&&<div style={{fontFamily:S.ui,fontSize:mob?11:12,fontWeight:300,letterSpacing:"0.12em",color:"rgba(255,255,255,.55)",marginTop:mob?8:12}}>{h[0].location||h[0].sub||h[0].maker}</div>}
+                  </div>
+                  {/* 스크롤 힌트 */}
+                  <div style={{position:"absolute",bottom:mob?16:24,left:"50%",transform:"translateX(-50%)",opacity:.4}}>
+                    <div style={{width:1,height:mob?20:28,background:"rgba(255,255,255,.5)"}}/>
                   </div>
                 </div>}
               </div>
@@ -600,9 +604,10 @@ export default function Sloist(){
             </div>
           </ScrollReveal>
 
-          {/* 패널 B — 중앙 1점 + 본문 발췌 */}
+          {/* 패널 B — 한 편의 기록 */}
           {h[3]&&<div style={{margin:"0 auto",padding:mob?"0 24px":"0 24px",maxWidth:mob?undefined:600}}>
             <ScrollReveal>
+              <div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,letterSpacing:mob?4:6,color:S.txGh,textAlign:mob?"center":undefined,marginBottom:mob?16:24}}>한 편의 기록</div>
               <div onClick={()=>openDetail(h[3])} style={{cursor:"pointer",width:mob?"88%":"100%",margin:mob?"0 auto":undefined}}>
                 <Img grad={h[3].grad} photo={h[3].photo} aspect="3/2" r={2}/>
                 <div style={{marginTop:mob?12:20}}>
@@ -617,12 +622,15 @@ export default function Sloist(){
           {/* ── 카테고리 입구 ── */}
           <div style={{padding:mob?"64px 0 0":"120px 0 0"}}>
             {[
-              {key:"space",label:"space",desc:"장소의 기록",items:SPACE},
-              {key:"scene",label:"scene",desc:"장면의 기록",items:SCENE},
-              {key:"objet",label:"objet",desc:"물건의 기록",items:OBJET},
-            ].map(({key,label,desc,items:catArr})=>{
-              const preview=catArr.slice(0,mob?3:4);
+              {key:"space",label:"space",desc:"장소의 기록",items:SPACE,asp:"4/5"},
+              {key:"scene",label:"scene",desc:"장면의 기록",items:SCENE,asp:"3/4"},
+              {key:"objet",label:"objet",desc:"물건의 기록",items:OBJET,asp:"1/1"},
+            ].map(({key,label,desc,items:catArr,asp})=>{
+              const usedIds=h.map(x=>x?.id).filter(Boolean);
+              const pool=catArr.filter(x=>!usedIds.includes(x.id));
+              const preview=pool.slice(0,mob?3:4);
               if(preview.length===0)return null;
+              const main=preview[0];const side=preview.slice(1);
               return <ScrollReveal key={key}>
                 <div style={{padding:mob?"0 24px 56px":"0 56px 80px",maxWidth:1100,margin:"0 auto"}}>
                   {/* 카테고리 헤더 */}
@@ -633,15 +641,39 @@ export default function Sloist(){
                     </div>
                     <button onClick={()=>onCatClick(key)} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.12em",color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>더 보기</button>
                   </div>
-                  {/* 미리보기 그리드 */}
-                  <div style={{display:"grid",gridTemplateColumns:mob?"repeat(3,1fr)":"repeat(4,1fr)",gap:mob?16:28}}>
-                    {preview.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer"}}>
-                      <Img grad={it.grad} photo={it.photo} aspect={key==="scene"?"3/4":"1/1"} r={2}/>
-                      <div style={{marginTop:mob?8:12}}>
-                        <div style={{fontFamily:S.sf,fontSize:mob?11:13,fontWeight:300,lineHeight:1.5,color:S.tx,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.title}</div>
+                  {/* 비대칭 레이아웃: 1큰 + 나머지 작은 */}
+                  {mob
+                    ?<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+                      <div onClick={()=>openDetail(main)} style={{cursor:"pointer",gridRow:"span 2"}}>
+                        <Img grad={main.grad} photo={main.photo} aspect={asp} r={2}/>
+                        <div style={{marginTop:8}}>
+                          <div style={{fontFamily:S.sf,fontSize:12,fontWeight:300,lineHeight:1.5,color:S.tx}}>{main.title}</div>
+                          {(main.location||main.sub||main.maker)&&<div style={{fontFamily:S.ui,fontSize:9,fontWeight:300,color:S.txF,marginTop:2,letterSpacing:"0.06em"}}>{main.location||main.sub||main.maker}</div>}
+                        </div>
                       </div>
-                    </div>)}
-                  </div>
+                      {side.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer"}}>
+                        <Img grad={it.grad} photo={it.photo} aspect="1/1" r={2}/>
+                        <div style={{marginTop:6}}>
+                          <div style={{fontFamily:S.sf,fontSize:10,fontWeight:300,lineHeight:1.4,color:S.tx,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.title}</div>
+                        </div>
+                      </div>)}
+                    </div>
+                    :<div style={{display:"grid",gridTemplateColumns:"1.4fr 1fr 1fr",gap:28,alignItems:"start"}}>
+                      <div onClick={()=>openDetail(main)} style={{cursor:"pointer"}}>
+                        <Img grad={main.grad} photo={main.photo} aspect={asp} r={2}/>
+                        <div style={{marginTop:14}}>
+                          <div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,lineHeight:1.5,color:S.tx}}>{main.title}</div>
+                          {(main.location||main.sub||main.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,color:S.txF,marginTop:4,letterSpacing:"0.08em"}}>{main.location||main.sub||main.maker}</div>}
+                        </div>
+                      </div>
+                      {side.map(it=><div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer"}}>
+                        <Img grad={it.grad} photo={it.photo} aspect="1/1" r={2}/>
+                        <div style={{marginTop:10}}>
+                          <div style={{fontFamily:S.sf,fontSize:13,fontWeight:300,lineHeight:1.5,color:S.tx,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{it.title}</div>
+                        </div>
+                      </div>)}
+                    </div>
+                  }
                 </div>
               </ScrollReveal>;
             })}
