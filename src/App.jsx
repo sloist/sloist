@@ -428,7 +428,7 @@ export default function Sloist(){
     <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:mob?16:20}}>
       <button onClick={()=>goTo("about")} style={{fontFamily:S.bd,fontSize:11,fontWeight:300,letterSpacing:"0.06em",color:"#C8C5BE",background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txGh} onMouseLeave={e=>e.currentTarget.style.color="#C8C5BE"}>느리게 걷는 사람들의 시선</button>
       <span style={{color:S.ln,fontSize:9}}>·</span>
-      <button onClick={()=>{sActiveCat("from_sloist");goTo("cat");}} style={{fontFamily:S.bd,fontSize:11,fontWeight:300,letterSpacing:"0.06em",color:"#C8C5BE",background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txGh} onMouseLeave={e=>e.currentTarget.style.color="#C8C5BE"}>슬로이스트의 기록</button>
+      <button onClick={()=>{pushUrl("/from_sloist");mt(()=>{sDetail(null);sEdRoom(null);sView("home");sActiveCat("from_sloist");});}} style={{fontFamily:S.bd,fontSize:11,fontWeight:300,letterSpacing:"0.06em",color:"#C8C5BE",background:"none",border:"none",cursor:"pointer",transition:"color .5s",padding:mob?"12px 8px":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txGh} onMouseLeave={e=>e.currentTarget.style.color="#C8C5BE"}>슬로이스트의 기록</button>
     </div>
   </div>;
 
