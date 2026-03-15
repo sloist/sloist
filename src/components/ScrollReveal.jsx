@@ -3,7 +3,7 @@
 // 한 번만 발동. delay로 시차 가능.
 import { useEffect, useRef, useState } from "react";
 
-export default function ScrollReveal({ children, delay = 0, distance = 24, duration = 1.0, style = {} }) {
+export default function ScrollReveal({ children, delay = 0, distance = 12, duration = 0.5, style = {} }) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
 
@@ -30,7 +30,7 @@ export default function ScrollReveal({ children, delay = 0, distance = 24, durat
         ...style,
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : `translateY(${distance}px)`,
-        transition: `opacity ${duration}s cubic-bezier(.16,.6,.4,1), transform ${duration}s cubic-bezier(.16,.6,.4,1)`,
+        transition: `opacity ${duration}s ease, transform ${duration}s ease`,
         willChange: "opacity, transform",
       }}
     >

@@ -277,7 +277,7 @@ export default function Sloist(){
   const openRoom=eid=>{prevState.current={view,activeCat,edRoom,detail,scroll:window.scrollY};pushUrl("/room/"+eid);mt(()=>{sEdRoom(eid);sDetail(null);sView("room");});};
   const goBack=()=>{const p=prevState.current;if(p){pushUrl(p.view==="home"?"/":"/"+p.view);sCVis(false);setTimeout(()=>{sView(p.view);sActiveCat(p.activeCat||null);sEdRoom(p.edRoom||null);sDetail(p.detail||null);prevState.current=null;setTimeout(()=>{window.scrollTo({top:p.scroll});setTimeout(()=>sCVis(true),80);},50);},350);}else goHome();};
   const closeSov=(cb)=>{sSovFading(true);setTimeout(()=>{sSov(false);sSovFading(false);if(cb)cb();},300);};
-  const doSearch=q=>{sSearchQ(q);pushUrl("/search");sDetail(null);sEdRoom(null);sView("search");window.scrollTo({top:0});sSovFading(true);setTimeout(()=>{sSov(false);sSovFading(false);},1200);};
+  const doSearch=q=>{sSearchQ(q);pushUrl("/search");sDetail(null);sEdRoom(null);sView("search");window.scrollTo({top:0});sSovFading(true);setTimeout(()=>{sSov(false);sSovFading(false);},300);};
 
   // popstate 핸들러 (브라우저 뒤로/앞으로가기)
   useEffect(()=>{
@@ -321,7 +321,7 @@ export default function Sloist(){
   const sv=k=>items.filter(i=>i.root===k&&savedIds.includes(i.id));
   const edItems=eid=>items.filter(i=>i.editor===eid);
   const dl=detail?live(detail.id):null;
-  const fd=(show)=>({opacity:show?1:0,transition:"opacity .8s cubic-bezier(.2,0,.3,1)",willChange:"opacity"});
+  const fd=(show)=>({opacity:show?1:0,transition:"opacity .4s ease",willChange:"opacity"});
   const TagLinks=({tags,size=10,color=S.txGh})=>tags?<span>{tags.split(" · ").map((t,i)=><span key={t}>{i>0&&<span style={{margin:"0 3px"}}>{"  "}</span>}<span onClick={e=>{e.stopPropagation();doSearch(t);}} style={{fontFamily:S.ui,fontSize:size,fontWeight:300,letterSpacing:1,color,cursor:"pointer",transition:"color .4s"}} onMouseEnter={e=>e.currentTarget.style.color=S.tx} onMouseLeave={e=>e.currentTarget.style.color=color}>{t}</span></span>)}</span>:null;
   useEffect(()=>{if(sov){sSq("");sShowTags(false);setTimeout(()=>sqRef.current?.focus(),120);}},[sov]);
 
@@ -473,7 +473,7 @@ export default function Sloist(){
         {/* ── 히어로: 이미지 + 중앙하단 오버레이 제목 ── */}
         <div style={{position:"relative",width:"100%",maxWidth:mob?undefined:(isSpace?900:720),margin:"0 auto",padding:isSpace?0:(mob?"0 16px":"0 48px"),paddingTop:isSpace?0:(mob?8:36)}}>
           <div style={{width:"100%",aspectRatio:heroAsp,position:"relative",overflow:"hidden",borderRadius:isSpace?0:(mob?2:3),background:"#F0EEE9"}}>
-            {dl.photo&&<img className="hero-reveal" src={dl.photo} alt="" onLoad={e=>{e.currentTarget.style.animation="imageReveal 1s ease-out forwards";}} style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)",clipPath:"inset(100% 0 0 0)"}}/>}
+            {dl.photo&&<img className="hero-reveal" src={dl.photo} alt="" onLoad={e=>{e.currentTarget.style.animation="imageReveal 1s ease-out forwards";}} style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(0.9) contrast(0.98) brightness(1.01)",clipPath:"inset(100% 0 0 0)"}}/>}
             {!dl.photo&&<div style={{width:"100%",height:"100%",background:dl.grad||S.bgAlt}}/>}
             <div style={{position:"absolute",bottom:0,left:0,right:0,height:isSpace?"60%":"50%",background:"linear-gradient(to top, rgba(30,29,26,"+(isSpace?".55":".45")+"), transparent)",pointerEvents:"none"}}/>
             <div style={{position:"absolute",bottom:mob?16:24,left:0,right:0,textAlign:"center",padding:mob?"0 24px":"0 48px"}}>
@@ -493,13 +493,16 @@ export default function Sloist(){
 
           {/* 추가 이미지 (2장째부터) */}
           {dl.photos&&dl.photos.length>1&&<div style={{marginTop:mob?36:56,display:"flex",flexDirection:"column",gap:mob?24:36}}>
-            {dl.photos.slice(1).map((url,i)=><div key={i} style={{borderRadius:2,overflow:"hidden"}}><img src={url} alt="" style={{width:"100%",display:"block",filter:"saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"}}/></div>)}
+            {dl.photos.slice(1).map((url,i)=><div key={i} style={{borderRadius:2,overflow:"hidden"}}><img src={url} alt="" style={{width:"100%",display:"block",filter:"saturate(0.9) contrast(0.98) brightness(1.01)"}}/></div>)}
           </div>}
 
           {/* ── 지그재그: 좌 → 우 → 좌 ── */}
 
+          {/* 웜그레이 점 — 본문과 액션 사이 숨표 */}
+          <div style={{textAlign:"center",margin:mob?"40px 0":"64px 0"}}><div style={{width:4,height:4,borderRadius:"50%",background:"#6B6560",display:"inline-block"}}/></div>
+
           {/* 1) 좌: 보관 · 링크 · 글쓴이 */}
-          <div style={{marginTop:mob?40:64,paddingTop:mob?16:20,borderTop:"1px solid "+S.ln,display:"flex",alignItems:"center",gap:mob?14:20}}>
+          <div style={{paddingTop:mob?16:20,borderTop:"1px solid "+S.ln,display:"flex",alignItems:"center",gap:mob?14:20}}>
             <button onClick={()=>keep(dl.id)} style={{fontFamily:S.ui,fontSize:12,fontWeight:300,letterSpacing:"0.08em",color:isSaved(dl.id)?S.ac:S.txF,background:"none",border:"none",cursor:"pointer",padding:mob?"12px 0":"8px 0",minHeight:mob?44:undefined,transition:"color .3s ease",display:"flex",flexDirection:"column",alignItems:"center",gap:0}}>
               <span>{isSaved(dl.id)?"보관됨":"보관"}</span>
               <span style={{width:4,height:4,borderRadius:"50%",background:"#6B6560",marginTop:8,opacity:isSaved(dl.id)?1:0,transition:"opacity "+(isSaved(dl.id)?".6s":".4s")+" ease"}}/>
@@ -524,6 +527,7 @@ export default function Sloist(){
         {/* 3) 좌: 관련 기록 */}
         {relatedItems.length>0&&<div style={{maxWidth:640,margin:"0 auto",padding:mob?"0 24px":"0 32px"}}>
           <div style={{marginTop:mob?28:40}}>
+            <div style={{textAlign:"center",marginBottom:16}}><div style={{width:4,height:4,borderRadius:"50%",background:"#6B6560",display:"inline-block"}}/></div>
             <div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.18em",color:S.txGh,marginBottom:mob?20:28}}>{relLabel}</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:mob?16:40}}>
               {relatedItems.map(ri=><div key={ri.id} onClick={()=>openDetail(ri)} style={{cursor:"pointer"}}>
@@ -557,18 +561,18 @@ export default function Sloist(){
   };
 
   /* ═══ RENDER ═══ */
-  if(loading||!dataLoaded||!splashDone){return <div style={{fontFamily:S.sf,background:S.bg,minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",opacity:splashFading?0:1,transition:"opacity 1.2s cubic-bezier(.2,0,.3,1)"}}>
+  if(loading||!dataLoaded||!splashDone){return <div style={{fontFamily:S.sf,background:S.bg,minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",opacity:splashFading?0:1,transition:"opacity .4s ease"}}>
     <style>{`@keyframes sloistIn{0%{opacity:0}100%{opacity:1}}@keyframes sloistSub{0%{opacity:0}100%{opacity:.6}}@keyframes sloistDot{0%,100%{opacity:.3}50%{opacity:.8}}`}</style>
     <div style={{fontSize:mob?24:36,fontWeight:300,letterSpacing:mob?8:14,color:S.tx,animation:`sloistIn ${isFirstVisit.current?"2.4s":"1s"} cubic-bezier(.2,0,.3,1) ${isFirstVisit.current?"1s":".3s"} forwards`,opacity:0}}>sloist</div>
     {isFirstVisit.current&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:3,color:S.txGh,marginTop:14,animation:"sloistSub 1.6s cubic-bezier(.2,0,.3,1) 2.2s forwards",opacity:0}}>멈춰야 보이는 것들</div>}
     {!isFirstVisit.current&&<div style={{width:4,height:4,borderRadius:"50%",background:S.txGh,marginTop:20,animation:"sloistDot 2s ease-in-out infinite"}}/>}
   </div>;}
   const h=homeFeed;
-  return <div style={{fontFamily:S.bd,background:S.bg,color:S.tx,minHeight:"100vh",WebkitFontSmoothing:"antialiased",animation:"mainIn 1s cubic-bezier(.2,0,.3,1) forwards"}}>
-    <style>{`html,body{overscroll-behavior-x:none;overscroll-behavior-y:contain}::selection{background:rgba(130,125,118,.15);color:inherit}button:focus-visible,a:focus-visible,input:focus-visible{outline:1px solid rgba(130,125,118,.3);outline-offset:2px}@keyframes mainIn{from{opacity:0}to{opacity:1}}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0}to{opacity:1}}@keyframes imageReveal{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0 0 0 0)}}@media(prefers-reduced-motion:reduce){.hero-reveal{animation:none!important;clip-path:none!important}}`}</style>
+  return <div style={{fontFamily:S.bd,background:S.bg,color:S.tx,minHeight:"100vh",WebkitFontSmoothing:"antialiased",animation:"mainIn .4s ease forwards"}}>
+    <style>{`html,body{overscroll-behavior-x:none;overscroll-behavior-y:contain}::selection{background:rgba(130,125,118,.15);color:inherit}button:focus-visible,a:focus-visible,input:focus-visible{outline:1px solid rgba(130,125,118,.3);outline-offset:2px}@keyframes mainIn{from{opacity:0}to{opacity:1}}@keyframes fi{from{opacity:0}to{opacity:1}}@keyframes tagIn{from{opacity:0}to{opacity:1}}@keyframes stg{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@keyframes imageReveal{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0 0 0 0)}}@media(prefers-reduced-motion:reduce){.hero-reveal{animation:none!important;clip-path:none!important}}`}</style>
 
     {/* SEARCH — Cereal 검색 오버레이 */}
-    {sov&&<div style={{position:"fixed",inset:0,background:"rgba(250,250,248,.97)",backdropFilter:"blur(40px)",zIndex:200,overflowY:"auto",opacity:sovFading?0:1,transition:"opacity 1.2s cubic-bezier(.2,0,.3,1)",animation:sovFading?undefined:"fi .6s cubic-bezier(.2,0,.3,1)"}}>
+    {sov&&<div style={{position:"fixed",inset:0,background:"rgba(250,250,248,.97)",backdropFilter:"blur(8px)",zIndex:200,overflowY:"auto",opacity:sovFading?0:1,transition:"opacity .3s ease",animation:sovFading?undefined:"fi .3s ease"}}>
       <div style={{display:"flex",justifyContent:"flex-end",padding:mob?"14px 20px":"18px 48px"}}>
         <button onClick={()=>closeSov()} style={{fontFamily:S.ui,fontSize:11,fontWeight:300,letterSpacing:"0.12em",color:S.txGh,background:"none",border:"none",cursor:"pointer",transition:"color .4s",padding:mob?"8px 0":"4px 0",minHeight:mob?44:undefined}} onMouseEnter={e=>e.currentTarget.style.color=S.txQ} onMouseLeave={e=>e.currentTarget.style.color=S.txGh}>닫기</button>
       </div>
@@ -604,7 +608,7 @@ export default function Sloist(){
             curtain={
               <div style={{height:"calc(100 * var(--dvh, 1vh))",background:S.bg,position:"relative"}}>
                 {h[0]&&<div onClick={()=>openDetail(h[0])} style={{cursor:"pointer",position:"absolute",inset:0,overflow:"hidden",background:"#F0EEE9"}}>
-                  {h[0].photo&&<img className="hero-reveal" src={h[0].photo} alt="" onLoad={e=>{e.currentTarget.style.animation="imageReveal 1s ease-out forwards";}} style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)",clipPath:"inset(100% 0 0 0)"}}/>}
+                  {h[0].photo&&<img className="hero-reveal" src={h[0].photo} alt="" onLoad={e=>{e.currentTarget.style.animation="imageReveal 1s ease-out forwards";}} style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(0.9) contrast(0.98) brightness(1.01)",clipPath:"inset(100% 0 0 0)"}}/>}
                   <div style={{position:"absolute",bottom:0,left:0,right:0,height:"55%",background:"linear-gradient(to top, rgba(30,29,26,.45), transparent)",pointerEvents:"none"}}/>
                   <div style={{position:"absolute",bottom:mob?28:44,left:mob?24:56,right:mob?24:56}}>
                     <div style={{fontFamily:S.sf,fontSize:mob?24:38,fontWeight:300,lineHeight:1.4,letterSpacing:mob?0:1,color:"#fff",textShadow:"0 1px 8px rgba(0,0,0,.15)"}}>{h[0].title}</div>
@@ -904,9 +908,9 @@ export default function Sloist(){
     {/* ARCHIVE */}
     {view==="archive"&&<div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column"}}><Nav/><div style={{maxWidth:900,margin:"0 auto",width:"100%",padding:mob?"48px 20px":"96px 48px",flex:"1 0 auto"}}>
       <div style={{textAlign:"center",marginBottom:mob?64:120}}><p style={{fontFamily:S.sf,fontSize:mob?14:16,lineHeight:2.6,color:S.txQ,letterSpacing:1}}>{"느리게 남겨진 기록들"}</p></div>
-      <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:mob?"72px 0":"96px 64px"}}>{ED&&Object.entries(ED).map(([eid,ed],idx)=>{const ei=edItems(eid);const coverPhoto=(ei.find(i=>i.photo)||{}).photo;return <div key={eid} style={{opacity:0,animation:"stg .7s ease "+idx*.12+"s both",cursor:"pointer"}} onClick={()=>openRoom(eid)}>
+      <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:mob?"72px 0":"96px 64px"}}>{ED&&Object.entries(ED).map(([eid,ed],idx)=>{const ei=edItems(eid);const coverPhoto=(ei.find(i=>i.photo)||{}).photo;return <div key={eid} style={{opacity:0,animation:"stg .5s ease "+idx*.12+"s both",cursor:"pointer"}} onClick={()=>openRoom(eid)}>
         <div style={{width:"100%",aspectRatio:"4/5",background:ed.grad||S.lnL,borderRadius:2,position:"relative",overflow:"hidden"}}>
-          {coverPhoto&&<img src={coverPhoto} alt="" style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"}}/>}
+          {coverPhoto&&<img src={coverPhoto} alt="" style={{width:"100%",height:"100%",objectFit:"cover",filter:"saturate(0.9) contrast(0.98) brightness(1.01)"}}/>}
         </div>
         <div style={{marginTop:mob?16:20}}>
           <div style={{fontFamily:S.sf,fontSize:mob?15:17,fontWeight:300,letterSpacing:mob?3:4,marginBottom:10}}>{ed.name}</div>
@@ -1125,11 +1129,11 @@ export default function Sloist(){
     </div>;})()}
     {view==="mypage"&&detail&&<DetailView/>}
 
-    {showTop&&view!=="about"&&<button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:mob?28:40,right:mob?20:40,width:mob?44:36,height:mob?44:36,display:"flex",alignItems:"center",justifyContent:"center",background:S.bg,border:"1px solid "+S.lnL,borderRadius:"50%",cursor:"pointer",transition:"opacity .8s cubic-bezier(.2,0,.3,1)",opacity:.5,zIndex:100,backdropFilter:"blur(8px)"}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>{e.currentTarget.style.opacity="0.5";}}><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={S.txGh} strokeWidth="1.5"><polyline points="6 15 12 9 18 15"/></svg></button>}
-    {toast&&<div style={{position:"fixed",bottom:mob?32:40,left:"50%",transform:"translateX(-50%)",color:S.txQ,fontSize:11,fontWeight:300,letterSpacing:3,zIndex:300,fontFamily:S.ui,opacity:toastVis?1:0,transition:"opacity .8s cubic-bezier(.2,0,.3,1)",pointerEvents:"none"}}>{toast}</div>}
+    {showTop&&view!=="about"&&<button onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{position:"fixed",bottom:mob?28:40,right:mob?20:40,width:mob?44:36,height:mob?44:36,display:"flex",alignItems:"center",justifyContent:"center",background:S.bg,border:"1px solid "+S.lnL,borderRadius:"50%",cursor:"pointer",transition:"opacity .3s ease",opacity:.5,zIndex:100,backdropFilter:"blur(8px)"}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>{e.currentTarget.style.opacity="0.5";}}><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={S.txGh} strokeWidth="1.5"><polyline points="6 15 12 9 18 15"/></svg></button>}
+    {toast&&<div style={{position:"fixed",bottom:mob?32:40,left:"50%",transform:"translateX(-50%)",color:S.txQ,fontSize:11,fontWeight:300,letterSpacing:3,zIndex:300,fontFamily:S.ui,opacity:toastVis?1:0,transition:"opacity .3s ease",pointerEvents:"none"}}>{toast}</div>}
 
     {/* 삭제 확인 다이얼로그 */}
-    {confirmDel&&<div style={{position:"fixed",inset:0,zIndex:400,background:"rgba(249,248,247,.85)",backdropFilter:"blur(16px)",display:"flex",alignItems:"center",justifyContent:"center",animation:"fi .5s cubic-bezier(.2,0,.3,1)"}}>
+    {confirmDel&&<div style={{position:"fixed",inset:0,zIndex:400,background:"rgba(249,248,247,.85)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",animation:"fi .3s ease"}}>
       <div style={{textAlign:"center",maxWidth:280,padding:"0 24px"}}>
         <div style={{fontFamily:S.ui,fontSize:11,fontWeight:300,color:S.txQ,lineHeight:1.8,marginBottom:8}}>이 기록을 삭제할까요?</div>
         <div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,color:S.tx,lineHeight:1.6,marginBottom:32}}>{confirmDel.title}</div>

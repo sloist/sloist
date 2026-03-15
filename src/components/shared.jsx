@@ -29,7 +29,7 @@ export function catColor(root) {
 import { useState, useRef, useEffect } from "react";
 
 const _imgCache = new Set();
-const IMG_FILTER = "saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)";
+const IMG_FILTER = "saturate(0.9) contrast(0.98) brightness(1.01)";
 
 export function Img({ grad, photo, aspect = "4/3", r = 2 }) {
   const cached = photo && _imgCache.has(photo);

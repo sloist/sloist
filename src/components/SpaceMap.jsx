@@ -25,7 +25,7 @@ function buildGeoJSON(spaces) {
 
 function popupHtml(f) {
   const photoHtml = f.properties.photo
-    ? `<img src="${escHtml(f.properties.photo)}" style="width:120px;height:80px;object-fit:cover;border-radius:2px;display:block;margin-bottom:6px;filter:saturate(.88) contrast(1.04) sepia(.06) brightness(1.01)"/>`
+    ? `<img src="${escHtml(f.properties.photo)}" style="width:120px;height:80px;object-fit:cover;border-radius:2px;display:block;margin-bottom:6px;filter:saturate(0.9) contrast(0.98) brightness(1.01)"/>`
     : "";
   return `<div class="sloist-popup-inner" data-space-id="${escHtml(f.properties.id)}" style="cursor:pointer">`
     + photoHtml
