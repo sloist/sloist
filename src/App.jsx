@@ -856,15 +856,16 @@ export default function Sloist(){
 
     {/* MY PAGE */}
     {view==="mypage"&&!detail&&(()=>{const saveName=async()=>{if(!nameVal.trim())return;await auth.updateProfile({name:nameVal.trim()});sEditName(false);flash("이름 변경됨");};const savedAll=[...sv("space"),...sv("scene"),...sv("objet")];const filteredSaved=savedCat?savedAll.filter(i=>i.root===savedCat):savedAll;return <div style={{...fd(cVis),minHeight:"100vh",display:"flex",flexDirection:"column",background:MS.bg,color:MS.tx,transition:"background .6s, color .6s"}}><Nav backAction={goBack}/>
-      {/* 한 줄 문장 */}
-      {tagline&&<div style={{textAlign:"center",padding:mob?"16px 24px 0":"24px 48px 0"}}><div style={{fontFamily:S.bd,fontSize:mob?12:13,fontWeight:300,color:MS.txF,letterSpacing:"0.04em",lineHeight:1.8}}>{tagline}</div></div>}
       <div style={{flex:"1 0 auto"}}>
         {/* 탭 */}
-        <div style={{display:"flex",justifyContent:"center",alignItems:"baseline",gap:mob?24:36,padding:mob?"20px 0 28px":"32px 0 40px"}}>
-          {[["saved","보관"],["following","팔로잉"]].map(([k,label])=><button key={k} onClick={()=>lt(()=>sMyTab(k))} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:mob?3:4,color:S.tx,opacity:myTab===k?1:.35,background:"none",border:"none",padding:"6px 0",cursor:"pointer",transition:"opacity .5s"}}>{label}</button>)}
-          {auth.isEditor&&<button onClick={()=>lt(()=>sMyTab("posts"))} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:mob?3:4,color:S.tx,opacity:myTab==="posts"?1:.35,background:"none",border:"none",cursor:"pointer",transition:"opacity .4s"}}>내 기록</button>}
-          <button onClick={()=>lt(()=>sMyTab("settings"))} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:mob?3:4,color:S.tx,opacity:myTab==="settings"?1:.35,background:"none",border:"none",cursor:"pointer",transition:"opacity .4s"}}>설정</button>
+        <div style={{display:"flex",justifyContent:"center",alignItems:"baseline",gap:mob?24:36,padding:mob?"20px 0 0":"32px 0 0"}}>
+          {[["saved","보관"],["following","팔로잉"]].map(([k,label])=><button key={k} onClick={()=>lt(()=>sMyTab(k))} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:mob?3:4,color:MS.tx,opacity:myTab===k?1:.35,background:"none",border:"none",padding:"6px 0",cursor:"pointer",transition:"opacity .5s"}}>{label}</button>)}
+          {auth.isEditor&&<button onClick={()=>lt(()=>sMyTab("posts"))} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:mob?3:4,color:MS.tx,opacity:myTab==="posts"?1:.35,background:"none",border:"none",cursor:"pointer",transition:"opacity .4s"}}>내 기록</button>}
+          <button onClick={()=>lt(()=>sMyTab("settings"))} style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:mob?3:4,color:MS.tx,opacity:myTab==="settings"?1:.35,background:"none",border:"none",cursor:"pointer",transition:"opacity .4s"}}>설정</button>
         </div>
+        {/* 한 줄 문장 — 탭 아래, 메모처럼 */}
+        {tagline&&<div style={{textAlign:"center",padding:mob?"12px 24px 0":"16px 48px 0"}}><div style={{fontFamily:S.bd,fontSize:mob?11:12,fontWeight:300,color:MS.txGh,letterSpacing:"0.02em",lineHeight:1.6}}>{tagline}</div></div>}
+        <div style={{height:mob?28:40}}/>
         <div style={fd(cVis)}>
 
           {/* posts — 기록 관리 (2열 데스크톱) */}
