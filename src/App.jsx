@@ -568,13 +568,19 @@ export default function Sloist(){
                   ?<div style={{width:"100%",display:"flex",flexDirection:"column",gap:28}}>
                     {h.slice(1,3).map((it,i)=>it&&<div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer",width:i===0?"85%":"72%",alignSelf:i===0?"flex-start":"flex-end"}}>
                       <Img grad={it.grad} photo={it.photo} aspect="4/5" r={2}/>
-                      <div style={{fontFamily:S.sf,fontSize:14,fontWeight:300,lineHeight:1.5,color:S.tx,marginTop:10}}>{it.title}</div>
+                      <div style={{marginTop:10}}>
+                        <div style={{fontFamily:S.sf,fontSize:14,fontWeight:300,lineHeight:1.5,color:S.tx}}>{it.title}</div>
+                        {(it.location||it.sub||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:S.txF,marginTop:3}}>{it.location||it.sub||it.maker}</div>}
+                      </div>
                     </div>)}
                   </div>
                   :<div style={{width:"100%",maxWidth:960,display:"grid",gridTemplateColumns:"1fr 1fr",gap:56}}>
                     {h.slice(1,3).map((it,i)=>it&&<div key={it.id} onClick={()=>openDetail(it)} style={{cursor:"pointer",marginTop:i===1?60:0}}>
                       <Img grad={it.grad} photo={it.photo} aspect="4/5" r={2}/>
-                      <div style={{fontFamily:S.sf,fontSize:17,fontWeight:300,lineHeight:1.5,color:S.tx,marginTop:16}}>{it.title}</div>
+                      <div style={{marginTop:16}}>
+                        <div style={{fontFamily:S.sf,fontSize:17,fontWeight:300,lineHeight:1.5,color:S.tx}}>{it.title}</div>
+                        {(it.location||it.sub||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:S.txF,marginTop:4}}>{it.location||it.sub||it.maker}</div>}
+                      </div>
                     </div>)}
                   </div>
                 }
@@ -590,7 +596,7 @@ export default function Sloist(){
             <ScrollReveal>
               <div onClick={()=>openDetail(h[3])} style={{cursor:"pointer",width:mob?"88%":"100%",margin:mob?"0 auto":undefined}}>
                 <Img grad={h[3].grad} photo={h[3].photo} aspect="3/2" r={2}/>
-                <div style={{marginTop:mob?10:16,textAlign:"center"}}>
+                <div style={{marginTop:mob?10:16}}>
                   <div style={{fontFamily:S.sf,fontSize:mob?15:20,fontWeight:300,lineHeight:1.5}}>{h[3].title}</div>
                   {(h[3].location||h[3].sub||h[3].maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:S.txF,marginTop:4}}>{h[3].location||h[3].sub||h[3].maker}</div>}
                 </div>
@@ -604,7 +610,10 @@ export default function Sloist(){
               {h.slice(4,7).map((it,i)=>it&&<ScrollReveal key={it.id} delay={i*100}>
                 <div onClick={()=>openDetail(it)} style={{cursor:"pointer",width:"82%",marginBottom:40,marginLeft:i%2===0?"0":"auto"}}>
                   <Img grad={it.grad} photo={it.photo} aspect="4/5" r={2}/>
-                  <div style={{fontFamily:S.sf,fontSize:13,fontWeight:300,lineHeight:1.5,color:S.tx,marginTop:10}}>{it.title}</div>
+                  <div style={{marginTop:10}}>
+                    <div style={{fontFamily:S.sf,fontSize:13,fontWeight:300,lineHeight:1.5,color:S.tx}}>{it.title}</div>
+                    {(it.location||it.sub||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:S.txF,marginTop:3}}>{it.location||it.sub||it.maker}</div>}
+                  </div>
                 </div>
               </ScrollReveal>)}
             </div>
@@ -613,7 +622,10 @@ export default function Sloist(){
                 {h.slice(4,7).map((it,i)=>it&&<ScrollReveal key={it.id} delay={i*120}>
                   <div onClick={()=>openDetail(it)} style={{cursor:"pointer"}}>
                     <Img grad={it.grad} photo={it.photo} aspect="4/5" r={2}/>
-                    <div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,lineHeight:1.5,color:S.tx,marginTop:14}}>{it.title}</div>
+                    <div style={{marginTop:14}}>
+                      <div style={{fontFamily:S.sf,fontSize:15,fontWeight:300,lineHeight:1.5,color:S.tx}}>{it.title}</div>
+                      {(it.location||it.sub||it.maker)&&<div style={{fontFamily:S.ui,fontSize:10,fontWeight:300,letterSpacing:"0.08em",color:S.txF,marginTop:4}}>{it.location||it.sub||it.maker}</div>}
+                    </div>
                   </div>
                 </ScrollReveal>)}
               </div>
